@@ -33,6 +33,34 @@ public class User {
     @OneToMany(mappedBy = "user", orphanRemoval = true)
     private Set<Profile> profiles = new LinkedHashSet<>();
 
+    @OneToOne(fetch = FetchType.LAZY, orphanRemoval = true)
+    @JoinColumn(name = "current_profile_id")
+    private Profile currentProfile;
+
+    public User() {}
+
+    public User(
+            String email,
+            String password,
+            String name,
+            Boolean male,
+            Color avatarColor
+    ) {
+        this.email = email;
+        this.password = password;
+        this.name = name;
+        this.male = male;
+        this.avatarColor = avatarColor;
+    }
+
+    public Profile getCurrentProfile() {
+        return currentProfile;
+    }
+
+    public void setCurrentProfile(Profile currentProfile) {
+        this.currentProfile = currentProfile;
+    }
+
     public Set<Profile> getProfiles() {
         return profiles;
     }

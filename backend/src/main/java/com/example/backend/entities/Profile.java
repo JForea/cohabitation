@@ -1,5 +1,6 @@
 package com.example.backend.entities;
 
+import com.example.backend.types.Role;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -57,11 +58,16 @@ public class Profile {
     @OneToMany(mappedBy = "completedBy", orphanRemoval = true)
     private Set<Task> completedTasks = new LinkedHashSet<>();
 
-    @Column(name = "is_admin", nullable = false)
-    private Boolean isAdmin = false;
+    @Enumerated
+    @Column(name = "role", nullable = false)
+    private Role role = Role.INHABITANT;
 
-    public Boolean getIsAdmin() {
-        return isAdmin;
+    public Role getRole() {
+        return role;
+    }
+
+    public void setRole(Role role) {
+        this.role = role;
     }
 
     public Set<Task> getCompletedTasks() {

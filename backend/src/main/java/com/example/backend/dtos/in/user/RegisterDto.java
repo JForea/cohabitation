@@ -1,14 +1,10 @@
 package com.example.backend.dtos.in.user;
 
-import com.example.backend.entities.User;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import org.hibernate.validator.constraints.Length;
 
-/**
- * DTO for {@link User}
- */
 public record RegisterDto(
         @Email(message = "Email is invalid.") @NotBlank(message = "Email must be provided.") String email,
         @NotBlank(message = "Password must be provided.") @Length(min = 8, max = 32, message =

@@ -2,6 +2,7 @@ package com.example.backend.controllers;
 
 import com.example.backend.dtos.in.user.AuthenticationDto;
 import com.example.backend.dtos.in.user.RegisterDto;
+import com.example.backend.dtos.out.profile.ProfileDto;
 import com.example.backend.dtos.out.user.UserDto;
 import com.example.backend.entities.User;
 import com.example.backend.security.CustomUserDetails;
@@ -61,5 +62,16 @@ public class UserController {
                 user.getName(),
                 user.getCurrentProfile()
         ));
+    }
+
+    @PostMapping("/me/join")
+    public ResponseEntity<ProfileDto> join(
+            @AuthenticationPrincipal CustomUserDetails details,
+            @RequestParam String code
+    ) {
+        User user = details.getUser();
+        return ResponseEntity.ok(
+                userService.join(user, code)
+        );
     }
 }

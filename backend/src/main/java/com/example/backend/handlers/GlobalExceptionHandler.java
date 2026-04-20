@@ -1,6 +1,8 @@
 package com.example.backend.handlers;
 
 import com.example.backend.dtos.out.common.ErrorDetails;
+import com.example.backend.exceptions.ResourceNotFoundException;
+import com.example.backend.exceptions.StateConflictException;
 import jakarta.persistence.PersistenceException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
@@ -20,12 +22,18 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(details, status);
     }
 
-    @ExceptionHandler(UsernameNotFoundException.class)
+    @ExceptionHandler({
+            ResourceNotFoundException.class,
+            UsernameNotFoundException.class
+    })
     public ResponseEntity<ErrorDetails> handleUsernameNotFound(UsernameNotFoundException e) {
         return createErrorResponse(e, "NotFoundException", HttpStatus.NOT_FOUND);
     }
 
-    @ExceptionHandler(DataIntegrityViolationException.class)
+    @ExceptionHandler({
+            DataIntegrityViolationException.class,
+            StateConflictException.class
+    })
     public ResponseEntity<ErrorDetails> handlePersistence(PersistenceException e) {
         return createErrorResponse(e, "UniqueConstraintViolation", HttpStatus.CONFLICT);
     }

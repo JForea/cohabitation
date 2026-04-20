@@ -62,6 +62,17 @@ public class Profile {
     @Column(name = "role", nullable = false)
     private Role role = Role.INHABITANT;
 
+    public Profile() {}
+
+    public Profile(
+            User user,
+            Apartment apartment
+    ) {
+        this.apartment = apartment;
+        this.user = user;
+        this.name = user.getName();
+    }
+
     public Role getRole() {
         return role;
     }

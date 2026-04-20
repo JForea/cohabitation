@@ -1,6 +1,7 @@
 package com.example.backend.dtos.out.profile;
 
 import com.example.backend.entities.Profile;
+import com.example.backend.types.Color;
 import com.example.backend.types.Role;
 
 public record ProfileDto(
@@ -8,7 +9,8 @@ public record ProfileDto(
     String name,
     Integer points,
     Integer apartmentId,
-    Role role
+    Role role,
+    Color avatarColor
 ) {
     public ProfileDto(Profile profile) {
         this(
@@ -16,7 +18,8 @@ public record ProfileDto(
                 profile.getName(),
                 profile.getPoints(),
                 profile.getApartment().getId(),
-                profile.getRole()
+                profile.getRole(),
+                profile.getAvatarColor()
         );
     }
 }

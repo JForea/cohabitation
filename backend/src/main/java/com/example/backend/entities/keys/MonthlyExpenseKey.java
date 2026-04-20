@@ -4,7 +4,7 @@ import com.example.backend.entities.Apartment;
 import jakarta.persistence.*;
 import org.hibernate.proxy.HibernateProxy;
 
-import java.time.LocalDate;
+import java.time.Month;
 import java.util.Objects;
 
 @Embeddable
@@ -14,9 +14,9 @@ public class MonthlyExpenseKey {
     private Apartment apartment;
 
     @Column(name = "month")
-    private LocalDate month;
+    private Month month;
 
-    public LocalDate getMonth() {
+    public Month getMonth() {
         return month;
     }
 

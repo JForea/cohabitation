@@ -13,6 +13,7 @@ import com.example.backend.repositories.ApartmentRepository;
 import com.example.backend.repositories.ProfileRepository;
 import com.example.backend.repositories.UserRepository;
 import com.example.backend.types.Color;
+import com.example.backend.types.Role;
 import org.springframework.security.core.parameters.P;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -47,6 +48,20 @@ public class UserService {
         return colors[random.nextInt(colors.length)];
     }
 
+    public Role getCurrentUserRoleInApartment(User user, Integer apartmentId) {
+        Optional<Profile> profileOptional = profileRepository.findByUserAndApartment_id(user, apartmentId);
+
+        if (profileOptional.isEmpty())
+            return null;
+
+        Profile profile = profileOptional.get();
+
+        if (profile.getLeftAt() != null)
+            return null;
+
+        return profile.getRole();
+    }
+
     public UserDto create(RegisterDto dto) {
         User user = userRepository.save(new User(
                 dto.email(),
@@ -60,7 +75,7 @@ public class UserService {
     }
 
     public UserDto authenticate(AuthenticationDto dto) throws UsernameNotFoundException {
-        User user = userRepository.findUserByEmail(dto.email()).orElseThrow(() ->
+        User user = userRepository.findByEmail(dto.email()).orElseThrow(() ->
                 new UsernameNotFoundException("User not found."));
 
         if (passwordEncoder.matches(dto.password(), user.getPassword()))
@@ -82,6 +97,8 @@ public class UserService {
             Profile profile = oldProfile.get();
             profile.setLeftAt(null);
             profile.setName(user.getName());
+            profile.setAvatarColor(user.getAvatarColor());
+            profile.setRole(Role.INHABITANT);
             profileRepository.save(profile);
             return new ProfileDto(profile);
         }

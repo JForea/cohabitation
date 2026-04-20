@@ -1,11 +1,13 @@
 package com.example.backend.entities;
 
+import com.example.backend.dtos.in.tasks.CreateTaskDto;
 import com.example.backend.types.Room;
 import com.example.backend.types.TaskPriority;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.Instant;
+import java.time.LocalDate;
 
 @Entity
 @Table(name = "task")
@@ -39,11 +41,11 @@ public class Task {
 
     @Enumerated
     @Column(name = "room", nullable = false)
-    private Room room;
+    private Room room = Room.COMMON;
 
     @Enumerated
     @Column(name = "priority", nullable = false)
-    private TaskPriority priority;
+    private TaskPriority priority = TaskPriority.MEDIUM;
 
     @Column(name = "points", nullable = false)
     private Short points = 5;
@@ -51,12 +53,52 @@ public class Task {
     @Column(name = "repeat_time")
     private Short repeatTime;
 
+    @Column(name = "due_date")
+    private LocalDate dueTime;
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false)
     private Instant createdAt;
 
     @Column(name = "completed_at")
     private Instant completedAt;
+
+    public Task() {}
+
+    public Task(
+            Apartment apartment,
+            Profile createdBy,
+            Profile assignedTo,
+            String name,
+            String description,
+            Room room,
+            TaskPriority priority,
+            Short points,
+            Short repeatTime,
+            LocalDate dueTime
+    ) {
+        this.apartment = apartment;
+        this.createdBy = createdBy;
+        this.assignedTo = assignedTo;
+        this.name = name;
+        this.description = description;
+        if (room != null)
+            this.room = room;
+        if (priority != null)
+            this.priority = priority;
+        if (points != null)
+            this.points = points;
+        this.repeatTime = repeatTime;
+        this.dueTime = dueTime;
+    }
+
+    public LocalDate getDueTime() {
+        return dueTime;
+    }
+
+    public void setDueTime(LocalDate dueTime) {
+        this.dueTime = dueTime;
+    }
 
     public Instant getCompletedAt() {
         return completedAt;

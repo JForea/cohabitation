@@ -8,6 +8,7 @@ import com.example.backend.entities.User;
 import com.example.backend.exceptions.StateConflictException;
 import com.example.backend.repositories.ApartmentRepository;
 import com.example.backend.repositories.ProfileRepository;
+import com.example.backend.repositories.UserRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
@@ -16,12 +17,15 @@ public class ApartmentService {
     private final ApartmentRepository apartmentRepository;
     private final ProfileRepository profileRepository;
 
+    private final UserRepository userRepository;
+
     public ApartmentService(
             ApartmentRepository apartmentRepository,
-            ProfileRepository profileRepository
-    ) {
+            ProfileRepository profileRepository,
+            UserRepository userRepository) {
         this.apartmentRepository = apartmentRepository;
         this. profileRepository = profileRepository;
+        this.userRepository = userRepository;
     }
 
     @Transactional
@@ -35,6 +39,9 @@ public class ApartmentService {
         ));
 
         Profile profile = profileRepository.save(new Profile(user, apartment, true));
+
+        user.setCurrentProfile(profile);
+        userRepository.save(user);
 
         return new ProfileDto(profile);
     }

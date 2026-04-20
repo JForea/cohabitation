@@ -1,5 +1,6 @@
 package com.example.backend.entities;
 
+import com.example.backend.types.Color;
 import com.example.backend.types.Role;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -28,6 +29,10 @@ public class Profile {
 
     @Column(name = "left_at")
     private Instant leftAt;
+
+    @Enumerated
+    @Column(name = "avatar_color", nullable = false)
+    private Color avatarColor;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "user_id", nullable = false)
@@ -72,7 +77,16 @@ public class Profile {
         this.apartment = apartment;
         this.user = user;
         this.name = user.getName();
+        this.avatarColor = user.getAvatarColor();
         this.role = isCreator ? Role.CREATOR : Role.INHABITANT;
+    }
+
+    public Color getAvatarColor() {
+        return avatarColor;
+    }
+
+    public void setAvatarColor(Color avatarColor) {
+        this.avatarColor = avatarColor;
     }
 
     public Role getRole() {

@@ -1,9 +1,9 @@
 package com.example.backend.handlers;
 
 import com.example.backend.dtos.out.common.ErrorDetails;
+import com.example.backend.exceptions.AccessForbiddenException;
 import com.example.backend.exceptions.ResourceNotFoundException;
 import com.example.backend.exceptions.StateConflictException;
-import jakarta.persistence.PersistenceException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,7 +26,7 @@ public class GlobalExceptionHandler {
             ResourceNotFoundException.class,
             UsernameNotFoundException.class
     })
-    public ResponseEntity<ErrorDetails> handleUsernameNotFound(UsernameNotFoundException e) {
+    public ResponseEntity<ErrorDetails> handleUsernameNotFound(Exception e) {
         return createErrorResponse(e, "NotFoundException", HttpStatus.NOT_FOUND);
     }
 
@@ -34,8 +34,13 @@ public class GlobalExceptionHandler {
             DataIntegrityViolationException.class,
             StateConflictException.class
     })
-    public ResponseEntity<ErrorDetails> handlePersistence(PersistenceException e) {
-        return createErrorResponse(e, "UniqueConstraintViolation", HttpStatus.CONFLICT);
+    public ResponseEntity<ErrorDetails> handleConflict(Exception e) {
+        return createErrorResponse(e, "StateConflictException", HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(AccessForbiddenException.class)
+    public ResponseEntity<ErrorDetails> handleAccessForbidden(Exception e) {
+        return createErrorResponse(e, "AccessForbiddenException", HttpStatus.FORBIDDEN);
     }
 
 }

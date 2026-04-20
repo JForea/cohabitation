@@ -9,4 +9,5 @@ import java.util.Optional;
 
 public interface ProfileRepository extends ListCrudRepository<Profile, Long> {
     Optional<Profile> findByApartmentAndUser(Apartment apartment, User user);
+    Optional<Profile> findByUserAndApartment_id(User user, Integer apartmentId);
 }

@@ -11,8 +11,10 @@ import com.example.backend.exceptions.ResourceNotFoundException;
 import com.example.backend.repositories.ApartmentRepository;
 import com.example.backend.repositories.ProfileRepository;
 import com.example.backend.repositories.TaskRepository;
+import com.example.backend.specifications.TaskSpecifications;
 import com.example.backend.types.Role;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -69,13 +71,26 @@ public class TaskService {
         return task.getId();
     }
 
-    public List<TaskDto> getTasks(Integer apartmentId, User user, Short cntPerPage, Short page) {
+    public List<TaskDto> getTasks(
+            Integer apartmentId,
+            User user,
+            Short cntPerPage,
+            Short page,
+            Integer assignedTo,
+            Boolean done
+    ) {
         Role role = userService.getCurrentUserRoleInApartment(user, apartmentId);
 
         if (role == null)
             throw new AccessForbiddenException("You can't view tasks in this apartment.");
 
-        return taskRepository.findByApartment_Id(apartmentId, PageRequest.of(page, cntPerPage)).map(
+        Specification<Task> spec = Specification
+                .where(TaskSpecifications.byApartment(apartmentId))
+                .and(TaskSpecifications.assignedToUser(assignedTo))
+                .and(TaskSpecifications.taskDoneStatusIs(done));
+
+        return taskRepository.findAll(spec, PageRequest.of(page, cntPerPage))
+                .map(
                 TaskDto::new
         ).toList();
     }

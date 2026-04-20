@@ -40,11 +40,13 @@ public class TaskController {
             @PathVariable Integer apartmentId,
             @RequestParam(defaultValue = "0") Short page,
             @RequestParam(defaultValue = "10") Short size,
+            @RequestParam(required = false) Integer assignedTo,
+            @RequestParam(required = false) Boolean done,
             @AuthenticationPrincipal CustomUserDetails details
     ) {
         User user = details.getUser();
         return ResponseEntity.ok(
-                taskService.getTasks(apartmentId, user, size, page)
+                taskService.getTasks(apartmentId, user, size, page, assignedTo, done)
         );
     }
 }

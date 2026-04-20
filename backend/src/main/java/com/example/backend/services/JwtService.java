@@ -1,5 +1,6 @@
 package com.example.backend.services;
 
+import com.example.backend.dtos.out.profile.ProfileDto;
 import com.example.backend.dtos.out.user.UserDto;
 import com.example.backend.entities.Profile;
 import io.jsonwebtoken.Jwts;
@@ -18,14 +19,14 @@ public class JwtService {
     private String secret;
 
     public String generateToken(UserDto dto) {
-        Profile profile = dto.profile();
+        ProfileDto profile = dto.profile();
 
         Map<String, String> claims = new HashMap<>();
         claims.put("id", "" + dto.id());
         claims.put("name", dto.name());
         claims.put("email", dto.email());
-        claims.put("profileId", "" + (profile != null ? profile.getId() : null));
-        claims.put("role", (profile != null ? profile.getRole().name() : null));
+        claims.put("profileId", "" + (profile != null ? profile.id() : null));
+        claims.put("role", (profile != null ? profile.role().name() : null));
 
         long exp = 30 * 60 * 1000;
         return Jwts.builder()

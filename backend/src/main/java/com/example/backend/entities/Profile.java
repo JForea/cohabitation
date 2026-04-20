@@ -66,11 +66,13 @@ public class Profile {
 
     public Profile(
             User user,
-            Apartment apartment
+            Apartment apartment,
+            boolean isCreator
     ) {
         this.apartment = apartment;
         this.user = user;
         this.name = user.getName();
+        this.role = isCreator ? Role.CREATOR : Role.INHABITANT;
     }
 
     public Role getRole() {

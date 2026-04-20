@@ -46,6 +46,13 @@ public class Apartment {
     @OneToMany(mappedBy = "apartment", orphanRemoval = true)
     private Set<Task> tasks = new LinkedHashSet<>();
 
+    public Apartment() {}
+
+    public Apartment(String name, String address) {
+        this.name = name;
+        this.address = address;
+    }
+
     public Set<Task> getTasks() {
         return tasks;
     }

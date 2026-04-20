@@ -13,6 +13,7 @@ import com.example.backend.repositories.ApartmentRepository;
 import com.example.backend.repositories.ProfileRepository;
 import com.example.backend.repositories.UserRepository;
 import com.example.backend.types.Color;
+import org.springframework.security.core.parameters.P;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -27,25 +28,6 @@ public class UserService {
     private final ProfileRepository profileRepository;
     private final ApartmentRepository apartmentRepository;
     private final PasswordEncoder passwordEncoder;
-
-    private UserDto getUserDto(User user) {
-        return new UserDto(
-                user.getId(),
-                user.getEmail(),
-                user.getName(),
-                user.getCurrentProfile()
-        );
-    }
-
-    private ProfileDto getProfileDto(Profile profile) {
-        return new ProfileDto(
-                profile.getId(),
-                profile.getName(),
-                profile.getPoints(),
-                profile.getApartment().getId(),
-                profile.getRole()
-        );
-    }
 
     public UserService(
             UserRepository userRepository,
@@ -74,7 +56,7 @@ public class UserService {
                 getRandomColor()
         ));
 
-        return getUserDto(user);
+        return new UserDto(user);
     }
 
     public UserDto authenticate(AuthenticationDto dto) throws UsernameNotFoundException {
@@ -82,7 +64,7 @@ public class UserService {
                 new UsernameNotFoundException("User not found."));
 
         if (passwordEncoder.matches(dto.password(), user.getPassword()))
-            return getUserDto(user);
+            return new UserDto(user);
 
         throw new UsernameNotFoundException("User not found.");
     }
@@ -101,16 +83,17 @@ public class UserService {
             profile.setLeftAt(null);
             profile.setName(user.getName());
             profileRepository.save(profile);
-            return getProfileDto(profile);
+            return new ProfileDto(profile);
         }
 
         Profile profile = profileRepository.save(
                 new Profile(
                         user,
-                        apartment
+                        apartment,
+                        false
                 )
         );
 
-        return getProfileDto(profile);
+        return new ProfileDto(profile);
     }
 }

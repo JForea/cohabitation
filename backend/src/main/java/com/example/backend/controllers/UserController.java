@@ -56,12 +56,7 @@ public class UserController {
     @GetMapping("/me")
     public ResponseEntity<UserDto> me(@AuthenticationPrincipal CustomUserDetails details) {
         User user = details.getUser();
-        return ResponseEntity.ok(new UserDto(
-                user.getId(),
-                user.getEmail(),
-                user.getName(),
-                user.getCurrentProfile()
-        ));
+        return ResponseEntity.ok(new UserDto(user));
     }
 
     @PostMapping("/me/join")

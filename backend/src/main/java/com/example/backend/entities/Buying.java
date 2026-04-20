@@ -30,10 +30,10 @@ public class Buying {
     @JoinColumn(name = "completed_by")
     private Profile completedBy;
 
-    @Column(name = "name", nullable = false, length = 65)
+    @Column(name = "name", nullable = false, length = 64)
     private String name;
 
-    @Column(name = "quantity", nullable = false, length = 17)
+    @Column(name = "quantity", nullable = false, length = 16)
     private String quantity;
 
     @Enumerated

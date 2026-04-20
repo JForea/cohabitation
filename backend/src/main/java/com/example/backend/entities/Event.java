@@ -19,7 +19,7 @@ public class Event {
     @JoinColumn(name = "apartment_id", nullable = false)
     private Apartment apartment;
 
-    @Column(name = "name", nullable = false, length = 65)
+    @Column(name = "name", nullable = false, length = 64)
     private String name;
 
     @Column(name = "date", nullable = false)
@@ -28,7 +28,7 @@ public class Event {
     @Column(name = "time", nullable = false)
     private LocalTime time;
 
-    @Column(name = "description", length = 257)
+    @Column(name = "description", length = 256)
     private String description;
 
     @CreationTimestamp

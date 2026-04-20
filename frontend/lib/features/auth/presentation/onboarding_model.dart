@@ -3,6 +3,7 @@ import 'package:frontend/features/auth/types/bubble.dart';
 import 'package:frontend/shared/presentation/ui/widgets/buttons/custom_icon_button.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:frontend/shared/presentation/ui/widgets/buttons/text_icon_button.dart';
+import 'package:go_router/go_router.dart';
 
 class OnboardingModel extends StatelessWidget {
   const OnboardingModel({
@@ -131,7 +132,7 @@ class OnboardingModel extends StatelessWidget {
                             icon: Icons.chevron_right,
                             text: 'Начать',
                             height: 50,
-                            onPressed: onButtonClick,
+                            onPressed: () => context.go('/auth'),
                             contentColor: Colors.white,
                           ),
                   ],

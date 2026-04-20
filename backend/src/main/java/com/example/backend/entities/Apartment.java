@@ -13,10 +13,10 @@ public class Apartment {
     @Column(name = "id", nullable = false)
     private Integer id;
 
-    @Column(name = "name", nullable = false, length = 31)
+    @Column(name = "name", nullable = false, length = 32)
     private String name;
 
-    @Column(name = "address", length = 63)
+    @Column(name = "address", length = 64)
     private String address;
 
     @Column(name = "invite_code", unique = true, length = 8)

@@ -29,7 +29,7 @@ public class Expense {
     @Column(name = "category", nullable = false)
     private ExpenseCategory category;
 
-    @Column(name = "check_image_ref", length = 31)
+    @Column(name = "check_image_ref", length = 32)
     private String checkImageRef;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)

@@ -6,13 +6,13 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseCookie;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-@Service
+@Component
 public class JwtService {
     @Value("${jwt.secret}")
     private String secret;
@@ -46,7 +46,6 @@ public class JwtService {
     }
 
     public ResponseCookie generateCookie(String token) {
-        // TODO: уменьшить время jwt
         return ResponseCookie.from("token", token)
                 .httpOnly(true)
                 .secure(false)

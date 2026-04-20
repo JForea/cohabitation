@@ -31,10 +31,10 @@ public class Task {
     @JoinColumn(name = "completed_by")
     private Profile completedBy;
 
-    @Column(name = "name", nullable = false, length = 65)
+    @Column(name = "name", nullable = false, length = 64)
     private String name;
 
-    @Column(name = "description", length = 257)
+    @Column(name = "description", length = 256)
     private String description;
 
     @Enumerated

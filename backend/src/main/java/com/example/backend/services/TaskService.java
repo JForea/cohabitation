@@ -13,10 +13,12 @@ import com.example.backend.repositories.ProfileRepository;
 import com.example.backend.repositories.TaskRepository;
 import com.example.backend.specifications.TaskSpecifications;
 import com.example.backend.types.Role;
+import jakarta.transaction.Transactional;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.util.List;
 
 @Service
@@ -93,5 +95,41 @@ public class TaskService {
                 .map(
                 TaskDto::new
         ).toList();
+    }
+
+    @Transactional
+    public Boolean switchTaskStatus(Integer apartmentId, User user, Long taskId) {
+        Role role = userService.getCurrentUserRoleInApartment(user, apartmentId);
+
+        if (role == null)
+            throw new AccessForbiddenException("You can't change task status in this apartment.");
+
+        Task task = taskRepository.findById(taskId).orElseThrow(
+                () -> new ResourceNotFoundException("Task not found.")
+        );
+
+        if (task.getAssignedTo() != null && role == Role.INHABITANT)
+            throw new AccessForbiddenException("You can't change status of this task, because you are not the " +
+                    "one who completed it.");
+
+        Profile profile;
+        if (task.getCompletedAt() != null) {
+            profile = task.getCompletedBy();
+            profile.addPoints(Integer.valueOf(-task.getPoints()).shortValue());
+
+            task.setCompletedAt(null);
+            task.setCompletedBy(null);
+        } else {
+            profile = user.getCurrentProfile();
+            profile.addPoints(task.getPoints());
+
+            task.setCompletedBy(profile);
+            task.setCompletedAt(Instant.now());
+        }
+
+        profileRepository.save(profile);
+        taskRepository.save(task);
+
+        return task.getCompletedAt() != null;
     }
 }

@@ -189,8 +189,8 @@ public class Profile {
         return points;
     }
 
-    public void setPoints(Integer points) {
-        this.points = points;
+    public void addPoints(Short value) {
+        this.points += value;
     }
 
     public String getName() {

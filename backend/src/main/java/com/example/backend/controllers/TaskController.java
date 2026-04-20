@@ -49,4 +49,16 @@ public class TaskController {
                 taskService.getTasks(apartmentId, user, size, page, assignedTo, done)
         );
     }
+
+    @PatchMapping("/{taskId}")
+    public ResponseEntity<Boolean> changeTaskStatus(
+            @PathVariable Integer apartmentId,
+            @PathVariable Long taskId,
+            @AuthenticationPrincipal CustomUserDetails details
+    ) {
+        User user = details.getUser();
+        return ResponseEntity.ok(
+                taskService.switchTaskStatus(apartmentId, user, taskId)
+        );
+    }
 }

@@ -2,13 +2,16 @@ package com.example.backend.controllers;
 
 import com.example.backend.dtos.in.user.AuthenticationDto;
 import com.example.backend.dtos.in.user.RegisterDto;
-import com.example.backend.dtos.out.user.AuthDto;
+import com.example.backend.dtos.out.user.UserDto;
+import com.example.backend.entities.User;
+import com.example.backend.security.CustomUserDetails;
 import com.example.backend.services.JwtService;
 import com.example.backend.services.UserService;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -26,27 +29,37 @@ public class UserController {
     }
 
     @PostMapping("/auth/registry")
-    public ResponseEntity<AuthDto> create(
+    public ResponseEntity<UserDto> create(
             @RequestBody RegisterDto dto,
             HttpServletResponse servletResponse
     ) {
-        AuthDto authDto = userService.create(dto);
-        String token = jwtService.generateToken(authDto);
+        UserDto userDto = userService.create(dto);
+        String token = jwtService.generateToken(userDto);
         ResponseCookie cookie = jwtService.generateCookie(token);
         servletResponse.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
-        return ResponseEntity.ok(authDto);
+        return ResponseEntity.ok(userDto);
     }
 
     @PostMapping("/auth/login")
-    public ResponseEntity<AuthDto> login(
+    public ResponseEntity<UserDto> login(
             @RequestBody AuthenticationDto dto,
             HttpServletResponse servletResponse
     ) {
-        AuthDto authDto = userService.authenticate(dto);
-        String token = jwtService.generateToken(authDto);
+        UserDto userDto = userService.authenticate(dto);
+        String token = jwtService.generateToken(userDto);
         ResponseCookie cookie = jwtService.generateCookie(token);
         servletResponse.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
-        return ResponseEntity.ok(authDto);
+        return ResponseEntity.ok(userDto);
     }
 
+    @GetMapping("/me")
+    public ResponseEntity<UserDto> me(@AuthenticationPrincipal CustomUserDetails details) {
+        User user = details.getUser();
+        return ResponseEntity.ok(new UserDto(
+                user.getId(),
+                user.getEmail(),
+                user.getName(),
+                user.getCurrentProfile()
+        ));
+    }
 }

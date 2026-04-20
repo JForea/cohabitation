@@ -2,7 +2,7 @@ package com.example.backend.services;
 
 import com.example.backend.dtos.in.user.AuthenticationDto;
 import com.example.backend.dtos.in.user.RegisterDto;
-import com.example.backend.dtos.out.user.AuthDto;
+import com.example.backend.dtos.out.user.UserDto;
 import com.example.backend.entities.User;
 import com.example.backend.repositories.UserRepository;
 import com.example.backend.types.Color;
@@ -32,7 +32,7 @@ public class UserService {
         return colors[random.nextInt(colors.length)];
     }
 
-    public AuthDto create(RegisterDto dto) {
+    public UserDto create(RegisterDto dto) {
         User user = repository.save(new User(
                 dto.email(),
                 passwordEncoder.encode(dto.password()),
@@ -41,7 +41,7 @@ public class UserService {
                 getRandomColor()
         ));
 
-        return new AuthDto(
+        return new UserDto(
                 user.getId(),
                 user.getEmail(),
                 user.getName(),
@@ -49,12 +49,12 @@ public class UserService {
         );
     }
 
-    public AuthDto authenticate(AuthenticationDto dto) throws UsernameNotFoundException {
+    public UserDto authenticate(AuthenticationDto dto) throws UsernameNotFoundException {
         User user = repository.findUserByEmail(dto.email()).orElseThrow(() ->
                 new UsernameNotFoundException("User not found."));
 
         if (passwordEncoder.matches(dto.password(), user.getPassword()))
-            return new AuthDto(
+            return new UserDto(
                     user.getId(),
                     user.getEmail(),
                     user.getName(),

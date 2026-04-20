@@ -1,0 +1,33 @@
+package com.example.backend.handlers;
+
+import com.example.backend.dtos.out.common.ErrorDetails;
+import jakarta.persistence.PersistenceException;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+@RestControllerAdvice
+public class GlobalExceptionHandler {
+    private ResponseEntity<ErrorDetails> createErrorResponse(Exception e, String type, HttpStatus status) {
+        ErrorDetails details = new ErrorDetails(
+                type,
+                e.getMessage(),
+                status.value()
+        );
+        return new ResponseEntity<>(details, status);
+    }
+
+    @ExceptionHandler(UsernameNotFoundException.class)
+    public ResponseEntity<ErrorDetails> handleUsernameNotFound(UsernameNotFoundException e) {
+        return createErrorResponse(e, "NotFoundException", HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ErrorDetails> handlePersistence(PersistenceException e) {
+        return createErrorResponse(e, "UniqueConstraintViolation", HttpStatus.CONFLICT);
+    }
+
+}

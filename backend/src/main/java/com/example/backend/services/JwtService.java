@@ -1,6 +1,6 @@
 package com.example.backend.services;
 
-import com.example.backend.dtos.out.user.AuthDto;
+import com.example.backend.dtos.out.user.UserDto;
 import com.example.backend.entities.Profile;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -17,7 +17,7 @@ public class JwtService {
     @Value("${jwt.secret}")
     private String secret;
 
-    public String generateToken(AuthDto dto) {
+    public String generateToken(UserDto dto) {
         Profile profile = dto.profile();
 
         Map<String, String> claims = new HashMap<>();

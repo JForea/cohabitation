@@ -62,11 +62,14 @@ public class UserController {
     @PostMapping("/me/join")
     public ResponseEntity<ProfileDto> join(
             @AuthenticationPrincipal CustomUserDetails details,
-            @RequestParam String code
+            @RequestParam String code,
+            HttpServletResponse servletResponse
     ) {
         User user = details.getUser();
-        return ResponseEntity.ok(
-                userService.join(user, code)
-        );
+        ProfileDto dto = userService.join(user, code);
+        String token = jwtService.generateToken(user, dto);
+        ResponseCookie cookie = jwtService.generateCookie(token);
+        servletResponse.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+        return ResponseEntity.ok(dto);
     }
 }

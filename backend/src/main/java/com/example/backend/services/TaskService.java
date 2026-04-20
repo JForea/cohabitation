@@ -1,6 +1,7 @@
 package com.example.backend.services;
 
 import com.example.backend.dtos.in.tasks.CreateTaskDto;
+import com.example.backend.dtos.out.tasks.TaskDto;
 import com.example.backend.entities.Apartment;
 import com.example.backend.entities.Profile;
 import com.example.backend.entities.Task;
@@ -10,7 +11,11 @@ import com.example.backend.exceptions.ResourceNotFoundException;
 import com.example.backend.repositories.ApartmentRepository;
 import com.example.backend.repositories.ProfileRepository;
 import com.example.backend.repositories.TaskRepository;
+import com.example.backend.types.Role;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public class TaskService {
@@ -18,14 +23,17 @@ public class TaskService {
     private final ProfileRepository profileRepository;
     private final ApartmentRepository apartmentRepository;
 
+    private final UserService userService;
+
     public TaskService(
             TaskRepository taskRepository,
             ProfileRepository profileRepository,
-            ApartmentRepository apartmentRepository
-    ) {
+            ApartmentRepository apartmentRepository,
+            UserService userService) {
         this.taskRepository = taskRepository;
         this.profileRepository = profileRepository;
         this.apartmentRepository = apartmentRepository;
+        this.userService = userService;
     }
 
     public Long create(User user, Integer apartmentId, CreateTaskDto dto) {
@@ -59,5 +67,16 @@ public class TaskService {
         ));
 
         return task.getId();
+    }
+
+    public List<TaskDto> getTasks(Integer apartmentId, User user, Short cntPerPage, Short page) {
+        Role role = userService.getCurrentUserRoleInApartment(user, apartmentId);
+
+        if (role == null)
+            throw new AccessForbiddenException("You can't view tasks in this apartment.");
+
+        return taskRepository.findByApartment_Id(apartmentId, PageRequest.of(page, cntPerPage)).map(
+                TaskDto::new
+        ).toList();
     }
 }

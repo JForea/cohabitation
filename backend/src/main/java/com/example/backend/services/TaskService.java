@@ -20,13 +20,13 @@ import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 public class TaskService {
     private final TaskRepository taskRepository;
     private final ProfileRepository profileRepository;
     private final ApartmentRepository apartmentRepository;
-
     private final UserService userService;
 
     public TaskService(
@@ -131,5 +131,22 @@ public class TaskService {
         taskRepository.save(task);
 
         return task.getCompletedAt() != null;
+    }
+
+    public void deleteOne(Integer apartmentId, User user, Long taskId) {
+        Role role = userService.getCurrentUserRoleInApartment(user, apartmentId);
+
+        if (role == null)
+            throw new AccessForbiddenException("You can't change task status in this apartment.");
+
+        Task task = taskRepository.findById(taskId).orElseThrow(
+                () -> new ResourceNotFoundException("Task not found.")
+        );
+
+        if (!Objects.equals(task.getCreatedBy().getId(), user.getCurrentProfile().getId()) && role == Role.INHABITANT) {
+            throw new AccessForbiddenException("You can't delete this task.");
+        }
+
+        taskRepository.delete(task);
     }
 }

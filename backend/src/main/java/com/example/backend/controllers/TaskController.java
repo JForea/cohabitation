@@ -61,4 +61,15 @@ public class TaskController {
                 taskService.switchTaskStatus(apartmentId, user, taskId)
         );
     }
+
+    @DeleteMapping("/{taskId}")
+    public ResponseEntity<Void> delete(
+            @PathVariable Integer apartmentId,
+            @PathVariable Long taskId,
+            @AuthenticationPrincipal CustomUserDetails details
+    ) {
+        User user = details.getUser();
+        taskService.deleteOne(apartmentId, user, taskId);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
 }

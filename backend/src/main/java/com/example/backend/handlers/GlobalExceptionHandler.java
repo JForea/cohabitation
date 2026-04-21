@@ -2,6 +2,7 @@ package com.example.backend.handlers;
 
 import com.example.backend.dtos.out.common.ErrorDetails;
 import com.example.backend.exceptions.AccessForbiddenException;
+import com.example.backend.exceptions.BadRequestException;
 import com.example.backend.exceptions.ResourceNotFoundException;
 import com.example.backend.exceptions.StateConflictException;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -41,6 +42,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(AccessForbiddenException.class)
     public ResponseEntity<ErrorDetails> handleAccessForbidden(Exception e) {
         return createErrorResponse(e, "AccessForbiddenException", HttpStatus.FORBIDDEN);
+    }
+
+    @ExceptionHandler(BadRequestException.class)
+    public ResponseEntity<ErrorDetails> handleBadRequest(Exception e) {
+        return createErrorResponse(e, "BadRequestException", HttpStatus.BAD_REQUEST);
     }
 
 }

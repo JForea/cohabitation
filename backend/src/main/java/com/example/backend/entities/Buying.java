@@ -1,5 +1,6 @@
 package com.example.backend.entities;
 
+import com.example.backend.dtos.in.buyings.CreateBuyingDto;
 import com.example.backend.types.BuyingCategory;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -38,7 +39,7 @@ public class Buying {
 
     @Enumerated
     @Column(name = "category", nullable = false)
-    private BuyingCategory  category;
+    private BuyingCategory  category = BuyingCategory.OTHER;
 
     @Column(name = "is_public", nullable = false)
     private Boolean isPublic = false;
@@ -49,6 +50,27 @@ public class Buying {
 
     @Column(name = "completed_at")
     private Instant completedAt;
+
+    public Buying() {}
+
+    public Buying(
+            Profile createdBy,
+            Profile assignedTo,
+            Apartment apartment,
+            String name,
+            String quantity,
+            BuyingCategory category,
+            Boolean isPublic
+    ) {
+        this.createdBy = createdBy;
+        this.assignedTo = assignedTo;
+        this.apartment = apartment;
+        this.name = name;
+        this.quantity = quantity;
+        if (category != null)
+            this.category = category;
+        this.isPublic = isPublic;
+    }
 
     public Instant getCompletedAt() {
         return completedAt;

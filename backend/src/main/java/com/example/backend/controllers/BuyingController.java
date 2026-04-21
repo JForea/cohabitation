@@ -2,6 +2,7 @@ package com.example.backend.controllers;
 
 import com.example.backend.dtos.in.buyings.CreateBuyingDto;
 import com.example.backend.dtos.in.buyings.CreateManyBuyingsDto;
+import com.example.backend.dtos.out.buyings.BuyingDto;
 import com.example.backend.entities.User;
 import com.example.backend.security.CustomUserDetails;
 import com.example.backend.services.BuyingService;
@@ -43,6 +44,19 @@ public class BuyingController {
         User user = details.getUser();
         return ResponseEntity.status(HttpStatus.CREATED).body(
                 buyingService.createMany(apartmentId, user, dto)
+        );
+    }
+
+    @GetMapping
+    public ResponseEntity<List<BuyingDto>> get(
+            @PathVariable Integer apartmentId,
+            @RequestParam(required = false) Integer assignedTo,
+            @RequestParam(required = false) Boolean isPublic,
+            @AuthenticationPrincipal CustomUserDetails details
+    ) {
+        User user = details.getUser();
+        return ResponseEntity.ok(
+            buyingService.get(apartmentId, user, assignedTo, isPublic)
         );
     }
 }

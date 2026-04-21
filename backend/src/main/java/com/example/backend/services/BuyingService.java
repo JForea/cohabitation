@@ -2,17 +2,17 @@ package com.example.backend.services;
 
 import com.example.backend.dtos.in.buyings.CreateBuyingDto;
 import com.example.backend.dtos.in.buyings.CreateManyBuyingsDto;
-import com.example.backend.entities.Apartment;
-import com.example.backend.entities.Buying;
-import com.example.backend.entities.Profile;
-import com.example.backend.entities.User;
+import com.example.backend.dtos.out.buyings.BuyingDto;
+import com.example.backend.entities.*;
 import com.example.backend.exceptions.AccessForbiddenException;
 import com.example.backend.exceptions.BadRequestException;
 import com.example.backend.exceptions.ResourceNotFoundException;
 import com.example.backend.repositories.ApartmentRepository;
 import com.example.backend.repositories.BuyingRepository;
 import com.example.backend.repositories.ProfileRepository;
+import com.example.backend.specifications.BuyingSpecifications;
 import com.example.backend.types.Role;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -106,5 +106,22 @@ public class BuyingService {
         )).toList());
 
         return buyings.stream().map(Buying::getId).toList();
+    }
+
+    public List<BuyingDto> get(Integer apartmentId, User user, Integer assignedTo, Boolean isPublic) {
+        Role role = userService.getCurrentUserRoleInApartment(user, apartmentId);
+
+        if (role == null)
+            throw new AccessForbiddenException("You can't get buyings in this apartment.");
+
+        if (assignedTo != null && isPublic != null && !isPublic)
+            throw new BadRequestException("You can't view others buying lists.");
+
+        Specification<Buying> spec = Specification
+                .where(BuyingSpecifications.byApartment(apartmentId))
+                .and(BuyingSpecifications.byAssignedTo(assignedTo))
+                .and(BuyingSpecifications.byPublic(isPublic, user.getId()));
+
+        return buyingRepository.findAll(spec).stream().map(BuyingDto::new).toList();
     }
 }

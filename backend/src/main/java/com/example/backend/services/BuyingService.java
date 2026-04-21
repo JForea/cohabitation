@@ -3,6 +3,8 @@ package com.example.backend.services;
 import com.example.backend.dtos.in.buyings.CreateBuyingDto;
 import com.example.backend.dtos.in.buyings.CreateManyBuyingsDto;
 import com.example.backend.dtos.out.buyings.BuyingDto;
+import com.example.backend.dtos.out.common.IdResponse;
+import com.example.backend.dtos.out.common.StatusResponse;
 import com.example.backend.entities.*;
 import com.example.backend.exceptions.AccessForbiddenException;
 import com.example.backend.exceptions.BadRequestException;
@@ -15,6 +17,7 @@ import com.example.backend.types.Role;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Objects;
 
@@ -39,7 +42,7 @@ public class BuyingService {
         this.apartmentRepository = apartmentRepository;
     }
 
-    public Long create(Integer apartmentId, User user, CreateBuyingDto dto) {
+    public IdResponse<Long> create(Integer apartmentId, User user, CreateBuyingDto dto) {
         Role role = userService.getCurrentUserRoleInApartment(user, apartmentId);
 
         if (role == null)
@@ -71,10 +74,10 @@ public class BuyingService {
                 )
         );
 
-        return buying.getId();
+        return new IdResponse<>(buying.getId());
     }
 
-    public List<Long> createMany(Integer apartmentId, User user, CreateManyBuyingsDto dto) {
+    public List<IdResponse<Long>> createMany(Integer apartmentId, User user, CreateManyBuyingsDto dto) {
         Role role = userService.getCurrentUserRoleInApartment(user, apartmentId);
 
         if (role == null)
@@ -106,7 +109,7 @@ public class BuyingService {
                 dto.isPublic()
         )).toList());
 
-        return buyings.stream().map(Buying::getId).toList();
+        return buyings.stream().map(buying -> new IdResponse<>(buying.getId())).toList();
     }
 
     public List<BuyingDto> get(Integer apartmentId, User user, Integer assignedTo, Boolean isPublic) {
@@ -124,6 +127,40 @@ public class BuyingService {
                 .and(BuyingSpecifications.byPublic(isPublic, user.getId()));
 
         return buyingRepository.findAll(spec).stream().map(BuyingDto::new).toList();
+    }
+
+    public StatusResponse changeStatus(Integer apartmentId, User user, Long buyingId) {
+        Role role = userService.getCurrentUserRoleInApartment(user, apartmentId);
+
+        if (role == null)
+            throw new AccessForbiddenException("You can't change status of buying in this apartment.");
+
+        Buying buying = buyingRepository.findById(buyingId).orElseThrow(
+                () -> new ResourceNotFoundException("Buying not found.")
+        );
+
+        Profile currentProfile = user.getCurrentProfile();
+        if (
+                buying.getIsPublic() &&
+                role == Role.INHABITANT &&
+                buying.getCompletedAt() != null &&
+                !Objects.equals(buying.getCompletedBy().getId(), currentProfile.getId()) ||
+                !buying.getIsPublic() &&
+                !Objects.equals(buying.getCreatedBy().getId(), currentProfile.getId())
+        )
+            throw new AccessForbiddenException("You can't change status of others buyings.");
+
+        if (buying.getCompletedAt() == null) {
+            buying.setCompletedBy(currentProfile);
+            buying.setCompletedAt(Instant.now());
+        } else {
+            buying.setCompletedBy(null);
+            buying.setCompletedAt(null);
+        }
+
+        buyingRepository.save(buying);
+
+        return new StatusResponse(buying.getCompletedAt() != null);
     }
 
     public void deleteOne(Integer apartmentId, User user, Long buyingId) {

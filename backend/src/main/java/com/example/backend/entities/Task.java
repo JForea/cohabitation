@@ -1,6 +1,5 @@
 package com.example.backend.entities;
 
-import com.example.backend.dtos.in.tasks.CreateTaskDto;
 import com.example.backend.types.Room;
 import com.example.backend.types.TaskPriority;
 import jakarta.persistence.*;

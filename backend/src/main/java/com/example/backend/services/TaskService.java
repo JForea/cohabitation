@@ -1,6 +1,8 @@
 package com.example.backend.services;
 
 import com.example.backend.dtos.in.tasks.CreateTaskDto;
+import com.example.backend.dtos.out.common.IdResponse;
+import com.example.backend.dtos.out.common.StatusResponse;
 import com.example.backend.dtos.out.tasks.TaskDto;
 import com.example.backend.entities.Apartment;
 import com.example.backend.entities.Profile;
@@ -40,7 +42,7 @@ public class TaskService {
         this.userService = userService;
     }
 
-    public Long create(User user, Integer apartmentId, CreateTaskDto dto) {
+    public IdResponse<Long> create(User user, Integer apartmentId, CreateTaskDto dto) {
         Profile creatorProfile = profileRepository.findByUserAndApartment_id(user, apartmentId).orElseThrow(
                 () -> new AccessForbiddenException("You can't create tasks in this apartment.")
         );
@@ -70,7 +72,7 @@ public class TaskService {
                 dto.dueDate()
         ));
 
-        return task.getId();
+        return new IdResponse<>(task.getId());
     }
 
     public List<TaskDto> getTasks(
@@ -98,7 +100,7 @@ public class TaskService {
     }
 
     @Transactional
-    public Boolean switchTaskStatus(Integer apartmentId, User user, Long taskId) {
+    public StatusResponse switchTaskStatus(Integer apartmentId, User user, Long taskId) {
         Role role = userService.getCurrentUserRoleInApartment(user, apartmentId);
 
         if (role == null)
@@ -130,7 +132,7 @@ public class TaskService {
         profileRepository.save(profile);
         taskRepository.save(task);
 
-        return task.getCompletedAt() != null;
+        return new StatusResponse(task.getCompletedAt() != null);
     }
 
     public void deleteOne(Integer apartmentId, User user, Long taskId) {

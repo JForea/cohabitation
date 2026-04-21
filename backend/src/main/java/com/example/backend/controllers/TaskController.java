@@ -1,6 +1,8 @@
 package com.example.backend.controllers;
 
 import com.example.backend.dtos.in.tasks.CreateTaskDto;
+import com.example.backend.dtos.out.common.IdResponse;
+import com.example.backend.dtos.out.common.StatusResponse;
 import com.example.backend.dtos.out.tasks.TaskDto;
 import com.example.backend.entities.User;
 import com.example.backend.security.CustomUserDetails;
@@ -24,15 +26,14 @@ public class TaskController {
     }
 
     @PostMapping
-    public ResponseEntity<Long> create(
+    public ResponseEntity<IdResponse<Long>> create(
             @RequestBody CreateTaskDto dto,
             @PathVariable Integer apartmentId,
             @AuthenticationPrincipal CustomUserDetails details,
             HttpServletResponse servletResponse
     ) {
         User user = details.getUser();
-        Long id = taskService.create(user, apartmentId, dto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(id);
+        return ResponseEntity.status(HttpStatus.CREATED).body(taskService.create(user, apartmentId, dto));
     }
 
     @GetMapping
@@ -51,7 +52,7 @@ public class TaskController {
     }
 
     @PatchMapping("/{taskId}")
-    public ResponseEntity<Boolean> changeTaskStatus(
+    public ResponseEntity<StatusResponse> changeTaskStatus(
             @PathVariable Integer apartmentId,
             @PathVariable Long taskId,
             @AuthenticationPrincipal CustomUserDetails details

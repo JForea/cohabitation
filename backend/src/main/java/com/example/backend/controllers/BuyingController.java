@@ -3,6 +3,8 @@ package com.example.backend.controllers;
 import com.example.backend.dtos.in.buyings.CreateBuyingDto;
 import com.example.backend.dtos.in.buyings.CreateManyBuyingsDto;
 import com.example.backend.dtos.out.buyings.BuyingDto;
+import com.example.backend.dtos.out.common.IdResponse;
+import com.example.backend.dtos.out.common.StatusResponse;
 import com.example.backend.entities.User;
 import com.example.backend.security.CustomUserDetails;
 import com.example.backend.services.BuyingService;
@@ -24,7 +26,7 @@ public class BuyingController {
     }
 
     @PostMapping
-    public ResponseEntity<Long> create(
+    public ResponseEntity<IdResponse<Long>> create(
             @PathVariable Integer apartmentId,
             @RequestBody CreateBuyingDto dto,
             @AuthenticationPrincipal CustomUserDetails details
@@ -36,7 +38,7 @@ public class BuyingController {
     }
 
     @PostMapping("/bulk")
-    public ResponseEntity<List<Long>> createMany(
+    public ResponseEntity<List<IdResponse<Long>>> createMany(
             @PathVariable Integer apartmentId,
             @RequestBody CreateManyBuyingsDto dto,
             @AuthenticationPrincipal CustomUserDetails details
@@ -57,6 +59,18 @@ public class BuyingController {
         User user = details.getUser();
         return ResponseEntity.ok(
             buyingService.get(apartmentId, user, assignedTo, isPublic)
+        );
+    }
+
+    @PatchMapping("/{buyingId}")
+    public ResponseEntity<StatusResponse> changeStatus(
+            @PathVariable Integer apartmentId,
+            @PathVariable Long buyingId,
+            @AuthenticationPrincipal CustomUserDetails details
+    ) {
+        User user = details.getUser();
+        return ResponseEntity.ok(
+                buyingService.changeStatus(apartmentId, user, buyingId)
         );
     }
 

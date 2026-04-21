@@ -59,4 +59,15 @@ public class BuyingController {
             buyingService.get(apartmentId, user, assignedTo, isPublic)
         );
     }
+
+    @DeleteMapping("/{buyingId}")
+    public ResponseEntity<Void> delete(
+            @PathVariable Integer apartmentId,
+            @PathVariable Long buyingId,
+            @AuthenticationPrincipal CustomUserDetails details
+    ) {
+        User user = details.getUser();
+        buyingService.deleteOne(apartmentId, user, buyingId);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
 }

@@ -16,6 +16,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 
 @Service
 public class BuyingService {
@@ -123,5 +124,21 @@ public class BuyingService {
                 .and(BuyingSpecifications.byPublic(isPublic, user.getId()));
 
         return buyingRepository.findAll(spec).stream().map(BuyingDto::new).toList();
+    }
+
+    public void deleteOne(Integer apartmentId, User user, Long buyingId) {
+        Role role = userService.getCurrentUserRoleInApartment(user, apartmentId);
+
+        if (role == null)
+            throw new AccessForbiddenException("You can't delete buyings in this apartment.");
+
+        Buying buying = buyingRepository.findById(buyingId).orElseThrow(
+                () -> new ResourceNotFoundException("Buying not found.")
+        );
+
+        if (!Objects.equals(buying.getCreatedBy().getId(), user.getCurrentProfile().getId()) && role == Role.INHABITANT)
+            throw new AccessForbiddenException("You can't delete others buyings.");
+
+        buyingRepository.delete(buying);
     }
 }

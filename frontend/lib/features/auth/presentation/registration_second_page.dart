@@ -1,31 +1,31 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/features/auth/data/auth_data_holder.dart';
-import 'package:frontend/features/auth/data/auth_service.dart';
-import 'package:frontend/shared/data/network/dio_client.dart';
+import 'package:frontend/features/auth/data/providers/auth_provider.dart';
 import 'package:frontend/shared/presentation/ui/widgets/buttons/custom_back_button.dart';
 import 'package:frontend/shared/presentation/ui/widgets/buttons/custom_text_button.dart';
 import 'package:frontend/shared/presentation/ui/widgets/inputs/controlled_named_text_field.dart';
 import 'package:frontend/shared/presentation/ui/widgets/switches/gender_switch.dart';
 
-class RegistrationSecondPage extends StatefulWidget {
+class RegistrationSecondPage extends ConsumerStatefulWidget {
   RegistrationSecondPage({super.key}) {
     dataHolder = AuthDataHolder.instance;
-    authService = AuthService(AppDio.dio);
   }
 
   late final AuthDataHolder dataHolder;
-  late final AuthService authService;
 
   @override
-  State<RegistrationSecondPage> createState() => _RegistrationSecondPageState();
+  ConsumerState<RegistrationSecondPage> createState() =>
+      _RegistrationSecondPageState();
 }
 
-class _RegistrationSecondPageState extends State<RegistrationSecondPage> {
+class _RegistrationSecondPageState
+    extends ConsumerState<RegistrationSecondPage> {
   void setName(String s) {
     widget.dataHolder.name = s;
   }
 
-  void switchSex() {
+  void switchGender() {
     setState(() {
       widget.dataHolder.male = !widget.dataHolder.male;
     });
@@ -34,16 +34,19 @@ class _RegistrationSecondPageState extends State<RegistrationSecondPage> {
   Future<void> register() async {
     AuthDataHolder dataHolder = widget.dataHolder;
 
-    await widget.authService.register(
-      dataHolder.email,
-      dataHolder.password,
-      dataHolder.name,
-      dataHolder.male,
-    );
+    await ref
+        .read(authProvider.notifier)
+        .register(
+          dataHolder.email,
+          dataHolder.password,
+          dataHolder.name,
+          dataHolder.male,
+        );
   }
 
   @override
   Widget build(BuildContext context) {
+    final authState = ref.watch(authProvider);
     final mediaQuery = MediaQuery.of(context);
 
     return Scaffold(
@@ -57,6 +60,8 @@ class _RegistrationSecondPageState extends State<RegistrationSecondPage> {
           crossAxisAlignment: .start,
           spacing: 20,
           children: [
+            if (authState.isLoading) CircularProgressIndicator(),
+
             CustomBackButton(),
             Text(
               "Как вас зовут?",
@@ -83,7 +88,7 @@ class _RegistrationSecondPageState extends State<RegistrationSecondPage> {
               password: false,
               require: true,
             ),
-            GenderSwitch(male: widget.dataHolder.male, onPressed: switchSex),
+            GenderSwitch(male: widget.dataHolder.male, onPressed: switchGender),
             Spacer(),
             CustomTextButton(onPressed: register, text: "Продолжить"),
           ],

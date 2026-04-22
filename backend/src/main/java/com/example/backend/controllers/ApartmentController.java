@@ -9,7 +9,6 @@ import com.example.backend.services.JwtService;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -36,8 +35,7 @@ public class ApartmentController {
         User user = details.getUser();
         ProfileDto profileDto = apartmentService.create(user, dto);
         String token = jwtService.generateToken(user, profileDto);
-        ResponseCookie cookie = jwtService.generateCookie(token);
-        servletResponse.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+        servletResponse.addHeader(HttpHeaders.AUTHORIZATION, "Bearer " + token);
         return ResponseEntity.status(HttpStatus.CREATED).body(profileDto);
     }
 }

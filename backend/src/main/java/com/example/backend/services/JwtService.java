@@ -2,12 +2,10 @@ package com.example.backend.services;
 
 import com.example.backend.dtos.out.profile.ProfileDto;
 import com.example.backend.dtos.out.user.UserDto;
-import com.example.backend.entities.Profile;
 import com.example.backend.entities.User;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
@@ -62,15 +60,5 @@ public class JwtService {
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
-    }
-
-    public ResponseCookie generateCookie(String token) {
-        return ResponseCookie.from("token", token)
-                .httpOnly(true)
-                .secure(false)
-                .path("/")
-                .maxAge(24 * 60 * 60)
-                .sameSite("Lax")
-                .build();
     }
 }

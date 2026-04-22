@@ -4,7 +4,6 @@ import com.example.backend.services.JwtService;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.jspecify.annotations.NonNull;
@@ -42,37 +41,31 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             @NonNull HttpServletResponse response,
             @NonNull FilterChain filterChain
     ) throws IOException, ServletException {
+        try {
+            String token = request.getHeader("Authorization").substring(7);
 
-        if (request.getCookies() != null) {
-            for (Cookie cookie : request.getCookies()) {
-                if ("token".equals(cookie.getName())) {
-                    try {
-                        Map<String, Object> claims =
-                                jwtService.parseClaimsJwsFromToken(cookie.getValue());
+            Map<String, Object> claims =
+                    jwtService.parseClaimsJwsFromToken(token);
 
-                        String email = (String) claims.get("email");
+            String email = (String) claims.get("email");
 
-                        if (email != null &&
-                                SecurityContextHolder.getContext().getAuthentication() == null) {
+            if (email != null &&
+                    SecurityContextHolder.getContext().getAuthentication() == null) {
 
-                            UserDetails userDetails =
-                                    userDetailsService.loadUserByUsername(email);
+                UserDetails userDetails =
+                        userDetailsService.loadUserByUsername(email);
 
-                            UsernamePasswordAuthenticationToken auth =
-                                    new UsernamePasswordAuthenticationToken(
-                                            userDetails,
-                                            null,
-                                            userDetails.getAuthorities()
-                                    );
+                UsernamePasswordAuthenticationToken auth =
+                        new UsernamePasswordAuthenticationToken(
+                                userDetails,
+                                null,
+                                userDetails.getAuthorities()
+                        );
 
-                            SecurityContextHolder.getContext().setAuthentication(auth);
-                        }
-                    } catch (JwtException e) {
-                        SecurityContextHolder.clearContext();
-                    }
-                    break;
-                }
+                SecurityContextHolder.getContext().setAuthentication(auth);
             }
+        } catch (Exception e) {
+            SecurityContextHolder.clearContext();
         }
 
         filterChain.doFilter(request, response);

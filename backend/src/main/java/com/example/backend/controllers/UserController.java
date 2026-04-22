@@ -10,7 +10,6 @@ import com.example.backend.services.JwtService;
 import com.example.backend.services.UserService;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -36,8 +35,7 @@ public class UserController {
     ) {
         UserDto userDto = userService.create(dto);
         String token = jwtService.generateToken(userDto);
-        ResponseCookie cookie = jwtService.generateCookie(token);
-        servletResponse.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+        servletResponse.addHeader(HttpHeaders.AUTHORIZATION, "Bearer " + token);
         return ResponseEntity.ok(userDto);
     }
 
@@ -48,8 +46,7 @@ public class UserController {
     ) {
         UserDto userDto = userService.authenticate(dto);
         String token = jwtService.generateToken(userDto);
-        ResponseCookie cookie = jwtService.generateCookie(token);
-        servletResponse.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+        servletResponse.addHeader(HttpHeaders.AUTHORIZATION, "Bearer " + token);
         return ResponseEntity.ok(userDto);
     }
 
@@ -68,8 +65,7 @@ public class UserController {
         User user = details.getUser();
         ProfileDto dto = userService.join(user, code);
         String token = jwtService.generateToken(user, dto);
-        ResponseCookie cookie = jwtService.generateCookie(token);
-        servletResponse.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+        servletResponse.addHeader(HttpHeaders.AUTHORIZATION, "Bearer " + token);
         return ResponseEntity.ok(dto);
     }
 }

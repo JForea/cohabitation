@@ -13,4 +13,3 @@ public record AuthenticationDto(
             "Password length must be 8-32 characters length.")
     String password
 ) {}
-

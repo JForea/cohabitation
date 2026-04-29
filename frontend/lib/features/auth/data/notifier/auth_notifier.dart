@@ -1,13 +1,36 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:frontend/shared/data/entities/user.dart';
 import 'package:frontend/shared/data/network/dio_client.dart';
 import 'package:frontend/features/auth/data/models/auth_state.dart';
 
 class AuthNotifier extends Notifier<AuthState> {
+  final FlutterSecureStorage _storage = FlutterSecureStorage();
+
   @override
   AuthState build() {
-    return AuthState();
+    _init();
+    return AuthState(isLoading: true);
+  }
+
+  Future<void> _init() async {
+    final token = await _storage.read(key: "token");
+
+    if (token == null) {
+      state = state.copyWith(isLoading: false);
+      return;
+    } else {
+      state = state.copyWith(token: token);
+    }
+
+    try {
+      await whoAmI();
+    } catch (_) {
+      await logout();
+    } finally {
+      state = state.copyWith(isLoading: false);
+    }
   }
 
   Future<void> _parseResponse(Response<dynamic> response) async {
@@ -15,7 +38,7 @@ class AuthNotifier extends Notifier<AuthState> {
 
     if (token == null) {
       print("Authorization failed.");
-      state = AuthState(isError: true);
+      state = state.copyWith(isError: true);
       return;
     }
 
@@ -23,7 +46,7 @@ class AuthNotifier extends Notifier<AuthState> {
 
     final user = User.fromJson(response.data);
 
-    state = AuthState(token: token.first, user: user);
+    state = state.copyWith(token: token.first, user: user);
   }
 
   Future<void> register(
@@ -32,7 +55,7 @@ class AuthNotifier extends Notifier<AuthState> {
     String name,
     bool male,
   ) async {
-    state = AuthState(isLoading: true);
+    state = state.copyWith(isLoading: true);
 
     try {
       final response = await AppDio.dio.post(
@@ -48,12 +71,12 @@ class AuthNotifier extends Notifier<AuthState> {
       _parseResponse(response);
     } catch (e) {
       print(e.toString());
-      state = AuthState(isError: true);
+      state = state.copyWith(isError: true);
     }
   }
 
   Future<void> login(String email, String password) async {
-    state = AuthState(isLoading: true);
+    state = state.copyWith(isLoading: true);
 
     final response = await AppDio.dio.post(
       '/users/auth/login',
@@ -64,9 +87,16 @@ class AuthNotifier extends Notifier<AuthState> {
   }
 
   Future<void> whoAmI() async {
-    final response = await AppDio.dio.get("/users/me");
+    try {
+      final response = await AppDio.dio.get("/users/me");
 
-    _parseResponse(response);
+      final user = User.fromJson(response.data);
+
+      state = state.copyWith(user: user);
+    } catch (e) {
+      print(e.toString());
+      state = state.copyWith(isError: true);
+    }
   }
 
   Future<void> logout() async {

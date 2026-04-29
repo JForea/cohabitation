@@ -14,4 +14,18 @@ class AuthState {
   });
 
   bool get isAuthenticated => token != null;
+
+  AuthState copyWith({
+    User? user,
+    String? token,
+    bool? isLoading,
+    bool? isError,
+  }) {
+    return AuthState(
+      user: user ?? this.user,
+      token: token ?? this.token,
+      isLoading: isLoading ?? this.isLoading,
+      isError: isError ?? this.isError,
+    );
+  }
 }

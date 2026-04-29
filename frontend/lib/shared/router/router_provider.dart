@@ -5,7 +5,7 @@ import 'package:frontend/features/auth/presentation/registration_first_page.dart
 import 'package:frontend/features/auth/presentation/registration_second_page.dart';
 import 'package:frontend/features/auth/presentation/welcome_page.dart';
 import 'package:frontend/features/home/presentation/home_page.dart';
-import 'package:frontend/features/house_enter/presentation/option_page.dart';
+import 'package:frontend/features/house_enter/presentation/ui/widgets/pages/option_page.dart';
 import 'package:go_router/go_router.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {

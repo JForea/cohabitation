@@ -46,7 +46,7 @@ class AuthNotifier extends Notifier<AuthState> {
 
     final user = User.fromJson(response.data);
 
-    state = state.copyWith(token: token.first, user: user);
+    state = state.copyWith(token: token.first, user: user, isLoading: false);
   }
 
   Future<void> register(
@@ -71,7 +71,7 @@ class AuthNotifier extends Notifier<AuthState> {
       _parseResponse(response);
     } catch (e) {
       print(e.toString());
-      state = state.copyWith(isError: true);
+      state = state.copyWith(isError: true, isLoading: false);
     }
   }
 
@@ -96,11 +96,13 @@ class AuthNotifier extends Notifier<AuthState> {
     } catch (e) {
       print(e.toString());
       state = state.copyWith(isError: true);
+      throw e;
     }
   }
 
   Future<void> logout() async {
     await AppDio.updateToken(null);
+    print("LOGGED OUT");
     state = AuthState();
   }
 }

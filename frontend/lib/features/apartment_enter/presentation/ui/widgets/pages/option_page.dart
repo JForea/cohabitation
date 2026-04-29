@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:frontend/features/house_enter/presentation/ui/widgets/buttons/enter_button.dart';
+import 'package:frontend/features/apartment_enter/presentation/ui/widgets/buttons/enter_button.dart';
 import 'package:go_router/go_router.dart';
 
 class OptionPage extends StatelessWidget {

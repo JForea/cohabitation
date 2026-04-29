@@ -30,7 +30,10 @@ class WelcomePage extends StatelessWidget {
             Spacer(),
             SvgPicture.asset('assets/icons/welcome.svg'),
             Spacer(),
-            CustomTextButton(onPressed: () {}, text: "Войти в аккаунт"),
+            CustomTextButton(
+              onPressed: () => context.push("/auth/login"),
+              text: "Войти в аккаунт",
+            ),
             SizedBox(height: 20),
             Row(
               mainAxisAlignment: .center,

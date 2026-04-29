@@ -79,12 +79,17 @@ class AuthNotifier extends Notifier<AuthState> {
   Future<void> login(String email, String password) async {
     state = state.copyWith(isLoading: true);
 
-    final response = await AppDio.dio.post(
-      '/users/auth/login',
-      data: {"email": email, "password": password},
-    );
+    try {
+      final response = await AppDio.dio.post(
+        '/users/auth/login',
+        data: {"email": email, "password": password},
+      );
 
-    _parseResponse(response);
+      _parseResponse(response);
+    } catch (e) {
+      print(e.toString());
+      state = state.copyWith(isError: true, isLoading: false);
+    }
   }
 
   Future<void> whoAmI() async {

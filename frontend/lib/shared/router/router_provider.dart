@@ -1,12 +1,13 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:frontend/features/auth/presentation/ui/widgets/pages/login_page.dart';
 import 'package:frontend/shared/data/providers/auth_provider.dart';
 import 'package:frontend/features/auth/presentation/ui/widgets/pages/onboarding_page.dart';
 import 'package:frontend/features/auth/presentation/ui/widgets/pages/registration_first_page.dart';
 import 'package:frontend/features/auth/presentation/ui/widgets/pages/registration_second_page.dart';
 import 'package:frontend/features/auth/presentation/ui/widgets/pages/welcome_page.dart';
 import 'package:frontend/features/home/presentation/ui/widgets/pages/home_page.dart';
-import 'package:frontend/features/house_enter/presentation/ui/widgets/pages/create_apartment_page.dart';
-import 'package:frontend/features/house_enter/presentation/ui/widgets/pages/option_page.dart';
+import 'package:frontend/features/apartment_enter/presentation/ui/widgets/pages/create_apartment_page.dart';
+import 'package:frontend/features/apartment_enter/presentation/ui/widgets/pages/option_page.dart';
 import 'package:go_router/go_router.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
@@ -54,6 +55,7 @@ final routerProvider = Provider<GoRouter>((ref) {
     routes: [
       GoRoute(path: '/', builder: (context, state) => HomePage()),
       GoRoute(path: '/auth', builder: (context, state) => WelcomePage()),
+      GoRoute(path: '/auth/login', builder: (context, state) => LoginPage()),
       GoRoute(
         path: '/auth/onboarding',
         builder: (context, state) => OnboardingPage(),

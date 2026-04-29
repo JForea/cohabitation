@@ -4,7 +4,7 @@ import 'package:frontend/features/auth/presentation/ui/widgets/pages/onboarding_
 import 'package:frontend/features/auth/presentation/ui/widgets/pages/registration_first_page.dart';
 import 'package:frontend/features/auth/presentation/ui/widgets/pages/registration_second_page.dart';
 import 'package:frontend/features/auth/presentation/ui/widgets/pages/welcome_page.dart';
-import 'package:frontend/features/home/presentation/home_page.dart';
+import 'package:frontend/features/home/presentation/ui/widgets/pages/home_page.dart';
 import 'package:frontend/features/house_enter/presentation/ui/widgets/pages/create_apartment_page.dart';
 import 'package:frontend/features/house_enter/presentation/ui/widgets/pages/option_page.dart';
 import 'package:go_router/go_router.dart';

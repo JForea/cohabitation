@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:frontend/features/auth/data/providers/auth_provider.dart';
+import 'package:frontend/shared/data/providers/auth_provider.dart';
 import 'package:frontend/shared/presentation/theme/custom_theme.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:frontend/shared/router/router_provider.dart';

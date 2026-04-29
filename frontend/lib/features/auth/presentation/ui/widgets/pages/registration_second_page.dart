@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/features/auth/data/auth_data_holder.dart';
-import 'package:frontend/features/auth/data/providers/auth_provider.dart';
+import 'package:frontend/shared/data/providers/auth_provider.dart';
 import 'package:frontend/shared/presentation/ui/widgets/buttons/custom_back_button.dart';
 import 'package:frontend/shared/presentation/ui/widgets/buttons/custom_text_button.dart';
 import 'package:frontend/shared/presentation/ui/widgets/inputs/controlled_named_text_field.dart';
@@ -46,7 +46,6 @@ class _RegistrationSecondPageState
 
   @override
   Widget build(BuildContext context) {
-    final authState = ref.watch(authProvider);
     final mediaQuery = MediaQuery.of(context);
 
     return Scaffold(
@@ -60,8 +59,6 @@ class _RegistrationSecondPageState
           crossAxisAlignment: .start,
           spacing: 20,
           children: [
-            if (authState.isLoading) CircularProgressIndicator(),
-
             CustomBackButton(),
             Text(
               "Как вас зовут?",

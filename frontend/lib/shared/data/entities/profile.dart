@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/shared/types/role.dart';
 import 'package:frontend/shared/utils/get_color_from_name.dart';
+import 'package:frontend/shared/utils/get_role_from_name.dart';
 
 class Profile {
   Profile({
@@ -18,7 +19,7 @@ class Profile {
       name: json['name'] as String,
       points: json['points'] as int,
       apartmentId: json['apartmentId'] as int,
-      role: json['role'] as Role,
+      role: getRoleFromName(json['role'] as String),
       color: getColorFromName(json['avatarColor'] as String),
     );
   }

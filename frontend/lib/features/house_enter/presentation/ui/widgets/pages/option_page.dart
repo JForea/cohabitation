@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:frontend/features/house_enter/presentation/ui/widgets/buttons/enter_button.dart';
+import 'package:go_router/go_router.dart';
 
 class OptionPage extends StatelessWidget {
   const OptionPage({super.key});
@@ -33,7 +34,7 @@ class OptionPage extends StatelessWidget {
             SizedBox(height: 60),
             EnterButton(
               filled: true,
-              onTap: () {},
+              onTap: () => context.push("/enter/create"),
               mainText: "Создать квартиру",
               subText: "Станьте администратором",
               icon: Icons.add,

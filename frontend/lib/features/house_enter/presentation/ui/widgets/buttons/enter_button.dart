@@ -18,30 +18,27 @@ class EnterButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      borderRadius: .all(.circular(15)),
-      clipBehavior: .antiAlias,
-      color: Colors.transparent,
-      child: Ink(
-        padding: .symmetric(vertical: 20, horizontal: 15),
-        width: .infinity,
-        decoration: BoxDecoration(
-          gradient: filled
-              ? LinearGradient(
-                  colors: [
-                    Theme.of(context).colorScheme.primary,
-                    Theme.of(context).colorScheme.secondary,
-                  ],
-                  begin: .topLeft,
-                  end: .bottomRight,
-                )
-              : null,
-          borderRadius: .all(.circular(15)),
-          border: filled ? null : .all(width: 1, color: Color(0xFFE2E0FF)),
-        ),
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: .all(.circular(15)),
+    return Ink(
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: .all(.circular(15)),
+        child: Container(
+          padding: .symmetric(vertical: 20, horizontal: 15),
+          width: .infinity,
+          decoration: BoxDecoration(
+            gradient: filled
+                ? LinearGradient(
+                    colors: [
+                      Theme.of(context).colorScheme.primary,
+                      Theme.of(context).colorScheme.secondary,
+                    ],
+                    begin: .topLeft,
+                    end: .bottomRight,
+                  )
+                : null,
+            borderRadius: .all(.circular(15)),
+            border: filled ? null : .all(width: 1, color: Color(0xFFE2E0FF)),
+          ),
           child: Row(
             crossAxisAlignment: .start,
             spacing: 10,

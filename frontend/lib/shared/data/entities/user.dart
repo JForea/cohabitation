@@ -22,5 +22,5 @@ class User {
   final int id;
   final String email;
   final String name;
-  final Profile? profile;
+  Profile? profile;
 }

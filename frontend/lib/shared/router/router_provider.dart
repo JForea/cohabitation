@@ -1,10 +1,11 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:frontend/features/auth/data/providers/auth_provider.dart';
-import 'package:frontend/features/auth/presentation/onboarding_page.dart';
-import 'package:frontend/features/auth/presentation/registration_first_page.dart';
-import 'package:frontend/features/auth/presentation/registration_second_page.dart';
-import 'package:frontend/features/auth/presentation/welcome_page.dart';
+import 'package:frontend/shared/data/providers/auth_provider.dart';
+import 'package:frontend/features/auth/presentation/ui/widgets/pages/onboarding_page.dart';
+import 'package:frontend/features/auth/presentation/ui/widgets/pages/registration_first_page.dart';
+import 'package:frontend/features/auth/presentation/ui/widgets/pages/registration_second_page.dart';
+import 'package:frontend/features/auth/presentation/ui/widgets/pages/welcome_page.dart';
 import 'package:frontend/features/home/presentation/home_page.dart';
+import 'package:frontend/features/house_enter/presentation/ui/widgets/pages/create_apartment_page.dart';
 import 'package:frontend/features/house_enter/presentation/ui/widgets/pages/option_page.dart';
 import 'package:go_router/go_router.dart';
 
@@ -66,6 +67,10 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => RegistrationSecondPage(),
       ),
       GoRoute(path: '/enter', builder: (context, state) => OptionPage()),
+      GoRoute(
+        path: '/enter/create',
+        builder: (context, state) => CreateApartmentPage(),
+      ),
     ],
   );
 });

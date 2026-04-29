@@ -9,6 +9,7 @@ import com.example.backend.security.CustomUserDetails;
 import com.example.backend.services.JwtService;
 import com.example.backend.services.UserService;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -30,7 +31,7 @@ public class UserController {
 
     @PostMapping("/auth/registry")
     public ResponseEntity<UserDto> create(
-            @RequestBody RegisterDto dto,
+            @RequestBody @Valid RegisterDto dto,
             HttpServletResponse servletResponse
     ) {
         UserDto userDto = userService.create(dto);
@@ -41,7 +42,7 @@ public class UserController {
 
     @PostMapping("/auth/login")
     public ResponseEntity<UserDto> login(
-            @RequestBody AuthenticationDto dto,
+            @RequestBody @Valid AuthenticationDto dto,
             HttpServletResponse servletResponse
     ) {
         UserDto userDto = userService.authenticate(dto);

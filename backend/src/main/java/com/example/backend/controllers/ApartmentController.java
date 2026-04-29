@@ -7,6 +7,7 @@ import com.example.backend.security.CustomUserDetails;
 import com.example.backend.services.ApartmentService;
 import com.example.backend.services.JwtService;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,7 +29,7 @@ public class ApartmentController {
 
     @PostMapping
     public ResponseEntity<ProfileDto> create(
-            @RequestBody CreateApartmentDto dto,
+            @RequestBody @Valid CreateApartmentDto dto,
             @AuthenticationPrincipal CustomUserDetails details,
             HttpServletResponse servletResponse
     ) {

@@ -8,6 +8,7 @@ import com.example.backend.entities.User;
 import com.example.backend.security.CustomUserDetails;
 import com.example.backend.services.TaskService;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -27,7 +28,7 @@ public class TaskController {
 
     @PostMapping
     public ResponseEntity<IdResponse<Long>> create(
-            @RequestBody CreateTaskDto dto,
+            @RequestBody @Valid CreateTaskDto dto,
             @PathVariable Integer apartmentId,
             @AuthenticationPrincipal CustomUserDetails details,
             HttpServletResponse servletResponse

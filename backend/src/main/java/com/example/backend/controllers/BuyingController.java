@@ -8,6 +8,7 @@ import com.example.backend.dtos.out.common.StatusResponse;
 import com.example.backend.entities.User;
 import com.example.backend.security.CustomUserDetails;
 import com.example.backend.services.BuyingService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -28,7 +29,7 @@ public class BuyingController {
     @PostMapping
     public ResponseEntity<IdResponse<Long>> create(
             @PathVariable Integer apartmentId,
-            @RequestBody CreateBuyingDto dto,
+            @RequestBody @Valid CreateBuyingDto dto,
             @AuthenticationPrincipal CustomUserDetails details
     ) {
         User user = details.getUser();
@@ -40,7 +41,7 @@ public class BuyingController {
     @PostMapping("/bulk")
     public ResponseEntity<List<IdResponse<Long>>> createMany(
             @PathVariable Integer apartmentId,
-            @RequestBody CreateManyBuyingsDto dto,
+            @RequestBody @Valid CreateManyBuyingsDto dto,
             @AuthenticationPrincipal CustomUserDetails details
     ) {
         User user = details.getUser();

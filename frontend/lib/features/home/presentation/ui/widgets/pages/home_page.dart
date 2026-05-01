@@ -1,36 +1,30 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/features/home/presentation/ui/widgets/navigation/custom_bottom_nav_bar.dart';
+import 'package:frontend/shared/data/providers/page_provider.dart';
 
-class HomePage extends StatefulWidget {
+class HomePage extends ConsumerWidget {
   const HomePage({super.key});
 
   @override
-  State<HomePage> createState() => _HomePageState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final currentlyActive = ref.watch(pageProvider);
 
-class _HomePageState extends State<HomePage> {
-  late int activeIndex;
-
-  void setIndex(int i) {
-    setState(() {
-      activeIndex = i;
-    });
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    activeIndex = 0;
-  }
-
-  @override
-  Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
-      body: Container(height: .infinity),
+      body: IndexedStack(
+        index: currentlyActive,
+        children: const [
+          Placeholder(),
+          Placeholder(),
+          Placeholder(),
+          Placeholder(),
+          Placeholder(),
+        ],
+      ),
       bottomNavigationBar: CustomBottomNavBar(
-        currentlyActive: activeIndex,
-        setIndex: setIndex,
+        currentlyActive: currentlyActive,
+        setIndex: (i) => ref.read(pageProvider.notifier).setIndex(i),
       ),
     );
   }

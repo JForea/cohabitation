@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/features/auth/presentation/ui/widgets/wrappers/onboarding_model.dart';
+import 'package:frontend/features/onboarding/presentation/ui/widgets/wrappers/onboarding_model.dart';
 import 'package:frontend/shared/presentation/types/bubble.dart';
 
 class OnboardingPage extends StatefulWidget {

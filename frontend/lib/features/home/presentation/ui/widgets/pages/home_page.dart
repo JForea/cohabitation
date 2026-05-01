@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/features/home/presentation/ui/widgets/navigation/custom_bottom_nav_bar.dart';
-import 'package:frontend/shared/data/providers/page_provider.dart';
+import 'package:frontend/features/home/data/providers/page_provider.dart';
 
 class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});

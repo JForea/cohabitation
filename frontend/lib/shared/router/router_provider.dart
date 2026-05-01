@@ -1,9 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:frontend/features/auth/presentation/ui/widgets/pages/login_page.dart';
+import 'package:frontend/features/auth/login/presentation/ui/widgets/pages/login_page.dart';
 import 'package:frontend/shared/data/providers/auth_provider.dart';
-import 'package:frontend/features/auth/presentation/ui/widgets/pages/onboarding_page.dart';
-import 'package:frontend/features/auth/presentation/ui/widgets/pages/registration_first_page.dart';
-import 'package:frontend/features/auth/presentation/ui/widgets/pages/registration_second_page.dart';
+import 'package:frontend/features/onboarding/presentation/ui/widgets/pages/onboarding_page.dart';
+import 'package:frontend/features/auth/register/presentation/ui/widgets/pages/registration_first_page.dart';
+import 'package:frontend/features/auth/register/presentation/ui/widgets/pages/registration_second_page.dart';
 import 'package:frontend/features/auth/presentation/ui/widgets/pages/welcome_page.dart';
 import 'package:frontend/features/home/presentation/ui/widgets/pages/home_page.dart';
 import 'package:frontend/features/apartment_enter/presentation/ui/widgets/pages/create_apartment_page.dart';

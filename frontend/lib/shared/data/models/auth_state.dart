@@ -1,4 +1,4 @@
-import 'package:frontend/shared/data/entities/user.dart';
+import 'package:frontend/shared/data/models/user.dart';
 
 class AuthState {
   final User? user;

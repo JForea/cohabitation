@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:frontend/shared/data/types/role.dart';
 import 'package:frontend/shared/data/types/room.dart';
 import 'package:frontend/shared/data/types/task_priority.dart';
+import 'package:frontend/shared/presentation/theme/app_colors.dart';
 
 T getTValueFromName<T>(String name) {
   name = name.toLowerCase();
@@ -9,12 +10,12 @@ T getTValueFromName<T>(String name) {
   switch (T) {
     case const (Color):
       res = switch (name) {
-        "blue" => const Color(0xFF6C63FF),
-        "green" => const Color(0xFF3EC98E),
-        "orange" => const Color(0xFFFF7854),
-        "yellow" => const Color(0xFFFFC107),
-        "purple" => const Color(0xFFE155F6),
-        "brown" => const Color(0xFF875B50),
+        "blue" => AppColors.blue,
+        "green" => AppColors.green,
+        "orange" => AppColors.orange,
+        "yellow" => AppColors.yellow,
+        "purple" => AppColors.purple,
+        "brown" => AppColors.brown,
         _ => Colors.black,
       };
       break;

@@ -16,7 +16,7 @@ import java.util.Map;
 public class JwtService {
     @Value("${jwt.secret}")
     private String secret;
-    private final long exp = 30 * 60 * 1000;
+    private final long exp = 24 * 60 * 60 * 1000;
 
     public String generateToken(UserDto dto) {
         ProfileDto profile = dto.profile();

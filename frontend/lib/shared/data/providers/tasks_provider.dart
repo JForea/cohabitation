@@ -1,29 +1,45 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/shared/data/models/task.dart';
 import 'package:frontend/shared/data/network/dio_client.dart';
+import 'package:frontend/shared/data/types/task_filter.dart';
 
-final tasksProvider = AsyncNotifierProvider<_TasksNotifier, List<Task>>(
-  _TasksNotifier.new,
-);
+final tasksProvider =
+    AsyncNotifierProvider.family<_TasksNotifier, List<Task>, int>(
+      _TasksNotifier.new,
+    );
 
 class _TasksNotifier extends AsyncNotifier<List<Task>> {
+  _TasksNotifier(this.apartmentId);
+  final int apartmentId;
+
+  static const _pageSize = 20;
+
   int _page = 0;
   bool _hasMore = true;
   bool _isLoading = false;
 
-  static const _pageSize = 20;
+  TaskFilter _filter = const TaskFilter();
 
   @override
   Future<List<Task>> build() async {
     _page = 0;
     _hasMore = true;
 
-    final tasks = await _fetchPage(_page);
-    return tasks;
+    return _fetchPage();
   }
 
-  Future<List<Task>> _fetchPage(int page) async {
-    final response = await AppDio.dio.get("/tasks?page=$_page&size=$_pageSize");
+  Future<List<Task>> _fetchPage() async {
+    final query = {
+      'page': '$_page',
+      'size': '$_pageSize',
+      if (_filter.assignedTo != null) 'assignedTo': '${_filter.assignedTo}',
+      if (_filter.done != null) 'done': '${_filter.done}',
+    };
+
+    final response = await AppDio.dio.get(
+      "/$apartmentId/tasks",
+      queryParameters: query,
+    );
 
     final data = response.data as List;
 
@@ -31,26 +47,24 @@ class _TasksNotifier extends AsyncNotifier<List<Task>> {
   }
 
   Future<void> loadMore() async {
-    if (_isLoading || !_hasMore) return;
+    if (_isLoading || !_hasMore || state.isLoading) return;
 
     _isLoading = true;
 
-    final current = state.value ?? [];
-
-    final nextPage = _page + 1;
+    final previousValue = state.value ?? [];
 
     try {
-      final newTasks = await _fetchPage(nextPage);
+      _page++;
+      final newTasks = await _fetchPage();
 
       if (newTasks.length < _pageSize) {
         _hasMore = false;
       }
 
-      _page = nextPage;
-
-      state = AsyncData([...current, ...newTasks]);
+      state = AsyncData([...previousValue, ...newTasks]);
     } catch (e, st) {
-      state = AsyncError(e, st);
+      _page--;
+      state = AsyncError<List<Task>>(e, st);
     } finally {
       _isLoading = false;
     }
@@ -61,9 +75,14 @@ class _TasksNotifier extends AsyncNotifier<List<Task>> {
     _hasMore = true;
 
     state = const AsyncLoading();
-
     state = await AsyncValue.guard(() async {
-      return _fetchPage(0);
+      return _fetchPage();
     });
+  }
+
+  Future<void> switchFilter({int? assignedTo, bool? done}) async {
+    _filter = TaskFilter(assignedTo: assignedTo, done: done);
+
+    await refresh();
   }
 }

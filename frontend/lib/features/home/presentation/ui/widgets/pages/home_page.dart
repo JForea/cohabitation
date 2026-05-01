@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/features/home/presentation/ui/widgets/navigation/custom_bottom_nav_bar.dart';
 import 'package:frontend/features/home/data/providers/page_provider.dart';
+import 'package:frontend/features/tasks/presentation/ui/widgets/tabs/tasks_tab.dart';
 
 class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
@@ -48,7 +49,7 @@ class _HomePageState extends ConsumerState<HomePage> {
         physics: const BouncingScrollPhysics(),
         children: const [
           Placeholder(),
-          Placeholder(),
+          TasksTab(),
           Placeholder(),
           Placeholder(),
           Placeholder(),

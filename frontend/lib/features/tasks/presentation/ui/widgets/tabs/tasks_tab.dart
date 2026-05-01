@@ -13,17 +13,27 @@ class TasksTab extends ConsumerStatefulWidget {
 }
 
 class _TasksTabState extends ConsumerState<TasksTab> {
+  Future<void> switchStatus(int apartmentId, int taskId) async {
+    ref
+        .read(tasksProvider(apartmentId).notifier)
+        .switchTaskStatus(taskId, ref.read(authProvider).user!.profile!);
+  }
+
   @override
   Widget build(BuildContext context) {
-    final tasks = ref.watch(
-      tasksProvider(ref.read(authProvider).user!.profile!.apartmentId),
-    );
+    int apartmentId = ref.read(authProvider).user!.profile!.apartmentId;
+    final tasks = ref.watch(tasksProvider(apartmentId));
 
     return TabWrapper(
       floatingButtonExists: true,
       children: [
         const Text("Задачи", style: TextStyle(fontSize: 20, fontWeight: .w600)),
-        ...?tasks.value?.map((t) => TaskCard(task: t)),
+        ...?tasks.value?.map(
+          (t) => TaskCard(
+            task: t,
+            onStatusSwitch: () => switchStatus(apartmentId, t.id),
+          ),
+        ),
       ],
     );
   }

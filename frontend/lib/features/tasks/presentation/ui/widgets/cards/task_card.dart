@@ -9,9 +9,10 @@ import 'package:frontend/shared/utils/get_date_display_from_date_time.dart';
 import 'package:frontend/shared/utils/get_display_name_from_t.dart';
 
 class TaskCard extends StatelessWidget {
-  const TaskCard({super.key, required this.task});
+  const TaskCard({super.key, required this.task, required this.onStatusSwitch});
 
   final Task task;
+  final Future<void> Function() onStatusSwitch;
 
   Color _getTaskColor() {
     return switch (task.priority) {
@@ -20,8 +21,6 @@ class TaskCard extends StatelessWidget {
       TaskPriority.high => AppColors.orange,
     };
   }
-
-  Future<void> switchTaskStatus() async {}
 
   @override
   Widget build(BuildContext context) {
@@ -40,7 +39,7 @@ class TaskCard extends StatelessWidget {
         crossAxisAlignment: .start,
         children: [
           GestureDetector(
-            onTap: switchTaskStatus,
+            onTap: onStatusSwitch,
             child: Container(
               width: 20,
               height: 20,
@@ -52,7 +51,9 @@ class TaskCard extends StatelessWidget {
                 borderRadius: .all(.circular(20)),
               ),
               child: task.completedBy != null
-                  ? Center(child: Icon(Icons.done, color: Colors.white))
+                  ? Center(
+                      child: Icon(Icons.done, color: Colors.white, size: 15),
+                    )
                   : null,
             ),
           ),

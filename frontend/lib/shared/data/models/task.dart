@@ -48,4 +48,31 @@ class Task {
   final TaskPriority priority;
   final int points;
   final DateTime? dueTime;
+
+  Task copyWith({
+    int? id,
+    Profile? createdBy,
+    Profile? assignedTo,
+    Profile? completedBy,
+    String? name,
+    String? description,
+    Room? room,
+    TaskPriority? priority,
+    int? points,
+    DateTime? dueTime,
+    bool clearCompletedBy = false,
+  }) {
+    return Task(
+      id: id ?? this.id,
+      createdBy: createdBy ?? this.createdBy,
+      assignedTo: assignedTo ?? this.assignedTo,
+      completedBy: clearCompletedBy ? null : (completedBy ?? this.completedBy),
+      name: name ?? this.name,
+      description: description ?? this.description,
+      room: room ?? this.room,
+      priority: priority ?? this.priority,
+      points: points ?? this.points,
+      dueTime: dueTime ?? this.dueTime,
+    );
+  }
 }

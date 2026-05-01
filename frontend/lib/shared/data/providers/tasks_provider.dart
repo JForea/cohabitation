@@ -1,6 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:frontend/shared/data/models/profile.dart';
 import 'package:frontend/shared/data/models/task.dart';
 import 'package:frontend/shared/data/network/dio_client.dart';
+import 'package:frontend/shared/data/types/role.dart';
 import 'package:frontend/shared/data/types/task_filter.dart';
 
 final tasksProvider =
@@ -11,6 +13,7 @@ final tasksProvider =
 class _TasksNotifier extends AsyncNotifier<List<Task>> {
   _TasksNotifier(this.apartmentId);
   final int apartmentId;
+  late final String baseUrl;
 
   static const _pageSize = 20;
 
@@ -24,6 +27,7 @@ class _TasksNotifier extends AsyncNotifier<List<Task>> {
   Future<List<Task>> build() async {
     _page = 0;
     _hasMore = true;
+    baseUrl = "/$apartmentId/tasks";
 
     return _fetchPage();
   }
@@ -36,10 +40,7 @@ class _TasksNotifier extends AsyncNotifier<List<Task>> {
       if (_filter.done != null) 'done': '${_filter.done}',
     };
 
-    final response = await AppDio.dio.get(
-      "/$apartmentId/tasks",
-      queryParameters: query,
-    );
+    final response = await AppDio.dio.get(baseUrl, queryParameters: query);
 
     final data = response.data as List;
 
@@ -84,5 +85,40 @@ class _TasksNotifier extends AsyncNotifier<List<Task>> {
     _filter = TaskFilter(assignedTo: assignedTo, done: done);
 
     await refresh();
+  }
+
+  Future<void> switchTaskStatus(int taskId, Profile userProfile) async {
+    final previous = state.value ?? [];
+
+    try {
+      bool ok = true;
+
+      final updated = previous.map((t) {
+        if (t.id == taskId) {
+          if (t.completedBy != null) {
+            if (t.completedBy!.id == userProfile.id ||
+                userProfile.role != Role.inhabitant) {
+              return t.copyWith(clearCompletedBy: true);
+            } else {
+              ok = false;
+            }
+          } else if (t.completedBy == null) {
+            return t.copyWith(completedBy: userProfile);
+          }
+        }
+
+        return t;
+      }).toList();
+
+      if (!ok) {
+        return;
+      }
+
+      state = AsyncData(updated);
+
+      await AppDio.dio.patch("$baseUrl/$taskId");
+    } catch (e) {
+      state = AsyncData(previous);
+    }
   }
 }

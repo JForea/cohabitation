@@ -1,4 +1,4 @@
-import 'package:frontend/shared/data/entities/profile.dart';
+import 'package:frontend/shared/data/models/profile.dart';
 
 class User {
   User({

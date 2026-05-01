@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/features/auth/types/bubble.dart';
+import 'package:frontend/shared/presentation/types/bubble.dart';
 import 'package:frontend/shared/presentation/ui/widgets/buttons/custom_icon_button.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:frontend/shared/presentation/ui/widgets/buttons/text_icon_button.dart';
 import 'package:go_router/go_router.dart';
 
-class OnboardingModel extends StatelessWidget {
-  const OnboardingModel({
+class OnboardingStepWrapper extends StatelessWidget {
+  const OnboardingStepWrapper({
     super.key,
-    required this.primaryColor,
+    required this.gradientStartColor,
     required this.gradientEndColor,
     required this.mainText,
     required this.secondaryText,
@@ -19,7 +19,7 @@ class OnboardingModel extends StatelessWidget {
     required this.bubbles,
   });
 
-  final Color primaryColor;
+  final Color gradientStartColor;
   final Color gradientEndColor;
   final List<Bubble> bubbles;
   final SvgPicture icon;
@@ -38,7 +38,7 @@ class OnboardingModel extends StatelessWidget {
         Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
-              colors: [primaryColor, gradientEndColor],
+              colors: [gradientStartColor, gradientEndColor],
               begin: Alignment.topLeft,
               end: Alignment.centerRight,
             ),
@@ -104,7 +104,7 @@ class OnboardingModel extends StatelessWidget {
                                   height: 8,
                                   width: 24,
                                   decoration: BoxDecoration(
-                                    color: primaryColor,
+                                    color: gradientStartColor,
                                     borderRadius: .all(.circular(4)),
                                   ),
                                 )
@@ -121,14 +121,14 @@ class OnboardingModel extends StatelessWidget {
                     Spacer(),
                     currentPage != pagesCnt
                         ? CustomIconButton(
-                            color: primaryColor,
+                            color: gradientStartColor,
                             icon: Icons.chevron_right,
                             iconColor: Colors.white,
                             size: 50,
                             onPressed: onButtonClick,
                           )
                         : TextIconButton(
-                            color: primaryColor,
+                            color: gradientStartColor,
                             icon: Icons.chevron_right,
                             text: 'Начать',
                             height: 50,

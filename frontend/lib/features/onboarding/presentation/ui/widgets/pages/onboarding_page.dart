@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/features/auth/presentation/ui/widgets/models/onboarding_model.dart';
-import 'package:frontend/features/auth/types/bubble.dart';
+import 'package:frontend/features/auth/presentation/ui/widgets/wrappers/onboarding_model.dart';
+import 'package:frontend/shared/presentation/types/bubble.dart';
 
 class OnboardingPage extends StatefulWidget {
   OnboardingPage({super.key});
@@ -19,8 +19,8 @@ class _OnboardingPageState extends State<OnboardingPage> {
   }
 
   late final List<Widget> screens = [
-    OnboardingModel(
-      primaryColor: Color(0xFF6C63FF),
+    OnboardingStepWrapper(
+      gradientStartColor: Color(0xFF6C63FF),
       gradientEndColor: Color(0xFF998DFF),
       bubbles: [
         Bubble(x: 0.12, y: 0.055, size: 140),
@@ -35,8 +35,8 @@ class _OnboardingPageState extends State<OnboardingPage> {
       currentPage: 1,
       onButtonClick: _incrementCurrentPage,
     ),
-    OnboardingModel(
-      primaryColor: Color(0xFF3DC990),
+    OnboardingStepWrapper(
+      gradientStartColor: Color(0xFF3DC990),
       gradientEndColor: Color(0xFF2ED3BC),
       bubbles: [
         Bubble(x: 0.15, y: 0.17, size: 40),
@@ -51,8 +51,8 @@ class _OnboardingPageState extends State<OnboardingPage> {
       currentPage: 2,
       onButtonClick: _incrementCurrentPage,
     ),
-    OnboardingModel(
-      primaryColor: Color(0xFFFF7A55),
+    OnboardingStepWrapper(
+      gradientStartColor: Color(0xFFFF7A55),
       gradientEndColor: Color(0xFFFFB269),
       bubbles: [
         Bubble(x: 0.03, y: 0.05, size: 80),

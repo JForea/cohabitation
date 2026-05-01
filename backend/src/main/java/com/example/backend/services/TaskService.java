@@ -110,7 +110,7 @@ public class TaskService {
                 () -> new ResourceNotFoundException("Task not found.")
         );
 
-        if (task.getAssignedTo() != null && role == Role.INHABITANT)
+        if (task.getCompletedAt() != null && role == Role.INHABITANT)
             throw new AccessForbiddenException("You can't change status of this task, because you are not the " +
                     "one who completed it.");
 

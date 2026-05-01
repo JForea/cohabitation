@@ -24,7 +24,7 @@ public record TaskDto(
                 task.getId(),
                 new ProfileDto(task.getCreatedBy()),
                 task.getAssignedTo() != null ? new ProfileDto(task.getAssignedTo()) : null,
-                task.getAssignedTo() != null ? new ProfileDto(task.getCompletedBy()) : null,
+                task.getCompletedBy() != null ? new ProfileDto(task.getCompletedBy()) : null,
                 task.getName(),
                 task.getDescription(),
                 task.getRoom(),

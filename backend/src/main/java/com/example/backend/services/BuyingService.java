@@ -126,7 +126,7 @@ public class BuyingService {
                 .and(BuyingSpecifications.byAssignedTo(assignedTo))
                 .and(BuyingSpecifications.byPublic(isPublic, user.getId()));
 
-        return buyingRepository.findAll(spec).stream().map(BuyingDto::new).toList();
+        return buyingRepository.findAllByApartment_IdOrderByCategory(apartmentId, spec).stream().map(BuyingDto::new).toList();
     }
 
     public StatusResponse changeStatus(Integer apartmentId, User user, Long buyingId) {

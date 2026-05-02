@@ -2,7 +2,7 @@ package com.example.backend.types;
 
 public enum BuyingCategory {
     BAKERY,
-    dDAIRY,
+    DAIRY,
     CEREALS,
     VEGETABLES,
     FRUITS,

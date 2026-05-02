@@ -6,6 +6,7 @@ import 'package:frontend/shared/presentation/theme/app_colors.dart';
 import 'package:frontend/shared/presentation/theme/app_shadows.dart';
 import 'package:frontend/shared/presentation/ui/widgets/avatars/avatar.dart';
 import 'package:frontend/shared/presentation/ui/widgets/badges/points_badge.dart';
+import 'package:frontend/shared/presentation/ui/widgets/checkboxes/status_checkbox.dart';
 import 'package:frontend/shared/utils/util_functions.dart';
 
 class TaskCard extends StatelessWidget {
@@ -39,24 +40,10 @@ class TaskCard extends StatelessWidget {
       child: Row(
         crossAxisAlignment: .start,
         children: [
-          GestureDetector(
-            onTap: onStatusSwitch,
-            child: Container(
-              width: 20,
-              height: 20,
-              decoration: BoxDecoration(
-                border: task.completedBy == null
-                    ? .all(color: taskColor, width: 1)
-                    : null,
-                color: task.completedBy != null ? AppColors.green : null,
-                borderRadius: .all(.circular(20)),
-              ),
-              child: task.completedBy != null
-                  ? Center(
-                      child: Icon(Icons.done, color: Colors.white, size: 15),
-                    )
-                  : null,
-            ),
+          StatusCheckbox(
+            checked: task.completedBy != null,
+            uncheckedColor: taskColor,
+            onCheck: onStatusSwitch,
           ),
           SizedBox(width: 15),
           Flexible(

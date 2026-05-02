@@ -13,6 +13,7 @@ class PageWrapper extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
+      physics: AlwaysScrollableScrollPhysics(),
       child: Container(
         padding: .only(
           top: 60,

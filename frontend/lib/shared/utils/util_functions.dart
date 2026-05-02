@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/shared/data/types/buying_category.dart';
 import 'package:frontend/shared/data/types/role.dart';
 import 'package:frontend/shared/data/types/room.dart';
 import 'package:frontend/shared/data/types/task_priority.dart';
@@ -64,6 +65,21 @@ class UtilFunctions {
           TaskPriority.medium => "Средний",
           TaskPriority.high => "Высокий",
         };
+        break;
+
+      case const (BuyingCategory):
+        result = switch (value as BuyingCategory) {
+          BuyingCategory.bakery => "Выпечка",
+          BuyingCategory.cereals => "Крупы",
+          BuyingCategory.dairy => "Молочное",
+          BuyingCategory.drinks => "Напитки",
+          BuyingCategory.fruits => "Фрукты",
+          BuyingCategory.household => "Бытовое",
+          BuyingCategory.meat => "Мясо",
+          BuyingCategory.other => "Другое",
+          BuyingCategory.vegetables => "Овощи",
+        };
+        break;
 
       default:
         throw UnsupportedError("Provided type $T is not supported.");
@@ -118,6 +134,21 @@ class UtilFunctions {
         };
         break;
 
+      case const (BuyingCategory):
+        res = switch (name) {
+          "bakery" => BuyingCategory.bakery,
+          "dairy" => BuyingCategory.dairy,
+          "cereals" => BuyingCategory.cereals,
+          "vegetables" => BuyingCategory.vegetables,
+          "fruits" => BuyingCategory.fruits,
+          "meat" => BuyingCategory.meat,
+          "drinks" => BuyingCategory.drinks,
+          "household" => BuyingCategory.household,
+          "other" => BuyingCategory.other,
+          _ => null,
+        };
+        break;
+
       default:
         throw UnsupportedError("Provided type $T is not supported.");
     }
@@ -144,6 +175,7 @@ class UtilFunctions {
           Room.kitchen => "KITCHEN",
           Room.livingRoom => "LIVING_ROOM",
         };
+        break;
 
       case const (TaskPriority):
         result = switch (value as TaskPriority) {
@@ -151,6 +183,21 @@ class UtilFunctions {
           TaskPriority.medium => "MEDIUM",
           TaskPriority.high => "HIGH",
         };
+        break;
+
+      case const (BuyingCategory):
+        result = switch (value as BuyingCategory) {
+          BuyingCategory.bakery => "BAKERY",
+          BuyingCategory.cereals => "CEREALS",
+          BuyingCategory.dairy => "DAIRY",
+          BuyingCategory.drinks => "DRINKS",
+          BuyingCategory.fruits => "FRUITS",
+          BuyingCategory.household => "HOUSEHOLD",
+          BuyingCategory.meat => "MEAT",
+          BuyingCategory.other => "OTHER",
+          BuyingCategory.vegetables => "VEGETABLES",
+        };
+        break;
 
       default:
         throw UnsupportedError("Provided type $T is not supported.");

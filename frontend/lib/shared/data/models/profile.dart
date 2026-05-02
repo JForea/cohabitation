@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/shared/data/types/role.dart';
-import 'package:frontend/shared/utils/get_t_value_from_name.dart';
+import 'package:frontend/shared/utils/util_functions.dart';
 
 class Profile {
   Profile({
@@ -18,8 +18,10 @@ class Profile {
       name: json['name'] as String,
       points: json['points'] as int,
       apartmentId: json['apartmentId'] as int,
-      role: getTValueFromName<Role>(json['role'] as String),
-      color: getTValueFromName<Color>(json['avatarColor'] as String),
+      role: UtilFunctions.getTValueFromName<Role>(json['role'] as String),
+      color: UtilFunctions.getTValueFromName<Color>(
+        json['avatarColor'] as String,
+      ),
     );
   }
 

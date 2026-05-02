@@ -3,7 +3,10 @@ import 'package:frontend/shared/data/models/profile.dart';
 import 'package:frontend/shared/data/models/task.dart';
 import 'package:frontend/shared/data/network/dio_client.dart';
 import 'package:frontend/shared/data/types/role.dart';
+import 'package:frontend/shared/data/types/room.dart';
 import 'package:frontend/shared/data/types/task_filter.dart';
+import 'package:frontend/shared/data/types/task_priority.dart';
+import 'package:frontend/shared/utils/util_functions.dart';
 
 final tasksProvider =
     AsyncNotifierProvider.family<_TasksNotifier, List<Task>, int>(
@@ -87,6 +90,67 @@ class _TasksNotifier extends AsyncNotifier<List<Task>> {
     await refresh();
   }
 
+  Future<bool> create({
+    required Profile userProfile,
+    required String name,
+    String? description,
+    Profile? assignedTo,
+    required Room room,
+    required TaskPriority priority,
+    int? dueDateOffset,
+    required int points,
+  }) async {
+    print(dueDateOffset);
+
+    if (_isLoading) {
+      return false;
+    }
+
+    try {
+      _isLoading = true;
+
+      final date = dueDateOffset == null
+          ? null
+          : DateTime.now().add(Duration(days: dueDateOffset));
+      final response = await AppDio.dio.post(
+        baseUrl,
+        data: {
+          "name": name,
+          "description": description == "" ? null : description,
+          "assignedTo": assignedTo?.id,
+          "room": UtilFunctions.tValueToStringRequest(room),
+          "priority": UtilFunctions.tValueToStringRequest(priority),
+          "dueDate": date == null
+              ? null
+              : UtilFunctions.dateToStringRequest(date),
+          "points": points,
+        },
+      );
+
+      final task = Task(
+        id: response.data["id"] as int,
+        createdBy: userProfile,
+        name: name,
+        description: description,
+        assignedTo: assignedTo,
+        room: room,
+        priority: priority,
+        dueDate: date,
+        points: points,
+      );
+
+      state = AsyncData([task, ...?state.value]);
+
+      _isLoading = false;
+
+      return true;
+    } catch (e) {
+      print(e);
+      _isLoading = false;
+      return false;
+    }
+  }
+
   Future<void> switchTaskStatus(int taskId, Profile userProfile) async {
     final previous = state.value ?? [];
 
@@ -116,9 +180,13 @@ class _TasksNotifier extends AsyncNotifier<List<Task>> {
 
       state = AsyncData(updated);
 
+      _isLoading = true;
+
       await AppDio.dio.patch("$baseUrl/$taskId");
     } catch (e) {
       state = AsyncData(previous);
+    } finally {
+      _isLoading = false;
     }
   }
 }

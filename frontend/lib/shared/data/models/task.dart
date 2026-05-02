@@ -1,7 +1,7 @@
 import 'package:frontend/shared/data/models/profile.dart';
 import 'package:frontend/shared/data/types/room.dart';
 import 'package:frontend/shared/data/types/task_priority.dart';
-import 'package:frontend/shared/utils/get_t_value_from_name.dart';
+import 'package:frontend/shared/utils/util_functions.dart';
 
 class Task {
   Task({
@@ -14,7 +14,7 @@ class Task {
     required this.room,
     required this.priority,
     required this.points,
-    this.dueTime,
+    this.dueDate,
   });
 
   factory Task.fromJson(Map<String, dynamic> json) {
@@ -29,11 +29,13 @@ class Task {
           : null,
       name: json["name"] as String,
       description: json["description"] as String?,
-      room: getTValueFromName<Room>(json["room"] as String),
-      priority: getTValueFromName<TaskPriority>(json["priority"] as String),
+      room: UtilFunctions.getTValueFromName<Room>(json["room"] as String),
+      priority: UtilFunctions.getTValueFromName<TaskPriority>(
+        json["priority"] as String,
+      ),
       points: json["points"] as int,
-      dueTime: json["dueTime"] != null
-          ? DateTime.parse(json["dueTime"] as String)
+      dueDate: json["dueDate"] != null
+          ? DateTime.parse(json["dueDate"] as String)
           : null,
     );
   }
@@ -47,7 +49,7 @@ class Task {
   final Room room;
   final TaskPriority priority;
   final int points;
-  final DateTime? dueTime;
+  final DateTime? dueDate;
 
   Task copyWith({
     int? id,
@@ -59,7 +61,7 @@ class Task {
     Room? room,
     TaskPriority? priority,
     int? points,
-    DateTime? dueTime,
+    DateTime? dueDate,
     bool clearCompletedBy = false,
   }) {
     return Task(
@@ -72,7 +74,7 @@ class Task {
       room: room ?? this.room,
       priority: priority ?? this.priority,
       points: points ?? this.points,
-      dueTime: dueTime ?? this.dueTime,
+      dueDate: dueDate ?? this.dueDate,
     );
   }
 }

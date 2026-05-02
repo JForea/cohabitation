@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:frontend/shared/data/types/task_priority.dart';
 import 'package:frontend/shared/presentation/theme/app_colors.dart';
 import 'package:frontend/shared/presentation/theme/app_decorations.dart';
-import 'package:frontend/shared/utils/get_display_name_from_t.dart';
+import 'package:frontend/shared/utils/util_functions.dart';
 
 class TaskPriorityChoiceChip extends StatelessWidget {
   const TaskPriorityChoiceChip({
@@ -62,7 +62,7 @@ class TaskPriorityChoiceChip extends StatelessWidget {
             ),
             Spacer(),
             Text(
-              getDisplayNameFromT(priority),
+              UtilFunctions.getDisplayNameFromT(priority),
               style: TextStyle(
                 color: selected ? AppColors.blue : Colors.black,
                 fontWeight: .w500,

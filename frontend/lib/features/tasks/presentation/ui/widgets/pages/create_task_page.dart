@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/features/tasks/presentation/ui/widgets/chips/task_priority_choice_chip.dart';
+import 'package:frontend/shared/data/models/profile.dart';
 import 'package:frontend/shared/data/providers/auth_provider.dart';
+import 'package:frontend/shared/data/providers/tasks_provider.dart';
 import 'package:frontend/shared/data/types/room.dart';
 import 'package:frontend/shared/data/types/task_priority.dart';
 import 'package:frontend/shared/presentation/theme/app_colors.dart';
@@ -12,8 +14,8 @@ import 'package:frontend/shared/presentation/ui/widgets/chips/custom_choice_chip
 import 'package:frontend/shared/presentation/ui/widgets/inputs/controlled_named_text_field.dart';
 import 'package:frontend/shared/presentation/ui/widgets/wrappers/choice_wrapper.dart';
 import 'package:frontend/shared/presentation/ui/widgets/wrappers/tab_wrapper.dart';
-import 'package:frontend/shared/utils/get_date_display_from_date_time.dart';
-import 'package:frontend/shared/utils/get_display_name_from_t.dart';
+import 'package:frontend/shared/utils/util_functions.dart';
+import 'package:go_router/go_router.dart';
 
 class CreateTaskPage extends ConsumerStatefulWidget {
   const CreateTaskPage({super.key});
@@ -25,11 +27,13 @@ class CreateTaskPage extends ConsumerStatefulWidget {
 class _CreateTaskPageState extends ConsumerState<CreateTaskPage> {
   late String name;
   late String description;
-  int? assignedTo;
+  Profile? assignedTo;
   late Room room;
   late TaskPriority priority;
-  int? dueTimeOffset;
+  int? dueDateOffset;
   late int points;
+
+  late bool isLoading;
 
   @override
   void initState() {
@@ -37,8 +41,11 @@ class _CreateTaskPageState extends ConsumerState<CreateTaskPage> {
     description = "";
     room = Room.common;
     priority = TaskPriority.medium;
-    dueTimeOffset = 0;
+    dueDateOffset = 0;
     points = 5;
+
+    isLoading = false;
+
     super.initState();
   }
 
@@ -56,9 +63,9 @@ class _CreateTaskPageState extends ConsumerState<CreateTaskPage> {
     });
   }
 
-  void changeAssigned(int? id) {
+  void changeAssigned(Profile? p) {
     setState(() {
-      assignedTo = id;
+      assignedTo = p;
     });
   }
 
@@ -68,9 +75,9 @@ class _CreateTaskPageState extends ConsumerState<CreateTaskPage> {
     });
   }
 
-  void changeDueTimeOffset(int? offset) {
+  void changeDueDateOffset(int? offset) {
     setState(() {
-      dueTimeOffset = offset;
+      dueDateOffset = offset;
     });
   }
 
@@ -78,6 +85,25 @@ class _CreateTaskPageState extends ConsumerState<CreateTaskPage> {
     setState(() {
       points = p;
     });
+  }
+
+  Future<bool> create() async {
+    final userProfile = ref.read(authProvider).user!.profile!;
+
+    final created = ref
+        .read(tasksProvider(userProfile.apartmentId).notifier)
+        .create(
+          userProfile: userProfile,
+          name: name,
+          description: description,
+          assignedTo: assignedTo,
+          room: room,
+          priority: priority,
+          dueDateOffset: dueDateOffset,
+          points: points,
+        );
+
+    return created;
   }
 
   @override
@@ -140,9 +166,9 @@ class _CreateTaskPageState extends ConsumerState<CreateTaskPage> {
                 (p) => CustomChoiceChip(
                   name: p.name,
                   icon: Avatar(name: p.name, size: 24, color: p.color),
-                  selected: p.id == assignedTo,
+                  selected: p.id == assignedTo?.id,
                   checkMark: true,
-                  onSelect: () => changeAssigned(p.id),
+                  onSelect: () => changeAssigned(p),
                 ),
               ),
             ],
@@ -152,7 +178,7 @@ class _CreateTaskPageState extends ConsumerState<CreateTaskPage> {
             children: Room.values
                 .map(
                   (r) => CustomChoiceChip(
-                    name: getDisplayNameFromT(r),
+                    name: UtilFunctions.getDisplayNameFromT(r),
                     selected: room == r,
                     checkMark: true,
                     onSelect: () => changeRoom(r),
@@ -179,17 +205,17 @@ class _CreateTaskPageState extends ConsumerState<CreateTaskPage> {
                 final date = DateTime.now().add(Duration(days: i));
 
                 return CustomChoiceChip(
-                  name: getDateDisplayFromDateTime(date),
-                  selected: i == dueTimeOffset,
+                  name: UtilFunctions.getDateDisplayFromDateTime(date),
+                  selected: i == dueDateOffset,
                   checkMark: true,
-                  onSelect: () => changeDueTimeOffset(i),
+                  onSelect: () => changeDueDateOffset(i),
                 );
               }),
               CustomChoiceChip(
                 name: "Без срока",
-                selected: dueTimeOffset == null,
+                selected: dueDateOffset == null,
                 checkMark: true,
-                onSelect: () => changeDueTimeOffset(null),
+                onSelect: () => changeDueDateOffset(null),
               ),
             ],
           ),
@@ -207,7 +233,18 @@ class _CreateTaskPageState extends ConsumerState<CreateTaskPage> {
               );
             }),
           ),
-          CustomTextButton(onPressed: () {}, text: "Создать"),
+          CustomTextButton(
+            onPressed: () async {
+              final success = await create();
+
+              if (success && context.mounted) {
+                context.go("/");
+              } else {
+                print("Couldn't create task.");
+              }
+            },
+            text: "Создать",
+          ),
         ],
       ),
     );

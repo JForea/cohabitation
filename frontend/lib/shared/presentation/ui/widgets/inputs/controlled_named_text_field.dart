@@ -109,8 +109,8 @@ class _ControlledNamedTextFieldState extends State<ControlledNamedTextField> {
                 child: TextField(
                   controller: _textEditingController,
                   onChanged: widget.onChange,
-                  minLines: widget.maxLines,
-                  maxLines: widget.maxLines,
+                  minLines: widget.maxLines ?? 1,
+                  maxLines: widget.maxLines ?? 1,
                   keyboardType: widget.maxLines != null && widget.maxLines! > 1
                       ? .multiline
                       : .text,

@@ -3,6 +3,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:frontend/shared/data/models/task.dart';
 import 'package:frontend/shared/data/types/task_priority.dart';
 import 'package:frontend/shared/presentation/theme/app_colors.dart';
+import 'package:frontend/shared/presentation/theme/app_shadows.dart';
 import 'package:frontend/shared/presentation/ui/widgets/avatars/avatar.dart';
 import 'package:frontend/shared/presentation/ui/widgets/badges/points_badge.dart';
 import 'package:frontend/shared/utils/get_date_display_from_date_time.dart';
@@ -34,6 +35,7 @@ class TaskCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surfaceContainer,
         borderRadius: .all(.circular(15)),
+        boxShadow: [AppShadows.standard()],
       ),
       child: Row(
         crossAxisAlignment: .start,

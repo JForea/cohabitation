@@ -1,7 +1,6 @@
 String getDateDisplayFromDateTime(DateTime date) {
   final now = DateTime.now();
 
-  // обрезаем время
   final today = DateTime(now.year, now.month, now.day);
   final target = DateTime(date.year, date.month, date.day);
 

@@ -5,33 +5,28 @@ import 'package:frontend/shared/data/providers/auth_provider.dart';
 import 'package:frontend/shared/data/providers/tasks_provider.dart';
 import 'package:frontend/shared/presentation/ui/widgets/wrappers/tab_wrapper.dart';
 
-class TasksTab extends ConsumerStatefulWidget {
+class TasksTab extends ConsumerWidget {
   const TasksTab({super.key});
 
-  @override
-  ConsumerState<ConsumerStatefulWidget> createState() => _TasksTabState();
-}
-
-class _TasksTabState extends ConsumerState<TasksTab> {
-  Future<void> switchStatus(int apartmentId, int taskId) async {
+  Future<void> switchStatus(WidgetRef ref, int apartmentId, int taskId) async {
     ref
         .read(tasksProvider(apartmentId).notifier)
         .switchTaskStatus(taskId, ref.read(authProvider).user!.profile!);
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     int apartmentId = ref.read(authProvider).user!.profile!.apartmentId;
     final tasks = ref.watch(tasksProvider(apartmentId));
 
-    return TabWrapper(
+    return PageWrapper(
       floatingButtonExists: true,
       children: [
         const Text("Задачи", style: TextStyle(fontSize: 20, fontWeight: .w600)),
         ...?tasks.value?.map(
           (t) => TaskCard(
             task: t,
-            onStatusSwitch: () => switchStatus(apartmentId, t.id),
+            onStatusSwitch: () => switchStatus(ref, apartmentId, t.id),
           ),
         ),
       ],

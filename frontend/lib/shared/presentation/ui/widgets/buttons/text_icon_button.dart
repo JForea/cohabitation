@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/shared/presentation/theme/app_shadows.dart';
 
 class TextIconButton extends StatelessWidget {
   const TextIconButton({
@@ -31,7 +32,7 @@ class TextIconButton extends StatelessWidget {
           color: color,
           borderRadius: .all(.circular(height / 4)),
           boxShadow: (shadow != null
-              ? [BoxShadow(color: color.withAlpha(38), blurRadius: 3.5)]
+              ? [AppShadows.standard(color: color)]
               : []),
         ),
         child: InkWell(

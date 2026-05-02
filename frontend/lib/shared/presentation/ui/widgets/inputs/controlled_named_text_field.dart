@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:frontend/shared/presentation/theme/app_shadows.dart';
 
 class ControlledNamedTextField extends StatefulWidget {
   const ControlledNamedTextField({
@@ -11,6 +12,7 @@ class ControlledNamedTextField extends StatefulWidget {
     required this.secondaryColor,
     required this.password,
     required this.require,
+    this.maxLines,
   });
 
   final String text;
@@ -20,6 +22,7 @@ class ControlledNamedTextField extends StatefulWidget {
   final bool secondaryColor;
   final bool password;
   final bool require;
+  final int? maxLines;
 
   @override
   State<StatefulWidget> createState() => _ControlledNamedTextFieldState();
@@ -97,9 +100,7 @@ class _ControlledNamedTextFieldState extends State<ControlledNamedTextField> {
                 ? Theme.of(context).colorScheme.surface
                 : Colors.white,
             borderRadius: .all(.circular(16)),
-            boxShadow: [
-              BoxShadow(color: Colors.black.withAlpha(38), blurRadius: 3.5),
-            ],
+            boxShadow: [AppShadows.standard()],
           ),
           child: Row(
             spacing: 8,
@@ -108,6 +109,11 @@ class _ControlledNamedTextFieldState extends State<ControlledNamedTextField> {
                 child: TextField(
                   controller: _textEditingController,
                   onChanged: widget.onChange,
+                  minLines: widget.maxLines,
+                  maxLines: widget.maxLines,
+                  keyboardType: widget.maxLines != null && widget.maxLines! > 1
+                      ? .multiline
+                      : .text,
                   decoration: InputDecoration(
                     border: .none,
                     hintText: widget.hintText,

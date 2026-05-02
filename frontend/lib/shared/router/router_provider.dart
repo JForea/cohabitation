@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/features/auth/login/presentation/ui/widgets/pages/login_page.dart';
+import 'package:frontend/features/tasks/presentation/ui/widgets/pages/create_task_page.dart';
 import 'package:frontend/shared/data/providers/auth_provider.dart';
 import 'package:frontend/features/onboarding/presentation/ui/widgets/pages/onboarding_page.dart';
 import 'package:frontend/features/auth/register/presentation/ui/widgets/pages/registration_first_page.dart';
@@ -72,6 +73,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/enter/create',
         builder: (context, state) => CreateApartmentPage(),
+      ),
+      GoRoute(
+        path: '/tasks/create',
+        builder: (context, state) => CreateTaskPage(),
       ),
     ],
   );

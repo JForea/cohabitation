@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/shared/presentation/theme/app_shadows.dart';
 import 'package:go_router/go_router.dart';
 
 class CustomBackButton extends StatelessWidget {
-  const CustomBackButton({super.key});
+  const CustomBackButton({super.key, required this.mainColor});
+
+  final bool mainColor;
 
   @override
   Widget build(BuildContext context) {
@@ -15,8 +18,11 @@ class CustomBackButton extends StatelessWidget {
           height: 42,
           alignment: .center,
           decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surface,
+            color: mainColor
+                ? Theme.of(context).colorScheme.surface
+                : Theme.of(context).colorScheme.surfaceContainer,
             borderRadius: .all(.circular(10)),
+            boxShadow: [AppShadows.standard()],
           ),
           child: Icon(Icons.arrow_back, size: 24),
         ),

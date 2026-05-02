@@ -35,7 +35,7 @@ class RegistrationFirstPage extends StatelessWidget {
           crossAxisAlignment: .start,
           spacing: 20,
           children: [
-            CustomBackButton(),
+            CustomBackButton(mainColor: true),
             Text(
               "Заполните данные",
               style: TextStyle(

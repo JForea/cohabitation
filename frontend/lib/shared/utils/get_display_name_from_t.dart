@@ -1,5 +1,6 @@
 import 'package:frontend/shared/data/types/role.dart';
 import 'package:frontend/shared/data/types/room.dart';
+import 'package:frontend/shared/data/types/task_priority.dart';
 
 String getDisplayNameFromT<T>(T value) {
   String result;
@@ -17,11 +18,18 @@ String getDisplayNameFromT<T>(T value) {
         Room.bathroom => "Ванная",
         Room.bedroom => "Спальня",
         Room.common => "Общее",
-        Room.corridor => "Корридор",
+        Room.corridor => "Коридор",
         Room.livingRoom => "Гостиная",
         Room.kitchen => "Кухня",
       };
       break;
+
+    case const (TaskPriority):
+      result = switch (value as TaskPriority) {
+        TaskPriority.low => "Низкий",
+        TaskPriority.medium => "Средний",
+        TaskPriority.high => "Высокий",
+      };
 
     default:
       throw UnsupportedError("Provided type $T is not supported.");

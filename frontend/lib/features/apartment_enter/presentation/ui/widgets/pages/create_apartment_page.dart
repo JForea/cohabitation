@@ -51,7 +51,7 @@ class _CreateApartmentPageState extends ConsumerState<CreateApartmentPage> {
           crossAxisAlignment: .start,
           spacing: 20,
           children: [
-            CustomBackButton(),
+            CustomBackButton(mainColor: true),
             Text(
               "Создать квартиру",
               style: TextStyle(fontSize: 20, fontWeight: .w500),

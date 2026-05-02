@@ -40,7 +40,7 @@ class LoginPage extends ConsumerWidget {
           crossAxisAlignment: .start,
           spacing: 20,
           children: [
-            CustomBackButton(),
+            CustomBackButton(mainColor: true),
             Text(
               "Введите данные",
               style: TextStyle(fontSize: 20, fontWeight: .w500),

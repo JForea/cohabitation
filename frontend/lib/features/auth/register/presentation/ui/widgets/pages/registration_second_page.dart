@@ -59,7 +59,7 @@ class _RegistrationSecondPageState
           crossAxisAlignment: .start,
           spacing: 20,
           children: [
-            CustomBackButton(),
+            CustomBackButton(mainColor: true),
             Text(
               "Как вас зовут?",
               style: TextStyle(

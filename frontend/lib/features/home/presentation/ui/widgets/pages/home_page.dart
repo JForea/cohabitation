@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/features/home/presentation/ui/widgets/navigation/custom_bottom_nav_bar.dart';
 import 'package:frontend/features/home/data/providers/page_provider.dart';
 import 'package:frontend/features/tasks/presentation/ui/widgets/tabs/tasks_tab.dart';
+import 'package:go_router/go_router.dart';
 
 class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
@@ -13,6 +14,27 @@ class HomePage extends ConsumerStatefulWidget {
 
 class _HomePageState extends ConsumerState<HomePage> {
   late final PageController controller;
+
+  Widget? _buildFloatingActionButton(int currentIndex, BuildContext context) {
+    return switch (currentIndex) {
+      1 => FloatingActionButton(
+        onPressed: () => context.push("/tasks/create"),
+        shape: CircleBorder(),
+        child: Icon(Icons.add, size: 28),
+      ),
+      2 => FloatingActionButton(
+        onPressed: () {},
+        shape: CircleBorder(),
+        child: Icon(Icons.add, size: 28),
+      ),
+      3 => FloatingActionButton(
+        onPressed: () {},
+        shape: CircleBorder(),
+        child: Icon(Icons.add, size: 28),
+      ),
+      _ => null,
+    };
+  }
 
   @override
   void initState() {
@@ -54,6 +76,10 @@ class _HomePageState extends ConsumerState<HomePage> {
           Placeholder(),
           Placeholder(),
         ],
+      ),
+      floatingActionButton: _buildFloatingActionButton(
+        currentlyActive,
+        context,
       ),
       bottomNavigationBar: CustomBottomNavBar(
         currentlyActive: currentlyActive,

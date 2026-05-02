@@ -7,4 +7,6 @@ class AppColors {
   static const yellow = Color(0xFFFFC107);
   static const purple = Color(0xFFE155F6);
   static const brown = Color(0xFF875B50);
+  static const greyBlue = Color(0xFF7774A3);
+  static const cyan = Color(0xFF44C6E3);
 }

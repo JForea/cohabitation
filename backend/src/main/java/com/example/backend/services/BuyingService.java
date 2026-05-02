@@ -14,6 +14,7 @@ import com.example.backend.repositories.BuyingRepository;
 import com.example.backend.repositories.ProfileRepository;
 import com.example.backend.specifications.BuyingSpecifications;
 import com.example.backend.types.Role;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
@@ -126,7 +127,7 @@ public class BuyingService {
                 .and(BuyingSpecifications.byAssignedTo(assignedTo))
                 .and(BuyingSpecifications.byPublic(isPublic, user.getId()));
 
-        return buyingRepository.findAllByApartment_IdOrderByCategory(apartmentId, spec).stream().map(BuyingDto::new).toList();
+        return buyingRepository.findAll(spec, Sort.by("category")).stream().map(BuyingDto::new).toList();
     }
 
     public StatusResponse changeStatus(Integer apartmentId, User user, Long buyingId) {

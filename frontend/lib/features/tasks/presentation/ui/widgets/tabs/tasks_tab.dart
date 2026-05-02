@@ -8,6 +8,10 @@ import 'package:frontend/shared/presentation/ui/widgets/wrappers/tab_wrapper.dar
 class TasksTab extends ConsumerWidget {
   const TasksTab({super.key});
 
+  Future<void> _refresh(WidgetRef ref, int apartmentId) async {
+    await ref.read(tasksProvider(apartmentId).notifier).refresh();
+  }
+
   Future<void> switchStatus(WidgetRef ref, int apartmentId, int taskId) async {
     ref
         .read(tasksProvider(apartmentId).notifier)
@@ -19,17 +23,23 @@ class TasksTab extends ConsumerWidget {
     int apartmentId = ref.read(authProvider).user!.profile!.apartmentId;
     final tasks = ref.watch(tasksProvider(apartmentId));
 
-    return PageWrapper(
-      floatingButtonExists: true,
-      children: [
-        const Text("Задачи", style: TextStyle(fontSize: 20, fontWeight: .w600)),
-        ...?tasks.value?.map(
-          (t) => TaskCard(
-            task: t,
-            onStatusSwitch: () => switchStatus(ref, apartmentId, t.id),
+    return RefreshIndicator(
+      onRefresh: () => _refresh(ref, apartmentId),
+      child: PageWrapper(
+        floatingButtonExists: true,
+        children: [
+          const Text(
+            "Задачи",
+            style: TextStyle(fontSize: 20, fontWeight: .w600),
           ),
-        ),
-      ],
+          ...?tasks.value?.map(
+            (t) => TaskCard(
+              task: t,
+              onStatusSwitch: () => switchStatus(ref, apartmentId, t.id),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

@@ -17,7 +17,7 @@ public record TaskDto(
         Room room,
         TaskPriority priority,
         Short points,
-        LocalDate dueTime
+        LocalDate dueDate
 ) {
     public TaskDto(Task task) {
         this(

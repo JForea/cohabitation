@@ -3,6 +3,7 @@ import 'package:frontend/shared/presentation/types/bubble.dart';
 import 'package:frontend/shared/presentation/ui/widgets/buttons/custom_icon_button.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:frontend/shared/presentation/ui/widgets/buttons/text_icon_button.dart';
+import 'package:frontend/shared/presentation/ui/widgets/other/bubble_widget.dart';
 import 'package:go_router/go_router.dart';
 
 class OnboardingStepWrapper extends StatelessWidget {
@@ -44,19 +45,7 @@ class OnboardingStepWrapper extends StatelessWidget {
             ),
           ),
         ),
-        for (Bubble bubble in bubbles)
-          Container(
-            margin: .only(
-              left: mediaQuery.size.width * bubble.x,
-              top: mediaQuery.size.height * bubble.y,
-            ),
-            width: bubble.size,
-            height: bubble.size,
-            decoration: BoxDecoration(
-              color: Colors.white.withAlpha(28),
-              borderRadius: .all(.circular(bubble.size)),
-            ),
-          ),
+        for (Bubble bubble in bubbles) BubbleWidget(bubble: bubble),
         Container(
           height: mediaQuery.size.height * 0.65,
           width: .infinity,

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/features/buyings/presentation/ui/widgets/tabs/buyings_tab.dart';
 import 'package:frontend/features/home/presentation/ui/widgets/navigation/custom_bottom_nav_bar.dart';
 import 'package:frontend/features/home/data/providers/page_provider.dart';
+import 'package:frontend/features/profile/presentation/ui/widgets/tabs/profile_tab.dart';
 import 'package:frontend/features/tasks/presentation/ui/widgets/tabs/tasks_tab.dart';
 import 'package:go_router/go_router.dart';
 
@@ -75,7 +76,7 @@ class _HomePageState extends ConsumerState<HomePage> {
           TasksTab(),
           BuyingsTab(),
           Placeholder(),
-          Placeholder(),
+          ProfileTab(),
         ],
       ),
       floatingActionButton: _buildFloatingActionButton(

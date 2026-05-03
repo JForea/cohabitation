@@ -3,6 +3,7 @@ package com.example.backend.services;
 import com.example.backend.dtos.in.apartment.CreateApartmentDto;
 import com.example.backend.dtos.out.apartment.ApartmentDto;
 import com.example.backend.dtos.out.apartment.CreateApartmentResponse;
+import com.example.backend.dtos.out.apartment.InviteCodeResponse;
 import com.example.backend.dtos.out.profile.ProfileDto;
 import com.example.backend.entities.Apartment;
 import com.example.backend.entities.MonthlyExpense;
@@ -23,10 +24,13 @@ import org.springframework.stereotype.Service;
 import java.time.Month;
 import java.util.Calendar;
 import java.util.Optional;
+import java.util.Random;
 
 @Service
 public class ApartmentService {
+
     private final ApartmentRepository apartmentRepository;
+
     private final ProfileRepository profileRepository;
 
     private final UserRepository userRepository;
@@ -34,6 +38,8 @@ public class ApartmentService {
     private final UserService userService;
 
     private final MonthlyExpenseRepository monthlyExpenseRepository;
+
+    private final Random random;
 
     public ApartmentService(
             ApartmentRepository apartmentRepository,
@@ -46,6 +52,7 @@ public class ApartmentService {
         this.userRepository = userRepository;
         this.userService = userService;
         this.monthlyExpenseRepository = monthlyExpenseRepository;
+        random = new Random();
     }
 
     @Transactional
@@ -93,5 +100,41 @@ public class ApartmentService {
                 apartment,
                 monthlyExpense.isPresent() ? monthlyExpense.get().getSum() : 0
         );
+    }
+
+    public InviteCodeResponse generateCode(User user, Integer apartmentId) {
+        Role role = userService.getCurrentUserRoleInApartment(user, apartmentId);
+
+        if (role == null || role == Role.INHABITANT)
+            throw new AccessForbiddenException("You can't generate invite code in this apartment.");
+
+        int inviteCodeLength = 8;
+        String charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+
+        Apartment apartment = apartmentRepository.findById(apartmentId).orElseThrow(
+                () -> new ResourceNotFoundException("Apartment not found.")
+        );
+
+        boolean generated = false;
+        StringBuilder inviteCodeBuilder = new StringBuilder();
+        while (!generated) {
+            for (int i = 0; i < inviteCodeLength; i++) {
+                inviteCodeBuilder.append(charset.charAt(random.nextInt(charset.length())));
+            }
+
+            Optional<Apartment> conflictingApartment = apartmentRepository.findByInviteCode(inviteCodeBuilder.toString());
+
+            if (conflictingApartment.isEmpty())
+                generated = true;
+            else
+                inviteCodeBuilder.delete(0, inviteCodeLength);
+        }
+
+        String inviteCode = inviteCodeBuilder.toString();
+        apartment.setInviteCode(inviteCode);
+
+        apartmentRepository.save(apartment);
+
+        return new InviteCodeResponse(inviteCode);
     }
 }

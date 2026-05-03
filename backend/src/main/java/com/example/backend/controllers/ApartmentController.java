@@ -3,6 +3,7 @@ package com.example.backend.controllers;
 import com.example.backend.dtos.in.apartment.CreateApartmentDto;
 import com.example.backend.dtos.out.apartment.ApartmentDto;
 import com.example.backend.dtos.out.apartment.CreateApartmentResponse;
+import com.example.backend.dtos.out.apartment.InviteCodeResponse;
 import com.example.backend.entities.User;
 import com.example.backend.security.CustomUserDetails;
 import com.example.backend.services.ApartmentService;
@@ -49,5 +50,15 @@ public class ApartmentController {
         User user = details.getUser();
         ApartmentDto dto = apartmentService.get(user, apartmentId);
         return ResponseEntity.ok(dto);
+    }
+
+    @PatchMapping("/{apartmentId}/code")
+    public ResponseEntity<InviteCodeResponse> generate(
+            @PathVariable Integer apartmentId,
+            @AuthenticationPrincipal CustomUserDetails details
+    ) {
+        User user = details.getUser();
+        InviteCodeResponse response = apartmentService.generateCode(user, apartmentId);
+        return ResponseEntity.ok(response);
     }
 }

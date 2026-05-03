@@ -4,7 +4,7 @@ import com.example.backend.dtos.in.apartment.CreateApartmentDto;
 import com.example.backend.dtos.out.apartment.ApartmentDto;
 import com.example.backend.dtos.out.apartment.CreateApartmentResponse;
 import com.example.backend.dtos.out.apartment.InviteCodeResponse;
-import com.example.backend.dtos.out.profile.ProfileDto;
+import com.example.backend.dtos.out.apartment.JoinApartmentResponse;
 import com.example.backend.entities.User;
 import com.example.backend.security.CustomUserDetails;
 import com.example.backend.services.ApartmentService;
@@ -44,16 +44,16 @@ public class ApartmentController {
     }
 
     @PostMapping("/join")
-    public ResponseEntity<ProfileDto> join(
+    public ResponseEntity<JoinApartmentResponse> join(
             @AuthenticationPrincipal CustomUserDetails details,
             @RequestParam String code,
             HttpServletResponse servletResponse
     ) {
         User user = details.getUser();
-        ProfileDto dto = apartmentService.join(user, code);
-        String token = jwtService.generateToken(user, dto);
+        JoinApartmentResponse response = apartmentService.join(user, code);
+        String token = jwtService.generateToken(user, response.profile());
         servletResponse.addHeader(HttpHeaders.AUTHORIZATION, "Bearer " + token);
-        return ResponseEntity.ok(dto);
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{apartmentId}")
@@ -66,8 +66,18 @@ public class ApartmentController {
         return ResponseEntity.ok(dto);
     }
 
+    @GetMapping("/{apartmentId}/code")
+    public ResponseEntity<InviteCodeResponse> getInviteCode(
+            @PathVariable Integer apartmentId,
+            @AuthenticationPrincipal CustomUserDetails details
+    ) {
+        User user = details.getUser();
+        InviteCodeResponse response = apartmentService.getCode(user, apartmentId);
+        return ResponseEntity.ok(response);
+    }
+
     @PatchMapping("/{apartmentId}/code")
-    public ResponseEntity<InviteCodeResponse> generate(
+    public ResponseEntity<InviteCodeResponse> generateCode(
             @PathVariable Integer apartmentId,
             @AuthenticationPrincipal CustomUserDetails details
     ) {

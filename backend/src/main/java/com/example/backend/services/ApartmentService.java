@@ -4,6 +4,7 @@ import com.example.backend.dtos.in.apartment.CreateApartmentDto;
 import com.example.backend.dtos.out.apartment.ApartmentDto;
 import com.example.backend.dtos.out.apartment.CreateApartmentResponse;
 import com.example.backend.dtos.out.apartment.InviteCodeResponse;
+import com.example.backend.dtos.out.apartment.JoinApartmentResponse;
 import com.example.backend.dtos.out.profile.ProfileDto;
 import com.example.backend.entities.Apartment;
 import com.example.backend.entities.MonthlyExpense;
@@ -55,6 +56,17 @@ public class ApartmentService {
         random = new Random();
     }
 
+    private Optional<MonthlyExpense> getMonthlyExpense(Apartment apartment) {
+        Month month = Month.of(Calendar.getInstance().get(Calendar.MONTH));
+
+        return monthlyExpenseRepository.findById(
+                new MonthlyExpenseKey(
+                        apartment,
+                        month
+                )
+        );
+    }
+
     @Transactional
     public CreateApartmentResponse create(User user, CreateApartmentDto dto) {
         if (user.getCurrentProfile() != null)
@@ -87,14 +99,7 @@ public class ApartmentService {
                 new ResourceNotFoundException("Apartment not found.")
         );
 
-        Month month = Month.of(Calendar.getInstance().get(Calendar.MONTH));
-
-        Optional<MonthlyExpense> monthlyExpense = monthlyExpenseRepository.findById(
-                new MonthlyExpenseKey(
-                        apartment,
-                        month
-                )
-        );
+        Optional<MonthlyExpense> monthlyExpense = getMonthlyExpense(apartment);
 
         return new ApartmentDto(
                 apartment,
@@ -138,7 +143,20 @@ public class ApartmentService {
         return new InviteCodeResponse(inviteCode);
     }
 
-    public ProfileDto join(User user, String code) throws StateConflictException {
+    public InviteCodeResponse getCode(User user, Integer apartmentId) {
+        Role role = userService.getCurrentUserRoleInApartment(user, apartmentId);
+
+        if (role == null || role == Role.INHABITANT)
+            throw new AccessForbiddenException("You can't generate invite code in this apartment.");
+
+        Apartment apartment = apartmentRepository.findById(apartmentId).orElseThrow(
+                () -> new ResourceNotFoundException("Apartment not found.")
+        );
+
+        return new InviteCodeResponse(apartment.getInviteCode());
+    }
+
+    public JoinApartmentResponse join(User user, String code) throws StateConflictException {
         if (user.getCurrentProfile() != null)
             throw new StateConflictException("You already have an apartment");
 
@@ -149,12 +167,23 @@ public class ApartmentService {
         Optional<Profile> oldProfile = profileRepository.findByApartmentAndUser(apartment, user);
         if (oldProfile.isPresent()) {
             Profile profile = oldProfile.get();
+
             profile.setLeftAt(null);
             profile.setName(user.getName());
             profile.setAvatarColor(user.getAvatarColor());
             profile.setRole(Role.INHABITANT);
             profileRepository.save(profile);
-            return new ProfileDto(profile);
+
+            user.setCurrentProfile(profile);
+            userRepository.save(user);
+
+            Optional<MonthlyExpense> monthlyExpense = getMonthlyExpense(apartment);
+
+            return new JoinApartmentResponse(
+                    apartment,
+                    monthlyExpense.isPresent() ? monthlyExpense.get().getSum() : 0,
+                    profile
+            );
         }
 
         Profile profile = profileRepository.save(
@@ -165,6 +194,15 @@ public class ApartmentService {
                 )
         );
 
-        return new ProfileDto(profile);
+        user.setCurrentProfile(profile);
+        userRepository.save(user);
+
+        Optional<MonthlyExpense> monthlyExpense = getMonthlyExpense(apartment);
+
+        return new JoinApartmentResponse(
+                apartment,
+                monthlyExpense.isPresent() ? monthlyExpense.get().getSum() : 0,
+                profile
+        );
     }
 }

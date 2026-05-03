@@ -31,7 +31,7 @@ class TaskCard extends StatelessWidget {
     return Container(
       padding: .symmetric(horizontal: 18, vertical: 12),
       width: .infinity,
-      height: 105,
+      height: 130,
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surfaceContainer,
         borderRadius: .all(.circular(15)),

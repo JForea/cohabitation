@@ -6,14 +6,13 @@ import 'package:frontend/shared/data/providers/auth_provider.dart';
 import 'package:frontend/shared/data/providers/tasks_provider.dart';
 import 'package:frontend/shared/data/types/room.dart';
 import 'package:frontend/shared/data/types/task_priority.dart';
-import 'package:frontend/shared/presentation/theme/app_colors.dart';
-import 'package:frontend/shared/presentation/ui/widgets/avatars/avatar.dart';
 import 'package:frontend/shared/presentation/ui/widgets/buttons/custom_back_button.dart';
 import 'package:frontend/shared/presentation/ui/widgets/buttons/custom_text_button.dart';
 import 'package:frontend/shared/presentation/ui/widgets/chips/custom_choice_chip.dart';
 import 'package:frontend/shared/presentation/ui/widgets/inputs/controlled_named_text_field.dart';
 import 'package:frontend/shared/presentation/ui/widgets/wrappers/choice_wrapper.dart';
-import 'package:frontend/shared/presentation/ui/widgets/wrappers/tab_wrapper.dart';
+import 'package:frontend/shared/presentation/ui/widgets/wrappers/page_wrapper.dart';
+import 'package:frontend/shared/presentation/ui/widgets/wrappers/user_choice_wrapper.dart';
 import 'package:frontend/shared/utils/util_functions.dart';
 import 'package:go_router/go_router.dart';
 
@@ -113,7 +112,6 @@ class _CreateTaskPageState extends ConsumerState<CreateTaskPage> {
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
       body: PageWrapper(
-        floatingButtonExists: false,
         children: [
           Row(
             spacing: 15,
@@ -148,30 +146,11 @@ class _CreateTaskPageState extends ConsumerState<CreateTaskPage> {
             require: false,
             maxLines: 5,
           ),
-          ChoiceWrapper(
+          UserChoiceWrapper(
             name: "Назначить",
-            children: [
-              CustomChoiceChip(
-                name: "Общий",
-                icon: Avatar(
-                  name: "Общий",
-                  size: 24,
-                  color: AppColors.greyBlue,
-                ),
-                selected: assignedTo == null,
-                checkMark: true,
-                onSelect: () => changeAssigned(null),
-              ),
-              ...profiles.map(
-                (p) => CustomChoiceChip(
-                  name: p.name,
-                  icon: Avatar(name: p.name, size: 24, color: p.color),
-                  selected: p.id == assignedTo?.id,
-                  checkMark: true,
-                  onSelect: () => changeAssigned(p),
-                ),
-              ),
-            ],
+            profiles: profiles,
+            selected: assignedTo?.id,
+            select: changeAssigned,
           ),
           ChoiceWrapper(
             name: "Комната",
@@ -233,6 +212,7 @@ class _CreateTaskPageState extends ConsumerState<CreateTaskPage> {
               );
             }),
           ),
+          Spacer(),
           CustomTextButton(
             onPressed: () async {
               final success = await create();

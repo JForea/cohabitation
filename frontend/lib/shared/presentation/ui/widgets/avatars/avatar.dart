@@ -27,7 +27,7 @@ class Avatar extends StatelessWidget {
           style: TextStyle(
             color: Colors.white,
             fontWeight: .w600,
-            fontSize: size * 0.6,
+            fontSize: size * 0.5,
           ),
         ),
       ),

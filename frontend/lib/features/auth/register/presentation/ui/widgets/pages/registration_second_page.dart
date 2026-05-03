@@ -6,6 +6,7 @@ import 'package:frontend/shared/presentation/ui/widgets/buttons/custom_back_butt
 import 'package:frontend/shared/presentation/ui/widgets/buttons/custom_text_button.dart';
 import 'package:frontend/shared/presentation/ui/widgets/inputs/controlled_named_text_field.dart';
 import 'package:frontend/shared/presentation/ui/widgets/switches/gender_switch.dart';
+import 'package:frontend/shared/presentation/ui/widgets/wrappers/auth_page_wrapper.dart';
 
 class RegistrationSecondPage extends ConsumerStatefulWidget {
   RegistrationSecondPage({super.key}) {
@@ -46,50 +47,40 @@ class _RegistrationSecondPageState
 
   @override
   Widget build(BuildContext context) {
-    final mediaQuery = MediaQuery.of(context);
-
     return Scaffold(
       backgroundColor: Colors.white,
-      body: Container(
-        padding: EdgeInsets.symmetric(
-          vertical: mediaQuery.size.height * 0.1,
-          horizontal: mediaQuery.size.width * 0.1,
-        ),
-        child: Column(
-          crossAxisAlignment: .start,
-          spacing: 20,
-          children: [
-            CustomBackButton(mainColor: true),
-            Text(
-              "Как вас зовут?",
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: .w500,
-                color: Theme.of(context).colorScheme.onSurface,
-              ),
+      body: AuthPageWrapper(
+        children: [
+          CustomBackButton(mainColor: true),
+          Text(
+            "Как вас зовут?",
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: .w500,
+              color: Theme.of(context).colorScheme.onSurface,
             ),
-            Text(
-              "Введите имя - так вас будут видеть соседи",
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: .w500,
-                color: Color(0xFF707070),
-              ),
+          ),
+          Text(
+            "Введите имя - так вас будут видеть соседи",
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: .w500,
+              color: Color(0xFF707070),
             ),
-            ControlledNamedTextField(
-              text: widget.dataHolder.name,
-              title: "ваше имя",
-              hintText: "Александр",
-              onChange: setName,
-              secondaryColor: true,
-              password: false,
-              require: true,
-            ),
-            GenderSwitch(male: widget.dataHolder.male, onPressed: switchGender),
-            Spacer(),
-            CustomTextButton(onPressed: register, text: "Продолжить"),
-          ],
-        ),
+          ),
+          ControlledNamedTextField(
+            text: widget.dataHolder.name,
+            title: "ваше имя",
+            hintText: "Александр",
+            onChange: setName,
+            secondaryColor: true,
+            password: false,
+            require: true,
+          ),
+          GenderSwitch(male: widget.dataHolder.male, onPressed: switchGender),
+          Spacer(),
+          CustomTextButton(onPressed: register, text: "Продолжить"),
+        ],
       ),
     );
   }

@@ -3,7 +3,7 @@ import 'package:frontend/shared/presentation/theme/app_colors.dart';
 import 'package:frontend/shared/presentation/theme/app_shadows.dart';
 
 class AppDecorations {
-  static choiceChipBox({
+  static BoxDecoration choiceChipBox({
     required BuildContext context,
     required bool selected,
     double borderRadius = 10,

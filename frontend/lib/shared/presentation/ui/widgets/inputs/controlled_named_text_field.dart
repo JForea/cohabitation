@@ -94,7 +94,7 @@ class _ControlledNamedTextFieldState extends State<ControlledNamedTextField> {
           ],
         ),
         Container(
-          padding: .symmetric(vertical: 8, horizontal: 16),
+          padding: .symmetric(vertical: 4, horizontal: 16),
           decoration: BoxDecoration(
             color: widget.secondaryColor
                 ? Theme.of(context).colorScheme.surface

@@ -25,7 +25,7 @@ class TasksTab extends ConsumerWidget {
 
     return RefreshIndicator(
       onRefresh: () => _refresh(ref, apartmentId),
-      child: PageWrapper(
+      child: TabWrapper(
         floatingButtonExists: true,
         children: [
           const Text(

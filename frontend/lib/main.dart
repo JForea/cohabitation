@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/shared/data/providers/auth_provider.dart';
 import 'package:frontend/shared/presentation/theme/custom_theme.dart';
@@ -7,6 +8,13 @@ import 'package:frontend/shared/router/router_provider.dart';
 
 Future<void> main() async {
   await dotenv.load(fileName: ".env");
+
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp, // только вертикально
+  ]);
+
   runApp(const ProviderScope(child: MyApp()));
 }
 
@@ -27,6 +35,7 @@ class MyApp extends ConsumerWidget {
     }
 
     return MaterialApp.router(
+      debugShowCheckedModeBanner: false,
       title: 'Flutter Demo',
       theme: customTheme,
       routerConfig: router,

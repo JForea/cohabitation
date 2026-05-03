@@ -24,7 +24,7 @@ class _HomePageState extends ConsumerState<HomePage> {
         child: Icon(Icons.add, size: 28),
       ),
       2 => FloatingActionButton(
-        onPressed: () {},
+        onPressed: () => context.push("/buyings/create"),
         shape: CircleBorder(),
         child: Icon(Icons.add, size: 28),
       ),

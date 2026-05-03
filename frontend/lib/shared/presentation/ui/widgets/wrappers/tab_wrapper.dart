@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-class PageWrapper extends StatelessWidget {
-  const PageWrapper({
+class TabWrapper extends StatelessWidget {
+  const TabWrapper({
     super.key,
     required this.children,
     required this.floatingButtonExists,

@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:frontend/features/apartment_enter/presentation/ui/widgets/pages/join_apartment_page.dart';
 import 'package:frontend/features/auth/login/presentation/ui/widgets/pages/login_page.dart';
 import 'package:frontend/features/buyings/presentation/ui/widgets/pages/create_buying_page.dart';
 import 'package:frontend/features/settings/presentation/ui/widgets/pages/settings_page.dart';
@@ -75,6 +76,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/enter/create',
         builder: (context, state) => CreateApartmentPage(),
+      ),
+      GoRoute(
+        path: '/enter/join',
+        builder: (context, state) => JoinApartmentPage(),
       ),
       GoRoute(
         path: '/tasks/create',

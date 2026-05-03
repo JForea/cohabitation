@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:frontend/shared/data/models/apartment.dart';
-import 'package:frontend/shared/data/models/create_apartment_response.dart';
+import 'package:frontend/shared/data/models/apartment/apartment.dart';
+import 'package:frontend/shared/data/models/apartment/create_apartment_response.dart';
 import 'package:frontend/shared/data/models/profile.dart';
 import 'package:frontend/shared/data/network/dio_client.dart';
 import 'package:frontend/shared/data/providers/auth_provider.dart';
@@ -59,22 +59,49 @@ class _ApartmentNotifier extends AsyncNotifier<Apartment?> {
         response.data,
       );
 
-      final apartment = Apartment(
-        address: address,
-        budget: createApartmentResponse.budget,
-        currentExpenseSum: 0,
-        id: createApartmentResponse.id,
-        name: name,
-      );
-
       state = await AsyncValue.guard(() async {
-        return apartment;
+        return Apartment(
+          address: address,
+          budget: createApartmentResponse.budget,
+          currentExpenseSum: 0,
+          id: createApartmentResponse.id,
+          name: name,
+        );
       });
 
       return createApartmentResponse.profile;
     } catch (e) {
-      print("Error during creating apartment");
-      print(e);
+      return null;
+    }
+  }
+
+  Future<Profile?> join(String inviteCode) async {
+    try {
+      final query = {'code': inviteCode};
+
+      final response = await AppDio.dio.post(
+        "$baseUrl/join",
+        queryParameters: query,
+      );
+
+      final token = response.headers['Authorization'];
+
+      if (token == null) {
+        return null;
+      }
+
+      await AppDio.updateToken(token.first);
+
+      state = await AsyncValue.guard(() async {
+        return Apartment.fromJson(response.data);
+      });
+
+      final profile = Profile.fromJson(response.data["profile"]);
+
+      print(profile);
+
+      return profile;
+    } catch (e) {
       return null;
     }
   }

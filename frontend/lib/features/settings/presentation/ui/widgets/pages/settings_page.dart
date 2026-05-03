@@ -38,17 +38,18 @@ class SettingsPage extends ConsumerWidget {
               ),
             ],
           ),
-          CustomWidgetList(
-            danger: false,
-            title: "Квартира",
-            children: [
-              GenerateInviteCodeTile(
-                inviteCode: apartment.inviteCode,
-                onGenerate: () =>
-                    ref.read(apartmentProvider.notifier).generateCode(),
-              ),
-            ],
-          ),
+          if (profile.role != Role.inhabitant)
+            CustomWidgetList(
+              danger: false,
+              title: "Квартира",
+              children: [
+                GenerateInviteCodeTile(
+                  inviteCode: apartment.inviteCode,
+                  onGenerate: () =>
+                      ref.read(apartmentProvider.notifier).generateCode(),
+                ),
+              ],
+            ),
           Spacer(),
           CustomWidgetList(
             danger: true,

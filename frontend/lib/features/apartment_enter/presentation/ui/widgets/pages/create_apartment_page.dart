@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:frontend/shared/data/providers/auth_provider.dart';
+import 'package:frontend/shared/data/providers/apartment_provider.dart';
 import 'package:frontend/shared/presentation/ui/widgets/buttons/custom_back_button.dart';
 import 'package:frontend/shared/presentation/ui/widgets/buttons/custom_text_button.dart';
 import 'package:frontend/shared/presentation/ui/widgets/inputs/controlled_named_text_field.dart';
@@ -34,7 +34,9 @@ class _CreateApartmentPageState extends ConsumerState<CreateApartmentPage> {
   }
 
   void create() async {
-    await ref.read(authProvider.notifier).createApartment(_name, _address);
+    await ref
+        .read(apartmentProvider.notifier)
+        .create(name: _name, address: _address);
   }
 
   @override

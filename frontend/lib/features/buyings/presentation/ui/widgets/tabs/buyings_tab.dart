@@ -9,14 +9,14 @@ class BuyingsTab extends ConsumerWidget {
   const BuyingsTab({super.key});
 
   Future<void> _refresh(WidgetRef ref, int apartmentId) async {
-    await ref.read(buyingsProvider(apartmentId).notifier).refresh();
+    await ref.read(buyingsProvider.notifier).refresh();
   }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final profile = ref.read(authProvider).user!.profile!;
+    final profile = ref.read(authProvider).value!.user!.profile!;
     int apartmentId = profile.apartmentId;
-    final categoryToBuyings = ref.watch(buyingsProvider(apartmentId)).value;
+    final categoryToBuyings = ref.watch(buyingsProvider).value;
 
     return RefreshIndicator(
       onRefresh: () => _refresh(ref, apartmentId),
@@ -36,7 +36,7 @@ class BuyingsTab extends ConsumerWidget {
               category: c,
               buyings: categoryToBuyings[c]!,
               onBuyingComplete: (id) => ref
-                  .read(buyingsProvider(apartmentId).notifier)
+                  .read(buyingsProvider.notifier)
                   .switchBuyingStatus(id, profile),
             ),
           ),

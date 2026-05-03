@@ -2,20 +2,18 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/shared/data/models/profile.dart';
 import 'package:frontend/shared/data/models/task.dart';
 import 'package:frontend/shared/data/network/dio_client.dart';
+import 'package:frontend/shared/data/providers/apartment_provider.dart';
 import 'package:frontend/shared/data/types/role.dart';
 import 'package:frontend/shared/data/types/room.dart';
 import 'package:frontend/shared/data/types/task_filter.dart';
 import 'package:frontend/shared/data/types/task_priority.dart';
 import 'package:frontend/shared/utils/util_functions.dart';
 
-final tasksProvider =
-    AsyncNotifierProvider.family<_TasksNotifier, List<Task>, int>(
-      _TasksNotifier.new,
-    );
+final tasksProvider = AsyncNotifierProvider<_TasksNotifier, List<Task>>(
+  _TasksNotifier.new,
+);
 
 class _TasksNotifier extends AsyncNotifier<List<Task>> {
-  _TasksNotifier(this.apartmentId);
-  final int apartmentId;
   late final String baseUrl;
 
   static const _pageSize = 20;
@@ -28,9 +26,13 @@ class _TasksNotifier extends AsyncNotifier<List<Task>> {
 
   @override
   Future<List<Task>> build() async {
-    _page = 0;
-    _hasMore = true;
-    baseUrl = "/$apartmentId/tasks";
+    final apartment = ref.watch(apartmentProvider).value;
+
+    if (apartment == null) {
+      throw Exception("Not in apartment.");
+    }
+
+    baseUrl = "/${apartment.id}/tasks";
 
     return _fetchPage();
   }

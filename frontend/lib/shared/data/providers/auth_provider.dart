@@ -1,4 +1,3 @@
-import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:frontend/shared/data/models/auth_state.dart';
@@ -6,52 +5,28 @@ import 'package:frontend/shared/data/models/profile.dart';
 import 'package:frontend/shared/data/models/user.dart';
 import 'package:frontend/shared/data/network/dio_client.dart';
 
-final authProvider = NotifierProvider<_AuthNotifier, AuthState>(
+final authProvider = AsyncNotifierProvider<_AuthNotifier, AuthState>(
   _AuthNotifier.new,
 );
 
-class _AuthNotifier extends Notifier<AuthState> {
+class _AuthNotifier extends AsyncNotifier<AuthState> {
   final FlutterSecureStorage _storage = FlutterSecureStorage();
 
   @override
-  AuthState build() {
-    _init();
-    return AuthState(isLoading: true);
-  }
-
-  Future<void> _init() async {
+  Future<AuthState> build() async {
     final token = await _storage.read(key: "token");
 
     if (token == null) {
-      state = state.copyWith(isLoading: false);
-      return;
-    } else {
-      state = state.copyWith(token: token);
+      return AuthState();
     }
 
     try {
-      await whoAmI();
+      final user = await _fetchUser();
+      return AuthState(token: token, user: user);
     } catch (_) {
       await logout();
-    } finally {
-      state = state.copyWith(isLoading: false);
+      return AuthState();
     }
-  }
-
-  Future<void> _parseResponse(Response<dynamic> response) async {
-    final token = response.headers['Authorization'];
-
-    if (token == null) {
-      print("Authorization failed.");
-      state = state.copyWith(isError: true);
-      return;
-    }
-
-    await AppDio.updateToken(token.first);
-
-    final user = User.fromJson(response.data);
-
-    state = state.copyWith(token: token.first, user: user, isLoading: false);
   }
 
   Future<void> register(
@@ -60,9 +35,9 @@ class _AuthNotifier extends Notifier<AuthState> {
     String name,
     bool male,
   ) async {
-    state = state.copyWith(isLoading: true);
+    state = const AsyncValue.loading();
 
-    try {
+    state = await AsyncValue.guard(() async {
       final response = await AppDio.dio.post(
         '/users/auth/registry',
         data: {
@@ -73,74 +48,56 @@ class _AuthNotifier extends Notifier<AuthState> {
         },
       );
 
-      _parseResponse(response);
-    } catch (e) {
-      print(e.toString());
-      state = state.copyWith(isError: true, isLoading: false);
-    }
+      final token = response.headers['Authorization']?.first;
+      if (token == null) throw Exception("No token");
+
+      await _storage.write(key: "token", value: token);
+      await AppDio.updateToken(token);
+
+      final user = User.fromJson(response.data);
+
+      return AuthState(token: token, user: user);
+    });
   }
 
   Future<void> login(String email, String password) async {
-    state = state.copyWith(isLoading: true);
+    state = const AsyncValue.loading();
 
-    try {
+    state = await AsyncValue.guard(() async {
       final response = await AppDio.dio.post(
         '/users/auth/login',
         data: {"email": email, "password": password},
       );
 
-      _parseResponse(response);
-    } catch (e) {
-      print(e.toString());
-      state = state.copyWith(isError: true, isLoading: false);
-    }
-  }
+      final token = response.headers['Authorization']?.first;
+      if (token == null) throw Exception("No token");
 
-  Future<void> whoAmI() async {
-    try {
-      final response = await AppDio.dio.get("/users/me");
+      await _storage.write(key: "token", value: token);
+      await AppDio.updateToken(token);
 
       final user = User.fromJson(response.data);
 
-      state = state.copyWith(user: user);
-    } catch (e) {
-      print(e.toString());
-      state = state.copyWith(isError: true);
-      throw e;
-    }
+      return AuthState(token: token, user: user);
+    });
   }
 
-  Future<void> createApartment(String name, String address) async {
-    try {
-      final response = await AppDio.dio.post(
-        "/apartments",
-        data: {"name": name, "address": address == "" ? null : address},
-      );
+  Future<User> _fetchUser() async {
+    final response = await AppDio.dio.get("/users/me");
+    return User.fromJson(response.data);
+  }
 
-      final token = response.headers['Authorization'];
-
-      if (token == null) {
-        state = state.copyWith(isError: true);
-        return;
-      }
-
-      await AppDio.updateToken(token.first);
-
-      final profile = Profile.fromJson(response.data);
-
-      final user = state.user!;
-      user.profile = profile;
-
-      state = state.copyWith(token: token.first, user: user, isLoading: false);
-    } catch (e) {
-      print("Error during creating apartment");
-      print(e);
+  void setProfile(Profile profile) {
+    if (state.value == null) {
+      return;
     }
+
+    state = AsyncValue.data(state.value!.copyWith(profile: profile));
   }
 
   Future<void> logout() async {
+    await _storage.delete(key: "token");
     await AppDio.updateToken(null);
-    print("LOGGED OUT");
-    state = AuthState();
+
+    state = AsyncValue.data(AuthState());
   }
 }

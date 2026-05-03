@@ -1,31 +1,25 @@
+import 'package:frontend/shared/data/models/profile.dart';
 import 'package:frontend/shared/data/models/user.dart';
 
 class AuthState {
   final User? user;
   final String? token;
-  final bool isLoading;
-  final bool isError;
 
-  AuthState({
-    this.user,
-    this.token,
-    this.isLoading = false,
-    this.isError = false,
-  });
+  AuthState({this.user, this.token});
 
   bool get isAuthenticated => token != null;
 
-  AuthState copyWith({
-    User? user,
-    String? token,
-    bool? isLoading,
-    bool? isError,
-  }) {
+  AuthState copyWith({Profile? profile, String? token}) {
     return AuthState(
-      user: user ?? this.user,
+      user: profile != null && user != null
+          ? User(
+              id: user!.id,
+              email: user!.email,
+              name: user!.name,
+              profile: profile,
+            )
+          : user,
       token: token ?? this.token,
-      isLoading: isLoading ?? this.isLoading,
-      isError: isError ?? this.isError,
     );
   }
 }

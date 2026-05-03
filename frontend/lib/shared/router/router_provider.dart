@@ -25,8 +25,8 @@ final routerProvider = Provider<GoRouter>((ref) {
 
       final path = state.uri.path;
 
-      final bool isLoggedIn = authState.token != null;
-      final bool isInApartment = authState.user?.profile != null;
+      final bool isLoggedIn = authState.value?.token != null;
+      final bool isInApartment = authState.value?.user?.profile != null;
 
       final bool isAtAuth = path.startsWith('/auth');
       final bool isAtEnter = path.startsWith('/enter');

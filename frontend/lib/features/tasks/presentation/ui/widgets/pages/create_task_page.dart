@@ -87,10 +87,10 @@ class _CreateTaskPageState extends ConsumerState<CreateTaskPage> {
   }
 
   Future<bool> create() async {
-    final userProfile = ref.read(authProvider).user!.profile!;
+    final userProfile = ref.read(authProvider).value!.user!.profile!;
 
     final created = ref
-        .read(tasksProvider(userProfile.apartmentId).notifier)
+        .read(tasksProvider.notifier)
         .create(
           userProfile: userProfile,
           name: name,
@@ -107,7 +107,7 @@ class _CreateTaskPageState extends ConsumerState<CreateTaskPage> {
 
   @override
   Widget build(BuildContext context) {
-    final profiles = [ref.read(authProvider).user!.profile!];
+    final profiles = [ref.read(authProvider).value!.user!.profile!];
 
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,

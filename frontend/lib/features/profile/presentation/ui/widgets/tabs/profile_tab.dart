@@ -8,7 +8,7 @@ class ProfileTab extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final profile = ref.read(authProvider).user!.profile!;
+    final profile = ref.read(authProvider).value!.user!.profile!;
 
     return Column(children: [ProfileAppBar(profile: profile)]);
   }

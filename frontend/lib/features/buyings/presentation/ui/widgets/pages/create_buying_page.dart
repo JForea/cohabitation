@@ -87,38 +87,35 @@ class _CreateBuyingPageState extends ConsumerState<CreateBuyingPage> {
   }
 
   Future<bool> create() {
-    final userProfile = ref.read(authProvider).user!.profile!;
+    final userProfile = ref.read(authProvider).value!.user!.profile!;
 
-    final created = ref
-        .read(buyingsProvider(userProfile.apartmentId).notifier)
-        .create(
-          userProfile: userProfile,
-          buyingRedacted: buyings[0],
-          assignedTo: assignedTo,
-          isPublic: true,
-        );
-
-    return created;
-  }
-
-  Future<bool> createMany() {
-    final userProfile = ref.read(authProvider).user!.profile!;
-
-    final created = ref
-        .read(buyingsProvider(userProfile.apartmentId).notifier)
-        .createMany(
-          userProfile: userProfile,
-          buyingsRedacted: buyings,
-          assignedTo: assignedTo,
-          isPublic: true,
-        );
+    Future<bool> created;
+    if (multipleCreate) {
+      created = ref
+          .read(buyingsProvider.notifier)
+          .createMany(
+            userProfile: userProfile,
+            buyingsRedacted: buyings,
+            assignedTo: assignedTo,
+            isPublic: true,
+          );
+    } else {
+      created = ref
+          .read(buyingsProvider.notifier)
+          .create(
+            userProfile: userProfile,
+            buyingRedacted: buyings[0],
+            assignedTo: assignedTo,
+            isPublic: true,
+          );
+    }
 
     return created;
   }
 
   @override
   Widget build(BuildContext context) {
-    final profiles = [ref.read(authProvider).user!.profile!];
+    final profiles = [ref.read(authProvider).value!.user!.profile!];
 
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
@@ -208,7 +205,7 @@ class _CreateBuyingPageState extends ConsumerState<CreateBuyingPage> {
           Spacer(),
           CustomTextButton(
             onPressed: () async {
-              final created = await (multipleCreate ? createMany() : create());
+              final created = await create();
 
               if (created && context.mounted) {
                 context.go("/");

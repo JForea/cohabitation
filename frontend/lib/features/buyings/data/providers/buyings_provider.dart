@@ -5,19 +5,16 @@ import 'package:frontend/features/buyings/data/models/buying_redacted.dart';
 import 'package:frontend/shared/data/models/buying.dart';
 import 'package:frontend/shared/data/models/profile.dart';
 import 'package:frontend/shared/data/network/dio_client.dart';
+import 'package:frontend/shared/data/providers/apartment_provider.dart';
 import 'package:frontend/shared/data/types/buying_category.dart';
 import 'package:frontend/shared/data/types/role.dart';
 
 final buyingsProvider =
-    AsyncNotifierProvider.family<
-      _BuyingNotifier,
-      Map<BuyingCategory, List<Buying>>,
-      int
-    >(_BuyingNotifier.new);
+    AsyncNotifierProvider<_BuyingNotifier, Map<BuyingCategory, List<Buying>>>(
+      _BuyingNotifier.new,
+    );
 
 class _BuyingNotifier extends AsyncNotifier<Map<BuyingCategory, List<Buying>>> {
-  _BuyingNotifier(this.apartmentId);
-  final int apartmentId;
   late final String baseUrl;
 
   static const _pageSize = 30;
@@ -28,9 +25,13 @@ class _BuyingNotifier extends AsyncNotifier<Map<BuyingCategory, List<Buying>>> {
 
   @override
   Future<Map<BuyingCategory, List<Buying>>> build() async {
-    _page = 0;
-    _hasMore = true;
-    baseUrl = "/$apartmentId/buyings";
+    final apartment = ref.watch(apartmentProvider).value;
+
+    if (apartment == null) {
+      throw Exception("Not in apartment.");
+    }
+
+    baseUrl = "/${apartment.id}/buyings";
 
     final buyings = await _fetchPage();
 

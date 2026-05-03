@@ -9,19 +9,19 @@ class TasksTab extends ConsumerWidget {
   const TasksTab({super.key});
 
   Future<void> _refresh(WidgetRef ref, int apartmentId) async {
-    await ref.read(tasksProvider(apartmentId).notifier).refresh();
+    await ref.read(tasksProvider.notifier).refresh();
   }
 
   Future<void> switchStatus(WidgetRef ref, int apartmentId, int taskId) async {
     ref
-        .read(tasksProvider(apartmentId).notifier)
-        .switchTaskStatus(taskId, ref.read(authProvider).user!.profile!);
+        .read(tasksProvider.notifier)
+        .switchTaskStatus(taskId, ref.read(authProvider).value!.user!.profile!);
   }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    int apartmentId = ref.read(authProvider).user!.profile!.apartmentId;
-    final tasks = ref.watch(tasksProvider(apartmentId));
+    int apartmentId = ref.read(authProvider).value!.user!.profile!.apartmentId;
+    final tasks = ref.watch(tasksProvider);
 
     return RefreshIndicator(
       onRefresh: () => _refresh(ref, apartmentId),

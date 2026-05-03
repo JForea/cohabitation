@@ -40,7 +40,7 @@ class CustomWidgetList extends StatelessWidget {
                   fontWeight: .w700,
                   color: danger
                       ? color
-                      : Theme.of(context).colorScheme.secondary,
+                      : Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
               ),
             ),

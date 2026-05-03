@@ -10,9 +10,13 @@ import 'package:frontend/shared/presentation/ui/widgets/wrappers/page_wrapper.da
 class SettingsPage extends ConsumerWidget {
   const SettingsPage({super.key});
 
+  void logout(WidgetRef ref) {
+    ref.read(authProvider.notifier).logout();
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final profile = ref.read(authProvider).user!.profile!;
+    final profile = ref.read(authProvider).value!.user!.profile!;
 
     return Scaffold(
       body: PageWrapper(
@@ -31,6 +35,9 @@ class SettingsPage extends ConsumerWidget {
               ),
             ],
           ),
+          CustomWidgetList(danger: false, title: "Квартира", children: [
+            
+          ],),
           Spacer(),
           CustomWidgetList(
             danger: true,
@@ -43,7 +50,7 @@ class SettingsPage extends ConsumerWidget {
               ),
               DangerListTile(
                 iconData: Icons.logout,
-                onTap: () {},
+                onTap: () => logout(ref),
                 text: "Выйти из аккаунта",
               ),
               if (profile.role == Role.creator)

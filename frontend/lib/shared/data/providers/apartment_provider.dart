@@ -12,6 +12,8 @@ final apartmentProvider = AsyncNotifierProvider<_ApartmentNotifier, Apartment?>(
 class _ApartmentNotifier extends AsyncNotifier<Apartment?> {
   late final String baseUrl;
 
+  late final int apartmentId;
+
   @override
   Future<Apartment?> build() async {
     baseUrl = "/apartments";
@@ -25,9 +27,9 @@ class _ApartmentNotifier extends AsyncNotifier<Apartment?> {
       return null;
     }
 
-    final response = await AppDio.dio.get(
-      "$baseUrl/${user.profile!.apartmentId}",
-    );
+    apartmentId = user.profile!.apartmentId;
+
+    final response = await AppDio.dio.get("$baseUrl/$apartmentId");
     Apartment apartment = Apartment.fromJson(response.data);
 
     return apartment;
@@ -75,5 +77,18 @@ class _ApartmentNotifier extends AsyncNotifier<Apartment?> {
       print(e);
       return null;
     }
+  }
+
+  Future<void> generateCode() async {
+    final response = await AppDio.dio.patch("$baseUrl/$apartmentId/code");
+    Apartment? apartment = state.value;
+
+    if (apartment == null) {
+      return;
+    }
+
+    apartment = apartment.copyWith(inviteCode: response.data["inviteCode"]);
+
+    state = AsyncValue.data(apartment);
   }
 }

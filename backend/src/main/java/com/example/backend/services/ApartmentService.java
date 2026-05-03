@@ -109,7 +109,7 @@ public class ApartmentService {
             throw new AccessForbiddenException("You can't generate invite code in this apartment.");
 
         int inviteCodeLength = 8;
-        String charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        String charset = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 
         Apartment apartment = apartmentRepository.findById(apartmentId).orElseThrow(
                 () -> new ResourceNotFoundException("Apartment not found.")

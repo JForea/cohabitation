@@ -25,4 +25,22 @@ class Apartment {
   final int budget;
   final int currentExpenseSum;
   final String? inviteCode;
+
+  Apartment copyWith({
+    int? id,
+    String? name,
+    String? address,
+    int? budget,
+    int? currentExpenseSum,
+    String? inviteCode,
+  }) {
+    return Apartment(
+      budget: budget ?? this.budget,
+      currentExpenseSum: currentExpenseSum ?? this.currentExpenseSum,
+      id: id ?? this.id,
+      name: name ?? this.name,
+      address: address ?? this.address,
+      inviteCode: inviteCode ?? this.inviteCode,
+    );
+  }
 }

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/features/settings/presentation/ui/widgets/list_tiles/danger_list_tile.dart';
+import 'package:frontend/features/settings/presentation/ui/widgets/list_tiles/generate_invite_code_tile.dart';
+import 'package:frontend/shared/data/providers/apartment_provider.dart';
 import 'package:frontend/shared/data/providers/auth_provider.dart';
 import 'package:frontend/shared/data/types/role.dart';
 import 'package:frontend/shared/presentation/ui/widgets/buttons/custom_back_button.dart';
@@ -17,6 +19,7 @@ class SettingsPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final profile = ref.read(authProvider).value!.user!.profile!;
+    final apartment = ref.watch(apartmentProvider).value!;
 
     return Scaffold(
       body: PageWrapper(
@@ -35,9 +38,17 @@ class SettingsPage extends ConsumerWidget {
               ),
             ],
           ),
-          CustomWidgetList(danger: false, title: "Квартира", children: [
-            
-          ],),
+          CustomWidgetList(
+            danger: false,
+            title: "Квартира",
+            children: [
+              GenerateInviteCodeTile(
+                inviteCode: apartment.inviteCode,
+                onGenerate: () =>
+                    ref.read(apartmentProvider.notifier).generateCode(),
+              ),
+            ],
+          ),
           Spacer(),
           CustomWidgetList(
             danger: true,

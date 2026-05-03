@@ -5,6 +5,7 @@ import 'package:frontend/shared/presentation/types/bubble.dart';
 import 'package:frontend/shared/presentation/ui/widgets/avatars/avatar.dart';
 import 'package:frontend/shared/presentation/ui/widgets/buttons/custom_icon_button.dart';
 import 'package:frontend/shared/presentation/ui/widgets/other/bubble_widget.dart';
+import 'package:go_router/go_router.dart';
 
 class ProfileAppBar extends StatelessWidget {
   const ProfileAppBar({super.key, required this.profile});
@@ -73,7 +74,7 @@ class ProfileAppBar extends StatelessWidget {
                   color: Color(0xFF464566),
                   icon: Icons.settings_outlined,
                   size: 40,
-                  onPressed: () {},
+                  onPressed: () => context.push('/settings'),
                   iconColor: Colors.white,
                 ),
               ],

@@ -43,6 +43,7 @@ class CategoryBuyingList extends StatelessWidget {
           ],
         ),
         CustomWidgetList(
+          danger: false,
           children: buyings
               .map(
                 (b) => BuyingListTile(buying: b, onComplete: onBuyingComplete),

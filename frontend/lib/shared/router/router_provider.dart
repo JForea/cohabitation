@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/features/auth/login/presentation/ui/widgets/pages/login_page.dart';
 import 'package:frontend/features/buyings/presentation/ui/widgets/pages/create_buying_page.dart';
+import 'package:frontend/features/settings/presentation/ui/widgets/pages/settings_page.dart';
 import 'package:frontend/features/tasks/presentation/ui/widgets/pages/create_task_page.dart';
 import 'package:frontend/shared/data/providers/auth_provider.dart';
 import 'package:frontend/features/onboarding/presentation/ui/widgets/pages/onboarding_page.dart';
@@ -83,6 +84,7 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/buyings/create',
         builder: (context, state) => CreateBuyingPage(),
       ),
+      GoRoute(path: "/settings", builder: (context, state) => SettingsPage()),
     ],
   );
 });

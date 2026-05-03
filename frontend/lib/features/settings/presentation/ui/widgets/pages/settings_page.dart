@@ -1,0 +1,61 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:frontend/features/settings/presentation/ui/widgets/list_tiles/danger_list_tile.dart';
+import 'package:frontend/shared/data/providers/auth_provider.dart';
+import 'package:frontend/shared/data/types/role.dart';
+import 'package:frontend/shared/presentation/ui/widgets/buttons/custom_back_button.dart';
+import 'package:frontend/shared/presentation/ui/widgets/lists/custom_widget_list.dart';
+import 'package:frontend/shared/presentation/ui/widgets/wrappers/page_wrapper.dart';
+
+class SettingsPage extends ConsumerWidget {
+  const SettingsPage({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final profile = ref.read(authProvider).user!.profile!;
+
+    return Scaffold(
+      body: PageWrapper(
+        children: [
+          Row(
+            spacing: 15,
+            children: [
+              CustomBackButton(mainColor: false),
+              Text(
+                "Настройки",
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onSurface,
+                  fontSize: 20,
+                  fontWeight: .w500,
+                ),
+              ),
+            ],
+          ),
+          Spacer(),
+          CustomWidgetList(
+            danger: true,
+            title: "Опасная зона",
+            children: [
+              DangerListTile(
+                iconData: Icons.home_outlined,
+                onTap: () {},
+                text: "Покинуть квартиру",
+              ),
+              DangerListTile(
+                iconData: Icons.logout,
+                onTap: () {},
+                text: "Выйти из аккаунта",
+              ),
+              if (profile.role == Role.creator)
+                DangerListTile(
+                  iconData: Icons.delete_outline,
+                  onTap: () {},
+                  text: "Удалить квартиру",
+                ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}

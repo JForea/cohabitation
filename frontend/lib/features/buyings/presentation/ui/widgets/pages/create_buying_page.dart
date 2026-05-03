@@ -186,6 +186,7 @@ class _CreateBuyingPageState extends ConsumerState<CreateBuyingPage> {
           ],
           if (multipleCreate) ...[
             CustomWidgetList(
+              danger: false,
               children: [
                 ...buyings.map(
                   (b) => RedactBuyingListTile(

@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/shared/data/models/buying.dart';
+import 'package:frontend/shared/data/models/profile.dart';
 import 'package:frontend/shared/data/network/dio_client.dart';
 import 'package:frontend/shared/data/types/buying_category.dart';
 
@@ -51,6 +52,59 @@ class _BuyingNotifier extends AsyncNotifier<Map<BuyingCategory, List<Buying>>> {
   void _addToMap(Map<BuyingCategory, List<Buying>> map, List<Buying> buyings) {
     for (var b in buyings) {
       (map[b.category] ??= []).add(b);
+    }
+  }
+
+  Future<bool> create({
+    required Profile userProfile,
+    required String name,
+    required String quantity,
+    required BuyingCategory category,
+    Profile? assignedTo,
+    required bool isPublic,
+  }) async {
+    if (_isLoading) {
+      return false;
+    }
+
+    try {
+      _isLoading = true;
+
+      final response = await AppDio.dio.post(
+        baseUrl,
+        data: {
+          "name": name,
+          "quantity": quantity,
+          "assignedTo": assignedTo?.id,
+          "category": category.name.toUpperCase(),
+          "isPublic": isPublic,
+        },
+      );
+
+      final Buying buying = Buying(
+        id: response.data["id"] as int,
+        createdBy: userProfile,
+        name: name,
+        quantity: quantity,
+        assignedTo: assignedTo,
+        category: category,
+      );
+
+      final mapValue = state.value ?? <BuyingCategory, List<Buying>>{};
+
+      final newMap = {...mapValue};
+
+      _addToMap(newMap, [buying]);
+
+      _isLoading = false;
+
+      state = AsyncData(newMap);
+
+      return true;
+    } catch (e) {
+      print(e);
+      _isLoading = false;
+      return false;
     }
   }
 

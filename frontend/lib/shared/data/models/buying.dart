@@ -6,8 +6,8 @@ class Buying {
   Buying({
     required this.id,
     required this.createdBy,
-    required this.assignedTo,
-    required this.completedBy,
+    this.assignedTo,
+    this.completedBy,
     required this.name,
     required this.quantity,
     required this.category,

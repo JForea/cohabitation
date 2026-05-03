@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:frontend/features/buyings/data/models/buying_redacted.dart';
+import 'package:frontend/features/buyings/data/providers/buyings_provider.dart';
 import 'package:frontend/features/buyings/presentation/ui/widgets/list_tiles/redact_buying_list_tile.dart';
 import 'package:frontend/shared/data/models/profile.dart';
 import 'package:frontend/shared/data/providers/auth_provider.dart';
@@ -18,6 +19,7 @@ import 'package:frontend/shared/presentation/ui/widgets/wrappers/choice_wrapper.
 import 'package:frontend/shared/presentation/ui/widgets/wrappers/page_wrapper.dart';
 import 'package:frontend/shared/presentation/ui/widgets/wrappers/user_choice_wrapper.dart';
 import 'package:frontend/shared/utils/util_functions.dart';
+import 'package:go_router/go_router.dart';
 
 class CreateBuyingPage extends ConsumerStatefulWidget {
   const CreateBuyingPage({super.key});
@@ -82,6 +84,23 @@ class _CreateBuyingPageState extends ConsumerState<CreateBuyingPage> {
     setState(() {
       buyings.add(BuyingRedacted());
     });
+  }
+
+  Future<bool> create() {
+    final userProfile = ref.read(authProvider).user!.profile!;
+
+    final created = ref
+        .read(buyingsProvider(userProfile.apartmentId).notifier)
+        .create(
+          userProfile: userProfile,
+          name: buyings[0].name,
+          quantity: buyings[0].quantity,
+          assignedTo: assignedTo,
+          category: buyings[0].category,
+          isPublic: true,
+        );
+
+    return created;
   }
 
   @override
@@ -173,7 +192,18 @@ class _CreateBuyingPageState extends ConsumerState<CreateBuyingPage> {
             select: changeAssigned,
           ),
           Spacer(),
-          CustomTextButton(onPressed: () {}, text: "Создать"),
+          CustomTextButton(
+            onPressed: () async {
+              final created = await create();
+
+              if (created && context.mounted) {
+                context.go("/");
+              } else {
+                print("Couldn't create buying.");
+              }
+            },
+            text: "Создать",
+          ),
         ],
       ),
     );

@@ -6,6 +6,7 @@ import 'package:frontend/shared/data/models/buying.dart';
 import 'package:frontend/shared/data/models/profile.dart';
 import 'package:frontend/shared/data/network/dio_client.dart';
 import 'package:frontend/shared/data/types/buying_category.dart';
+import 'package:frontend/shared/data/types/role.dart';
 
 final buyingsProvider =
     AsyncNotifierProvider.family<
@@ -165,6 +166,56 @@ class _BuyingNotifier extends AsyncNotifier<Map<BuyingCategory, List<Buying>>> {
       print(e);
       _isLoading = false;
       return false;
+    }
+  }
+
+  Future<void> switchBuyingStatus(int buyingId, Profile userProfile) async {
+    final previous = state.value ?? {};
+
+    try {
+      bool ok = true;
+
+      final updated = <BuyingCategory, List<Buying>>{};
+
+      final keys = previous.keys.toList();
+      for (int i = 0; i < keys.length; i++) {
+        final key = keys[i];
+        final values = previous[key];
+
+        for (int j = 0; j < (values?.length ?? 0); j++) {
+          Buying b = values![j];
+
+          if (b.id == buyingId) {
+            if (b.completedBy != null) {
+              if (b.completedBy!.id == userProfile.id ||
+                  userProfile.role != Role.inhabitant) {
+                b = b.copyWith(clearCompletedBy: true);
+              } else {
+                ok = false;
+              }
+            } else if (b.completedBy == null) {
+              b = b.copyWith(completedBy: userProfile);
+            }
+          }
+
+          updated[key] ??= [];
+          updated[key]!.add(b);
+        }
+      }
+
+      if (!ok) {
+        return;
+      }
+
+      state = AsyncData(updated);
+
+      _isLoading = true;
+
+      await AppDio.dio.patch("$baseUrl/$buyingId");
+    } catch (e) {
+      state = AsyncData(previous);
+    } finally {
+      _isLoading = false;
     }
   }
 

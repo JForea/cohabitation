@@ -14,7 +14,8 @@ class BuyingsTab extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    int apartmentId = ref.read(authProvider).user!.profile!.apartmentId;
+    final profile = ref.read(authProvider).user!.profile!;
+    int apartmentId = profile.apartmentId;
     final categoryToBuyings = ref.watch(buyingsProvider(apartmentId)).value;
 
     return RefreshIndicator(
@@ -34,7 +35,9 @@ class BuyingsTab extends ConsumerWidget {
             (c) => CategoryBuyingList(
               category: c,
               buyings: categoryToBuyings[c]!,
-              onBuyingComplete: (id) {},
+              onBuyingComplete: (id) => ref
+                  .read(buyingsProvider(apartmentId).notifier)
+                  .switchBuyingStatus(id, profile),
             ),
           ),
         ],

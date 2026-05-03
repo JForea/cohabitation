@@ -38,4 +38,25 @@ class Buying {
   final String name;
   final String quantity;
   final BuyingCategory category;
+
+  Buying copyWith({
+    int? id,
+    Profile? createdBy,
+    Profile? assignedTo,
+    Profile? completedBy,
+    String? name,
+    String? quantity,
+    BuyingCategory? category,
+    bool clearCompletedBy = false,
+  }) {
+    return Buying(
+      id: id ?? this.id,
+      createdBy: createdBy ?? this.createdBy,
+      assignedTo: assignedTo ?? this.assignedTo,
+      completedBy: clearCompletedBy ? null : (completedBy ?? this.completedBy),
+      name: name ?? this.name,
+      quantity: quantity ?? this.quantity,
+      category: category ?? this.category,
+    );
+  }
 }

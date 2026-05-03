@@ -24,6 +24,13 @@ public class MonthlyExpenseKey {
         return apartment;
     }
 
+    public MonthlyExpenseKey() {}
+
+    public MonthlyExpenseKey(Apartment apartment, Month month) {
+        this.apartment = apartment;
+        this.month = month;
+    }
+
     @Override
     public final boolean equals(Object o) {
         if (this == o) {

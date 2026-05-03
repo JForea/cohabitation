@@ -1,6 +1,7 @@
 package com.example.backend.controllers;
 
 import com.example.backend.dtos.in.apartment.CreateApartmentDto;
+import com.example.backend.dtos.out.apartment.ApartmentDto;
 import com.example.backend.dtos.out.profile.ProfileDto;
 import com.example.backend.entities.User;
 import com.example.backend.security.CustomUserDetails;
@@ -38,5 +39,15 @@ public class ApartmentController {
         String token = jwtService.generateToken(user, profileDto);
         servletResponse.addHeader(HttpHeaders.AUTHORIZATION, "Bearer " + token);
         return ResponseEntity.status(HttpStatus.CREATED).body(profileDto);
+    }
+
+    @GetMapping("/{apartmentId}")
+    public ResponseEntity<ApartmentDto> get(
+            @PathVariable Integer apartmentId,
+            @AuthenticationPrincipal CustomUserDetails details
+    ) {
+        User user = details.getUser();
+        ApartmentDto dto = apartmentService.get(user, apartmentId);
+        return ResponseEntity.ok(dto);
     }
 }

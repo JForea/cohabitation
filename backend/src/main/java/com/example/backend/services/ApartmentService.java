@@ -137,4 +137,34 @@ public class ApartmentService {
 
         return new InviteCodeResponse(inviteCode);
     }
+
+    public ProfileDto join(User user, String code) throws StateConflictException {
+        if (user.getCurrentProfile() != null)
+            throw new StateConflictException("You already have an apartment");
+
+        Apartment apartment = apartmentRepository.findByInviteCode(code).orElseThrow(() ->
+                new ResourceNotFoundException("Apartment with such invite code wasn't found.")
+        );
+
+        Optional<Profile> oldProfile = profileRepository.findByApartmentAndUser(apartment, user);
+        if (oldProfile.isPresent()) {
+            Profile profile = oldProfile.get();
+            profile.setLeftAt(null);
+            profile.setName(user.getName());
+            profile.setAvatarColor(user.getAvatarColor());
+            profile.setRole(Role.INHABITANT);
+            profileRepository.save(profile);
+            return new ProfileDto(profile);
+        }
+
+        Profile profile = profileRepository.save(
+                new Profile(
+                        user,
+                        apartment,
+                        false
+                )
+        );
+
+        return new ProfileDto(profile);
+    }
 }

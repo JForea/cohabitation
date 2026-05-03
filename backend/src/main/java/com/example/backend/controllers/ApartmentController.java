@@ -4,6 +4,7 @@ import com.example.backend.dtos.in.apartment.CreateApartmentDto;
 import com.example.backend.dtos.out.apartment.ApartmentDto;
 import com.example.backend.dtos.out.apartment.CreateApartmentResponse;
 import com.example.backend.dtos.out.apartment.InviteCodeResponse;
+import com.example.backend.dtos.out.profile.ProfileDto;
 import com.example.backend.entities.User;
 import com.example.backend.security.CustomUserDetails;
 import com.example.backend.services.ApartmentService;
@@ -40,6 +41,19 @@ public class ApartmentController {
         String token = jwtService.generateToken(user, response.profile());
         servletResponse.addHeader(HttpHeaders.AUTHORIZATION, "Bearer " + token);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @PostMapping("/join")
+    public ResponseEntity<ProfileDto> join(
+            @AuthenticationPrincipal CustomUserDetails details,
+            @RequestParam String code,
+            HttpServletResponse servletResponse
+    ) {
+        User user = details.getUser();
+        ProfileDto dto = apartmentService.join(user, code);
+        String token = jwtService.generateToken(user, dto);
+        servletResponse.addHeader(HttpHeaders.AUTHORIZATION, "Bearer " + token);
+        return ResponseEntity.ok(dto);
     }
 
     @GetMapping("/{apartmentId}")

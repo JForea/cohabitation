@@ -56,17 +56,4 @@ public class UserController {
         User user = details.getUser();
         return ResponseEntity.ok(new UserDto(user));
     }
-
-    @PostMapping("/me/join")
-    public ResponseEntity<ProfileDto> join(
-            @AuthenticationPrincipal CustomUserDetails details,
-            @RequestParam String code,
-            HttpServletResponse servletResponse
-    ) {
-        User user = details.getUser();
-        ProfileDto dto = userService.join(user, code);
-        String token = jwtService.generateToken(user, dto);
-        servletResponse.addHeader(HttpHeaders.AUTHORIZATION, "Bearer " + token);
-        return ResponseEntity.ok(dto);
-    }
 }

@@ -2,7 +2,7 @@ package com.example.backend.controllers;
 
 import com.example.backend.dtos.in.apartment.CreateApartmentDto;
 import com.example.backend.dtos.out.apartment.ApartmentDto;
-import com.example.backend.dtos.out.profile.ProfileDto;
+import com.example.backend.dtos.out.apartment.CreateApartmentResponse;
 import com.example.backend.entities.User;
 import com.example.backend.security.CustomUserDetails;
 import com.example.backend.services.ApartmentService;
@@ -29,16 +29,16 @@ public class ApartmentController {
     }
 
     @PostMapping
-    public ResponseEntity<ProfileDto> create(
+    public ResponseEntity<CreateApartmentResponse> create(
             @RequestBody @Valid CreateApartmentDto dto,
             @AuthenticationPrincipal CustomUserDetails details,
             HttpServletResponse servletResponse
     ) {
         User user = details.getUser();
-        ProfileDto profileDto = apartmentService.create(user, dto);
-        String token = jwtService.generateToken(user, profileDto);
+        CreateApartmentResponse response = apartmentService.create(user, dto);
+        String token = jwtService.generateToken(user, response.profile());
         servletResponse.addHeader(HttpHeaders.AUTHORIZATION, "Bearer " + token);
-        return ResponseEntity.status(HttpStatus.CREATED).body(profileDto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @GetMapping("/{apartmentId}")

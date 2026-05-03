@@ -7,7 +7,8 @@ public record ApartmentDto(
         String name,
         String address,
         Integer budget,
-        Integer currentExpenseSum
+        Integer currentExpenseSum,
+        String inviteCode
 ) {
     public ApartmentDto(Apartment apartment, Integer currentExpenseSum) {
         this(
@@ -15,7 +16,8 @@ public record ApartmentDto(
                 apartment.getName(),
                 apartment.getAddress(),
                 apartment.getBudget(),
-                currentExpenseSum
+                currentExpenseSum,
+                apartment.getInviteCode()
         );
     }
 }

@@ -2,6 +2,7 @@ package com.example.backend.services;
 
 import com.example.backend.dtos.in.apartment.CreateApartmentDto;
 import com.example.backend.dtos.out.apartment.ApartmentDto;
+import com.example.backend.dtos.out.apartment.CreateApartmentResponse;
 import com.example.backend.dtos.out.profile.ProfileDto;
 import com.example.backend.entities.Apartment;
 import com.example.backend.entities.MonthlyExpense;
@@ -48,7 +49,7 @@ public class ApartmentService {
     }
 
     @Transactional
-    public ProfileDto create(User user, CreateApartmentDto dto) {
+    public CreateApartmentResponse create(User user, CreateApartmentDto dto) {
         if (user.getCurrentProfile() != null)
             throw new StateConflictException("You already have an apartment");
 
@@ -62,7 +63,11 @@ public class ApartmentService {
         user.setCurrentProfile(profile);
         userRepository.save(user);
 
-        return new ProfileDto(profile);
+        return new CreateApartmentResponse(
+                apartment.getId(),
+                apartment.getBudget(),
+                new ProfileDto(profile)
+        );
     }
 
     public ApartmentDto get(User user, Integer apartmentId) {

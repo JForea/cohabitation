@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:frontend/features/buyings/data/models/buying_redacted.dart';
 import 'package:frontend/shared/data/models/buying.dart';
 import 'package:frontend/shared/data/models/profile.dart';
 import 'package:frontend/shared/data/network/dio_client.dart';
@@ -57,9 +58,7 @@ class _BuyingNotifier extends AsyncNotifier<Map<BuyingCategory, List<Buying>>> {
 
   Future<bool> create({
     required Profile userProfile,
-    required String name,
-    required String quantity,
-    required BuyingCategory category,
+    required BuyingRedacted buyingRedacted,
     Profile? assignedTo,
     required bool isPublic,
   }) async {
@@ -73,10 +72,10 @@ class _BuyingNotifier extends AsyncNotifier<Map<BuyingCategory, List<Buying>>> {
       final response = await AppDio.dio.post(
         baseUrl,
         data: {
-          "name": name,
-          "quantity": quantity,
+          "name": buyingRedacted.name,
+          "quantity": buyingRedacted.quantity,
           "assignedTo": assignedTo?.id,
-          "category": category.name.toUpperCase(),
+          "category": buyingRedacted.name.toUpperCase(),
           "isPublic": isPublic,
         },
       );
@@ -84,10 +83,10 @@ class _BuyingNotifier extends AsyncNotifier<Map<BuyingCategory, List<Buying>>> {
       final Buying buying = Buying(
         id: response.data["id"] as int,
         createdBy: userProfile,
-        name: name,
-        quantity: quantity,
+        name: buyingRedacted.name,
+        quantity: buyingRedacted.quantity,
         assignedTo: assignedTo,
-        category: category,
+        category: buyingRedacted.category,
       );
 
       final mapValue = state.value ?? <BuyingCategory, List<Buying>>{};
@@ -95,6 +94,67 @@ class _BuyingNotifier extends AsyncNotifier<Map<BuyingCategory, List<Buying>>> {
       final newMap = {...mapValue};
 
       _addToMap(newMap, [buying]);
+
+      _isLoading = false;
+
+      state = AsyncData(newMap);
+
+      return true;
+    } catch (e) {
+      print(e);
+      _isLoading = false;
+      return false;
+    }
+  }
+
+  Future<bool> createMany({
+    required Profile userProfile,
+    required List<BuyingRedacted> buyingsRedacted,
+    Profile? assignedTo,
+    required bool isPublic,
+  }) async {
+    if (_isLoading) {
+      return false;
+    }
+
+    try {
+      _isLoading = true;
+
+      final response = await AppDio.dio.post(
+        "$baseUrl/bulk",
+        data: {
+          "buyings": buyingsRedacted
+              .map(
+                (b) => {
+                  "name": b.name,
+                  "quantity": b.quantity,
+                  "category": b.category.name.toUpperCase(),
+                },
+              )
+              .toList(),
+          "assignedTo": assignedTo?.id,
+          "isPublic": isPublic,
+        },
+      );
+      final List<Buying> buyings = [];
+
+      for (int i = 0; i < buyingsRedacted.length; i++) {
+        buyings.add(
+          Buying(
+            id: response.data[i]["id"] as int,
+            createdBy: userProfile,
+            name: buyingsRedacted[i].name,
+            quantity: buyingsRedacted[i].quantity,
+            category: buyingsRedacted[i].category,
+          ),
+        );
+      }
+
+      final mapValue = state.value ?? <BuyingCategory, List<Buying>>{};
+
+      final newMap = {...mapValue};
+
+      _addToMap(newMap, buyings);
 
       _isLoading = false;
 

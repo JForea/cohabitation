@@ -17,8 +17,12 @@ class RedactBuyingListTile extends StatelessWidget {
   final VoidCallback onRemove;
   final void Function(BuyingCategory) changeCategory;
 
-  void _change(String buyingParameter, String s) {
-    buyingParameter = s;
+  void _changeName(BuyingRedacted buying, String s) {
+    buying.name = s;
+  }
+
+  void _changeQuantity(BuyingRedacted buying, String s) {
+    buying.quantity = s;
   }
 
   @override
@@ -32,7 +36,7 @@ class RedactBuyingListTile extends StatelessWidget {
             child: ControlledSmallTextField(
               text: buying.name,
               hintText: "Хлеб",
-              onChange: (s) => _change(buying.name, s),
+              onChange: (s) => _changeName(buying, s),
               secondaryColor: true,
             ),
           ),
@@ -40,7 +44,7 @@ class RedactBuyingListTile extends StatelessWidget {
             child: ControlledSmallTextField(
               text: buying.quantity,
               hintText: "1 шт",
-              onChange: (s) => _change(buying.quantity, s),
+              onChange: (s) => _changeQuantity(buying, s),
               secondaryColor: true,
             ),
           ),

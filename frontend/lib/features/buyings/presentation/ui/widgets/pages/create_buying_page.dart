@@ -93,10 +93,23 @@ class _CreateBuyingPageState extends ConsumerState<CreateBuyingPage> {
         .read(buyingsProvider(userProfile.apartmentId).notifier)
         .create(
           userProfile: userProfile,
-          name: buyings[0].name,
-          quantity: buyings[0].quantity,
+          buyingRedacted: buyings[0],
           assignedTo: assignedTo,
-          category: buyings[0].category,
+          isPublic: true,
+        );
+
+    return created;
+  }
+
+  Future<bool> createMany() {
+    final userProfile = ref.read(authProvider).user!.profile!;
+
+    final created = ref
+        .read(buyingsProvider(userProfile.apartmentId).notifier)
+        .createMany(
+          userProfile: userProfile,
+          buyingsRedacted: buyings,
+          assignedTo: assignedTo,
           isPublic: true,
         );
 
@@ -194,7 +207,7 @@ class _CreateBuyingPageState extends ConsumerState<CreateBuyingPage> {
           Spacer(),
           CustomTextButton(
             onPressed: () async {
-              final created = await create();
+              final created = await (multipleCreate ? createMany() : create());
 
               if (created && context.mounted) {
                 context.go("/");

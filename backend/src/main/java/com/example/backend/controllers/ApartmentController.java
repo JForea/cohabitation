@@ -66,16 +66,6 @@ public class ApartmentController {
         return ResponseEntity.ok(dto);
     }
 
-    @GetMapping("/{apartmentId}/code")
-    public ResponseEntity<InviteCodeResponse> getInviteCode(
-            @PathVariable Integer apartmentId,
-            @AuthenticationPrincipal CustomUserDetails details
-    ) {
-        User user = details.getUser();
-        InviteCodeResponse response = apartmentService.getCode(user, apartmentId);
-        return ResponseEntity.ok(response);
-    }
-
     @PatchMapping("/{apartmentId}/code")
     public ResponseEntity<InviteCodeResponse> generateCode(
             @PathVariable Integer apartmentId,

@@ -103,7 +103,8 @@ public class ApartmentService {
 
         return new ApartmentDto(
                 apartment,
-                monthlyExpense.isPresent() ? monthlyExpense.get().getSum() : 0
+                monthlyExpense.isPresent() ? monthlyExpense.get().getSum() : 0,
+                role == Role.INHABITANT ? null : apartment.getInviteCode()
         );
     }
 
@@ -141,19 +142,6 @@ public class ApartmentService {
         apartmentRepository.save(apartment);
 
         return new InviteCodeResponse(inviteCode);
-    }
-
-    public InviteCodeResponse getCode(User user, Integer apartmentId) {
-        Role role = userService.getCurrentUserRoleInApartment(user, apartmentId);
-
-        if (role == null || role == Role.INHABITANT)
-            throw new AccessForbiddenException("You can't generate invite code in this apartment.");
-
-        Apartment apartment = apartmentRepository.findById(apartmentId).orElseThrow(
-                () -> new ResourceNotFoundException("Apartment not found.")
-        );
-
-        return new InviteCodeResponse(apartment.getInviteCode());
     }
 
     public JoinApartmentResponse join(User user, String code) throws StateConflictException {

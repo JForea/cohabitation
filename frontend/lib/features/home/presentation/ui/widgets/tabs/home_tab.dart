@@ -7,15 +7,22 @@ import 'package:frontend/shared/presentation/ui/widgets/wrappers/tab_wrapper.dar
 class HomeTab extends ConsumerWidget {
   const HomeTab({super.key});
 
+  Future<void> _refresh(WidgetRef ref) async {
+    ref.read(neighboursProvider.notifier).refresh();
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final neighbours = ref.watch(neighboursProvider).value;
 
-    return TabWrapper(
-      floatingButtonExists: false,
-      children: [
-        NeighboursPreview(neighbours: neighbours?.take(3).toList() ?? []),
-      ],
+    return RefreshIndicator(
+      onRefresh: () async => _refresh(ref),
+      child: TabWrapper(
+        floatingButtonExists: false,
+        children: [
+          NeighboursPreview(neighbours: neighbours?.take(3).toList() ?? []),
+        ],
+      ),
     );
   }
 }

@@ -30,4 +30,16 @@ class _ApartmentNotifier extends AsyncNotifier<List<Profile>> {
 
     return profiles;
   }
+
+  Future<void> refresh() async {
+    final query = {"excludeMe": 'true'};
+
+    state = await AsyncValue.guard(() async {
+      final response = await AppDio.dio.get(baseUrl, queryParameters: query);
+
+      return (response.data as List)
+          .map((json) => Profile.fromJson(json))
+          .toList();
+    });
+  }
 }

@@ -17,7 +17,7 @@ class NeighbourPreviewCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: .symmetric(vertical: 15),
+      padding: .symmetric(vertical: 15, horizontal: 5),
       width: width,
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surfaceContainer,

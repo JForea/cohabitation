@@ -5,10 +5,12 @@ class TabWrapper extends StatelessWidget {
     super.key,
     required this.children,
     required this.floatingButtonExists,
+    required this.appBarExists,
   });
 
   final List<Widget> children;
   final bool floatingButtonExists;
+  final bool appBarExists;
 
   @override
   Widget build(BuildContext context) {
@@ -16,7 +18,7 @@ class TabWrapper extends StatelessWidget {
       physics: AlwaysScrollableScrollPhysics(),
       child: Container(
         padding: .only(
-          top: 60,
+          top: appBarExists ? 20 : 60,
           left: 20,
           right: 20,
           bottom: floatingButtonExists ? 90 : 20,

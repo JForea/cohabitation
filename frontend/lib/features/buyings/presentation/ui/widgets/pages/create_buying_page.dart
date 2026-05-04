@@ -6,6 +6,7 @@ import 'package:frontend/features/buyings/data/providers/buyings_provider.dart';
 import 'package:frontend/features/buyings/presentation/ui/widgets/list_tiles/redact_buying_list_tile.dart';
 import 'package:frontend/shared/data/models/profile.dart';
 import 'package:frontend/shared/data/providers/auth_provider.dart';
+import 'package:frontend/shared/data/providers/neighbours_provider.dart';
 import 'package:frontend/shared/data/types/buying_category.dart';
 import 'package:frontend/shared/presentation/theme/app_styles.dart';
 import 'package:frontend/shared/presentation/ui/widgets/buttons/custom_back_button.dart';
@@ -115,7 +116,10 @@ class _CreateBuyingPageState extends ConsumerState<CreateBuyingPage> {
 
   @override
   Widget build(BuildContext context) {
-    final profiles = [ref.read(authProvider).value!.user!.profile!];
+    final profiles = [
+      ref.read(authProvider).value!.user!.profile!,
+      ...ref.read(neighboursProvider).value!,
+    ];
 
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,

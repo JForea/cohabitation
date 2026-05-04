@@ -77,7 +77,7 @@ class _BuyingNotifier extends AsyncNotifier<Map<BuyingCategory, List<Buying>>> {
           "name": buyingRedacted.name,
           "quantity": buyingRedacted.quantity,
           "assignedTo": assignedTo?.id,
-          "category": buyingRedacted.name.toUpperCase(),
+          "category": buyingRedacted.category.name.toUpperCase(),
           "isPublic": isPublic,
         },
       );

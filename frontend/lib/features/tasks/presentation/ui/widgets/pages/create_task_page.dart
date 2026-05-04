@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/features/tasks/presentation/ui/widgets/chips/task_priority_choice_chip.dart';
 import 'package:frontend/shared/data/models/profile.dart';
 import 'package:frontend/shared/data/providers/auth_provider.dart';
+import 'package:frontend/shared/data/providers/neighbours_provider.dart';
 import 'package:frontend/shared/data/providers/tasks_provider.dart';
 import 'package:frontend/shared/data/types/room.dart';
 import 'package:frontend/shared/data/types/task_priority.dart';
@@ -107,7 +108,10 @@ class _CreateTaskPageState extends ConsumerState<CreateTaskPage> {
 
   @override
   Widget build(BuildContext context) {
-    final profiles = [ref.read(authProvider).value!.user!.profile!];
+    final profiles = [
+      ref.read(authProvider).value!.user!.profile!,
+      ...ref.read(neighboursProvider).value!,
+    ];
 
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,

@@ -21,6 +21,7 @@ class BuyingsTab extends ConsumerWidget {
     return RefreshIndicator(
       onRefresh: () => _refresh(ref, apartmentId),
       child: TabWrapper(
+        appBarExists: false,
         floatingButtonExists: true,
         children: [
           Text(

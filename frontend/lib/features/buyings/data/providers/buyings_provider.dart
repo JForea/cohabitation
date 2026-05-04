@@ -31,7 +31,7 @@ class _BuyingNotifier extends AsyncNotifier<Map<BuyingCategory, List<Buying>>> {
       throw Exception("Not in apartment.");
     }
 
-    baseUrl = "/${apartment.id}/buyings";
+    baseUrl = "/apartments/${apartment.id}/buyings";
 
     final buyings = await _fetchPage();
 

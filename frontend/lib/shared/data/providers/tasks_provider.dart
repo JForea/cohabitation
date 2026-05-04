@@ -32,7 +32,7 @@ class _TasksNotifier extends AsyncNotifier<List<Task>> {
       throw Exception("Not in apartment.");
     }
 
-    baseUrl = "/${apartment.id}/tasks";
+    baseUrl = "/apartments/${apartment.id}/tasks";
 
     return _fetchPage();
   }

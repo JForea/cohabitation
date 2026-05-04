@@ -2,7 +2,6 @@ package com.example.backend.controllers;
 
 import com.example.backend.dtos.in.user.AuthenticationDto;
 import com.example.backend.dtos.in.user.RegisterDto;
-import com.example.backend.dtos.out.profile.ProfileDto;
 import com.example.backend.dtos.out.user.UserDto;
 import com.example.backend.entities.User;
 import com.example.backend.security.CustomUserDetails;

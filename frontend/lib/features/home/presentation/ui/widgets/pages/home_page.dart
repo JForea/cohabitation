@@ -6,6 +6,8 @@ import 'package:frontend/features/home/data/providers/page_provider.dart';
 import 'package:frontend/features/home/presentation/ui/widgets/tabs/home_tab.dart';
 import 'package:frontend/features/profile/presentation/ui/widgets/tabs/profile_tab.dart';
 import 'package:frontend/features/tasks/presentation/ui/widgets/tabs/tasks_tab.dart';
+import 'package:frontend/shared/data/providers/user_provider.dart';
+import 'package:frontend/shared/data/types/role.dart';
 import 'package:go_router/go_router.dart';
 
 class HomePage extends ConsumerStatefulWidget {
@@ -18,13 +20,20 @@ class HomePage extends ConsumerStatefulWidget {
 class _HomePageState extends ConsumerState<HomePage> {
   late final PageController controller;
 
-  Widget? _buildFloatingActionButton(int currentIndex, BuildContext context) {
+  Widget? _buildFloatingActionButton(
+    int currentIndex,
+    Role? role,
+    BuildContext context,
+  ) {
     return switch (currentIndex) {
-      1 => FloatingActionButton(
-        onPressed: () => context.push("/tasks/create"),
-        shape: CircleBorder(),
-        child: Icon(Icons.add, size: 28),
-      ),
+      1 =>
+        role != Role.inhabitant
+            ? FloatingActionButton(
+                onPressed: () => context.push("/tasks/create"),
+                shape: CircleBorder(),
+                child: Icon(Icons.add, size: 28),
+              )
+            : null,
       2 => FloatingActionButton(
         onPressed: () => context.push("/buyings/create"),
         shape: CircleBorder(),
@@ -54,6 +63,7 @@ class _HomePageState extends ConsumerState<HomePage> {
   @override
   Widget build(BuildContext context) {
     final currentlyActive = ref.watch(pageProvider);
+    final role = ref.watch(userProvider.select((u) => u!.profile!.role));
 
     ref.listen(pageProvider, (prev, next) {
       if (!controller.position.isScrollingNotifier.value &&
@@ -82,6 +92,7 @@ class _HomePageState extends ConsumerState<HomePage> {
       ),
       floatingActionButton: _buildFloatingActionButton(
         currentlyActive,
+        role,
         context,
       ),
       bottomNavigationBar: CustomBottomNavBar(

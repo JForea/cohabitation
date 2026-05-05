@@ -153,7 +153,7 @@ class _TasksNotifier extends AsyncNotifier<List<Task>> {
     }
   }
 
-  Future<void> switchTaskStatus(int taskId, Profile userProfile) async {
+  Future<bool> switchTaskStatus(int taskId, Profile userProfile) async {
     final previous = state.value ?? [];
 
     try {
@@ -177,7 +177,7 @@ class _TasksNotifier extends AsyncNotifier<List<Task>> {
       }).toList();
 
       if (!ok) {
-        return;
+        return false;
       }
 
       state = AsyncData(updated);
@@ -185,10 +185,15 @@ class _TasksNotifier extends AsyncNotifier<List<Task>> {
       _isLoading = true;
 
       await AppDio.dio.patch("$baseUrl/$taskId");
+
+      _isLoading = false;
+
+      return true;
     } catch (e) {
       state = AsyncData(previous);
-    } finally {
       _isLoading = false;
+
+      return false;
     }
   }
 }

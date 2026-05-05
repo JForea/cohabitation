@@ -11,10 +11,10 @@ class ProfileTab extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final authState = ref.watch(authProvider);
+    final profile = ref.watch(
+      authProvider.select((s) => s.value!.user!.profile!),
+    );
     final neighboursState = ref.watch(neighboursProvider);
-
-    final profile = authState.value!.user!.profile!;
 
     return Column(
       children: [

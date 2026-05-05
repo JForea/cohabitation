@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/features/buyings/data/providers/buyings_provider.dart';
 import 'package:frontend/features/buyings/presentation/ui/widgets/lists/category_buying_list.dart';
-import 'package:frontend/shared/data/providers/auth_provider.dart';
+import 'package:frontend/shared/data/providers/user_provider.dart';
 import 'package:frontend/shared/presentation/ui/widgets/wrappers/tab_wrapper.dart';
 
 class BuyingsTab extends ConsumerWidget {
@@ -14,7 +14,7 @@ class BuyingsTab extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final profile = ref.read(authProvider).value!.user!.profile!;
+    final profile = ref.watch(userProvider.select((u) => u!.profile!));
     int apartmentId = profile.apartmentId;
     final buyingsState = ref.watch(buyingsProvider);
 
@@ -34,6 +34,7 @@ class BuyingsTab extends ConsumerWidget {
           ),
           buyingsState.when(
             data: (categoryToBuyings) => Column(
+              spacing: 20,
               children: [
                 ...categoryToBuyings.keys.map(
                   (c) => CategoryBuyingList(

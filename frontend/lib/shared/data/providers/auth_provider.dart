@@ -95,6 +95,23 @@ class _AuthNotifier extends AsyncNotifier<AuthState> {
     state = AsyncValue.data(current.copyWith(user: updatedUser));
   }
 
+  void updatePoints(int pointsAdd) {
+    final current = state.value;
+    if (current == null ||
+        current.user == null ||
+        current.user!.profile == null) {
+      return;
+    }
+
+    final newPoints = current.user!.profile!.points + pointsAdd;
+
+    final updatedUser = current.user!.copyWith(
+      profile: current.user!.profile?.copyWith(points: newPoints),
+    );
+
+    state = AsyncValue.data(current.copyWith(user: updatedUser));
+  }
+
   Future<void> logout() async {
     await _storage.delete(key: "token");
     await AppDio.updateToken(null);

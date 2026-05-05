@@ -13,7 +13,7 @@ final asyncApartmentProvider =
 class _ApartmentNotifier extends AsyncNotifier<Apartment?> {
   late String baseUrl;
 
-  late int apartmentId;
+  late int? apartmentId;
 
   @override
   Future<Apartment?> build() async {
@@ -21,15 +21,15 @@ class _ApartmentNotifier extends AsyncNotifier<Apartment?> {
 
     baseUrl = "/apartments";
 
-    final user = ref.watch(userProvider);
+    apartmentId = ref.watch(
+      userProvider.select((s) => s?.profile?.apartmentId),
+    );
 
     print("Apartment change.");
 
-    if (user == null || user.profile == null) {
+    if (apartmentId == null) {
       return null;
     }
-
-    apartmentId = user.profile!.apartmentId;
 
     final response = await AppDio.dio.get("$baseUrl/$apartmentId");
     Apartment apartment = Apartment.fromJson(response.data);

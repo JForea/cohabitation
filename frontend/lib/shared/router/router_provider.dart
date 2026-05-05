@@ -1,10 +1,10 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/features/apartment_enter/presentation/ui/widgets/pages/join_apartment_page.dart';
 import 'package:frontend/features/auth/login/presentation/ui/widgets/pages/login_page.dart';
 import 'package:frontend/features/buyings/presentation/ui/widgets/pages/create_buying_page.dart';
 import 'package:frontend/features/settings/presentation/ui/widgets/pages/settings_page.dart';
 import 'package:frontend/features/tasks/presentation/ui/widgets/pages/create_task_page.dart';
-import 'package:frontend/shared/data/providers/auth_provider.dart';
 import 'package:frontend/features/onboarding/presentation/ui/widgets/pages/onboarding_page.dart';
 import 'package:frontend/features/auth/register/presentation/ui/widgets/pages/registration_first_page.dart';
 import 'package:frontend/features/auth/register/presentation/ui/widgets/pages/registration_second_page.dart';
@@ -12,27 +12,30 @@ import 'package:frontend/features/auth/presentation/ui/widgets/pages/welcome_pag
 import 'package:frontend/features/home/presentation/ui/widgets/pages/home_page.dart';
 import 'package:frontend/features/apartment_enter/presentation/ui/widgets/pages/create_apartment_page.dart';
 import 'package:frontend/features/apartment_enter/presentation/ui/widgets/pages/option_page.dart';
+import 'package:frontend/shared/router/auth_flags_provider.dart';
 import 'package:go_router/go_router.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
-  final authState = ref.watch(authProvider);
+  final notifier = ValueNotifier(0);
+
+  ref.listen(authFlagsProvider, (_, __) {
+    notifier.value++;
+  });
 
   return GoRouter(
     initialLocation: '/',
+    refreshListenable: notifier,
     redirect: (context, state) {
-      if (authState.isLoading) return null;
+      final flags = ref.read(authFlagsProvider); // 👈 read, НЕ watch
 
-      print(state.uri.path);
+      if (flags.isLoading) return null;
 
       final path = state.uri.path;
 
-      final bool isLoggedIn = authState.value?.token != null;
-      final bool isInApartment = authState.value?.user?.profile != null;
+      final isAtAuth = path.startsWith('/auth');
+      final isAtEnter = path.startsWith('/enter');
 
-      final bool isAtAuth = path.startsWith('/auth');
-      final bool isAtEnter = path.startsWith('/enter');
-
-      if (!isLoggedIn) {
+      if (!flags.isLoggedIn) {
         if (!isAtAuth) return '/auth/onboarding';
 
         if (path.startsWith('/auth/register')) {
@@ -45,7 +48,7 @@ final routerProvider = Provider<GoRouter>((ref) {
         return null;
       }
 
-      if (!isInApartment) {
+      if (!flags.isInApartment) {
         if (!isAtEnter) return '/enter';
         return null;
       }

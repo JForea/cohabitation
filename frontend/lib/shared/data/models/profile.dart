@@ -31,4 +31,22 @@ class Profile {
   final int apartmentId;
   final Role role;
   final Color color;
+
+  Profile copyWith({
+    int? id,
+    String? name,
+    int? points,
+    int? apartmentId,
+    Role? role,
+    Color? color,
+  }) {
+    return Profile(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      points: points ?? this.points,
+      apartmentId: apartmentId ?? this.apartmentId,
+      role: role ?? this.role,
+      color: color ?? this.color,
+    );
+  }
 }

@@ -5,6 +5,7 @@ import 'package:frontend/features/settings/presentation/ui/widgets/list_tiles/ge
 import 'package:frontend/shared/data/providers/apartment_provider.dart';
 import 'package:frontend/shared/data/providers/async_apartment_provider.dart';
 import 'package:frontend/shared/data/providers/auth_provider.dart';
+import 'package:frontend/shared/data/providers/user_provider.dart';
 import 'package:frontend/shared/data/types/role.dart';
 import 'package:frontend/shared/presentation/ui/widgets/buttons/custom_back_button.dart';
 import 'package:frontend/shared/presentation/ui/widgets/lists/custom_widget_list.dart';
@@ -20,9 +21,7 @@ class SettingsPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final apartment = ref.watch(apartmentProvider);
-    final authState = ref.watch(authProvider);
-
-    final profile = authState.value!.user!.profile!;
+    final role = ref.watch(userProvider.select((u) => u?.profile?.role));
 
     return Scaffold(
       body: PageWrapper(
@@ -41,7 +40,7 @@ class SettingsPage extends ConsumerWidget {
               ),
             ],
           ),
-          if (profile.role != Role.inhabitant && apartment != null)
+          if (role != null && role != Role.inhabitant && apartment != null)
             CustomWidgetList(
               danger: false,
               title: "Квартира",
@@ -68,7 +67,7 @@ class SettingsPage extends ConsumerWidget {
                 onTap: () => logout(ref),
                 text: "Выйти из аккаунта",
               ),
-              if (profile.role == Role.creator)
+              if (role == Role.creator)
                 DangerListTile(
                   iconData: Icons.delete_outline,
                   onTap: () {},

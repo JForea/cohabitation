@@ -25,35 +25,27 @@ import java.util.Objects;
 @Service
 public class BuyingService {
 
-    private final UserService userService;
-
     private final BuyingRepository buyingRepository;
 
     private final ProfileRepository profileRepository;
 
     private final ApartmentRepository apartmentRepository;
 
-    public BuyingService(UserService userService,
-                         BuyingRepository buyingRepository,
-                         ProfileRepository profileRepository,
-                         ApartmentRepository apartmentRepository) {
-        this.userService = userService;
+    public BuyingService(
+             BuyingRepository buyingRepository,
+             ProfileRepository profileRepository,
+             ApartmentRepository apartmentRepository) {
         this.buyingRepository = buyingRepository;
         this.profileRepository = profileRepository;
         this.apartmentRepository = apartmentRepository;
     }
 
     public IdResponse<Long> create(Integer apartmentId, User user, CreateBuyingDto dto) {
-        Role role = userService.getCurrentUserRoleInApartment(user, apartmentId);
-
-        if (role == null)
-            throw new AccessForbiddenException("You can't create buyings in this apartment.");
-
         if (!dto.isPublic() && dto.assignedTo() != null)
             throw new BadRequestException("Buying shouldn't be private and have assigned user at the same time.");
 
         Apartment apartment = apartmentRepository.findById(apartmentId).orElseThrow(() ->
-                new ResourceNotFoundException("ApartmentNotFound")
+                new ResourceNotFoundException("Apartment not found.")
         );
         Profile createdBy = user.getCurrentProfile();
         Profile assignedTo = null;
@@ -79,11 +71,6 @@ public class BuyingService {
     }
 
     public List<IdResponse<Long>> createMany(Integer apartmentId, User user, CreateManyBuyingsDto dto) {
-        Role role = userService.getCurrentUserRoleInApartment(user, apartmentId);
-
-        if (role == null)
-            throw new AccessForbiddenException("You can't create buyings in this apartment.");
-
         if (!dto.isPublic() && dto.assignedTo() != null)
             throw new BadRequestException("Buying shouldn't be private and have assigned user at the same time.");
 
@@ -114,11 +101,6 @@ public class BuyingService {
     }
 
     public List<BuyingDto> get(Integer apartmentId, User user, Integer assignedTo, Boolean isPublic) {
-        Role role = userService.getCurrentUserRoleInApartment(user, apartmentId);
-
-        if (role == null)
-            throw new AccessForbiddenException("You can't get buyings in this apartment.");
-
         if (assignedTo != null && isPublic != null && !isPublic)
             throw new BadRequestException("You can't view others buying lists.");
 
@@ -131,19 +113,14 @@ public class BuyingService {
     }
 
     public StatusResponse changeStatus(Integer apartmentId, User user, Long buyingId) {
-        Role role = userService.getCurrentUserRoleInApartment(user, apartmentId);
-
-        if (role == null)
-            throw new AccessForbiddenException("You can't change status of buying in this apartment.");
-
-        Buying buying = buyingRepository.findById(buyingId).orElseThrow(
+        Buying buying = buyingRepository.findByApartment_IdAndId(apartmentId, buyingId).orElseThrow(
                 () -> new ResourceNotFoundException("Buying not found.")
         );
 
         Profile currentProfile = user.getCurrentProfile();
         if (
                 buying.getIsPublic() &&
-                role == Role.INHABITANT &&
+                currentProfile.getRole() == Role.INHABITANT &&
                 buying.getCompletedAt() != null &&
                 !Objects.equals(buying.getCompletedBy().getId(), currentProfile.getId()) ||
                 !buying.getIsPublic() &&
@@ -165,16 +142,12 @@ public class BuyingService {
     }
 
     public void deleteOne(Integer apartmentId, User user, Long buyingId) {
-        Role role = userService.getCurrentUserRoleInApartment(user, apartmentId);
-
-        if (role == null)
-            throw new AccessForbiddenException("You can't delete buyings in this apartment.");
-
-        Buying buying = buyingRepository.findById(buyingId).orElseThrow(
+        Buying buying = buyingRepository.findByApartment_IdAndId(apartmentId, buyingId).orElseThrow(
                 () -> new ResourceNotFoundException("Buying not found.")
         );
 
-        if (!Objects.equals(buying.getCreatedBy().getId(), user.getCurrentProfile().getId()) && role == Role.INHABITANT)
+        Profile profile = user.getCurrentProfile();
+        if (!Objects.equals(buying.getCreatedBy().getId(), profile.getId()) && profile.getRole() == Role.INHABITANT)
             throw new AccessForbiddenException("You can't delete others buyings.");
 
         buyingRepository.delete(buying);

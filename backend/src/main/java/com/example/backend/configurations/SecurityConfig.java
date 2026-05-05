@@ -4,6 +4,7 @@ import com.example.backend.repositories.UserRepository;
 import com.example.backend.security.JwtAuthFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -66,6 +67,16 @@ public class SecurityConfig {
                                 auth
                                         .requestMatchers("/api/users/auth/**").permitAll()
                                         .requestMatchers("/api/users/**").authenticated()
+                                        .requestMatchers(HttpMethod.POST, "/api/apartments")
+                                            .hasRole("HOUSELESS")
+                                        .requestMatchers(HttpMethod.POST, "/api/apartments/join")
+                                            .hasRole("HOUSELESS")
+                                        .requestMatchers("/api/apartments/*/code")
+                                            .hasAnyRole("ADMIN", "CREATOR")
+                                        .requestMatchers(HttpMethod.POST, "/api/apartments/*/tasks/**")
+                                            .hasAnyRole("ADMIN", "CREATOR")
+                                        .requestMatchers("/api/apartments/**")
+                                            .hasAnyRole("INHABITANT", "ADMIN", "CREATOR")
                                         .anyRequest().permitAll()
                 )
                 .sessionManagement(session ->

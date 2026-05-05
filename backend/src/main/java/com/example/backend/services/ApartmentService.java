@@ -36,8 +36,6 @@ public class ApartmentService {
 
     private final UserRepository userRepository;
 
-    private final UserService userService;
-
     private final MonthlyExpenseRepository monthlyExpenseRepository;
 
     private final Random random;
@@ -46,12 +44,10 @@ public class ApartmentService {
             ApartmentRepository apartmentRepository,
             ProfileRepository profileRepository,
             UserRepository userRepository,
-            UserService userService,
             MonthlyExpenseRepository monthlyExpenseRepository) {
         this.apartmentRepository = apartmentRepository;
         this. profileRepository = profileRepository;
         this.userRepository = userRepository;
-        this.userService = userService;
         this.monthlyExpenseRepository = monthlyExpenseRepository;
         random = new Random();
     }
@@ -90,10 +86,7 @@ public class ApartmentService {
     }
 
     public ApartmentDto get(User user, Integer apartmentId) {
-        Role role = userService.getCurrentUserRoleInApartment(user, apartmentId);
-
-        if (role == null)
-            throw new AccessForbiddenException("You can't get information about this apartment.");
+        Role role = user.getCurrentProfile().getRole();
 
         Apartment apartment = apartmentRepository.findById(apartmentId).orElseThrow(() ->
                 new ResourceNotFoundException("Apartment not found.")
@@ -108,12 +101,7 @@ public class ApartmentService {
         );
     }
 
-    public InviteCodeResponse generateCode(User user, Integer apartmentId) {
-        Role role = userService.getCurrentUserRoleInApartment(user, apartmentId);
-
-        if (role == null || role == Role.INHABITANT)
-            throw new AccessForbiddenException("You can't generate invite code in this apartment.");
-
+    public InviteCodeResponse generateCode(Integer apartmentId) {
         int inviteCodeLength = 8;
         String charset = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 
@@ -145,9 +133,6 @@ public class ApartmentService {
     }
 
     public JoinApartmentResponse join(User user, String code) throws StateConflictException {
-        if (user.getCurrentProfile() != null)
-            throw new StateConflictException("You already have an apartment");
-
         Apartment apartment = apartmentRepository.findByInviteCode(code).orElseThrow(() ->
                 new ResourceNotFoundException("Apartment with such invite code wasn't found.")
         );

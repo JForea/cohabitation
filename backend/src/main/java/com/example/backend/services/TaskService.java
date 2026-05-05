@@ -29,17 +29,15 @@ public class TaskService {
     private final TaskRepository taskRepository;
     private final ProfileRepository profileRepository;
     private final ApartmentRepository apartmentRepository;
-    private final UserService userService;
 
     public TaskService(
             TaskRepository taskRepository,
             ProfileRepository profileRepository,
-            ApartmentRepository apartmentRepository,
-            UserService userService) {
+            ApartmentRepository apartmentRepository
+    ) {
         this.taskRepository = taskRepository;
         this.profileRepository = profileRepository;
         this.apartmentRepository = apartmentRepository;
-        this.userService = userService;
     }
 
     public IdResponse<Long> create(User user, Integer apartmentId, CreateTaskDto dto) {
@@ -77,17 +75,11 @@ public class TaskService {
 
     public List<TaskDto> getTasks(
             Integer apartmentId,
-            User user,
             Short cntPerPage,
             Short page,
             Integer assignedTo,
             Boolean done
     ) {
-        Role role = userService.getCurrentUserRoleInApartment(user, apartmentId);
-
-        if (role == null)
-            throw new AccessForbiddenException("You can't view tasks in this apartment.");
-
         Specification<Task> spec = Specification
                 .where(TaskSpecifications.byApartment(apartmentId))
                 .and(TaskSpecifications.assignedToUser(assignedTo))
@@ -101,16 +93,16 @@ public class TaskService {
 
     @Transactional
     public StatusResponse switchTaskStatus(Integer apartmentId, User user, Long taskId) {
-        Role role = userService.getCurrentUserRoleInApartment(user, apartmentId);
-
-        if (role == null)
-            throw new AccessForbiddenException("You can't change task status in this apartment.");
-
-        Task task = taskRepository.findById(taskId).orElseThrow(
+        Task task = taskRepository.findByApartment_IdAndId(apartmentId, taskId).orElseThrow(
                 () -> new ResourceNotFoundException("Task not found.")
         );
 
-        if (task.getCompletedAt() != null && role == Role.INHABITANT)
+        Profile userProfile = user.getCurrentProfile();
+        if (
+                task.getCompletedAt() != null &&
+                !Objects.equals(task.getCompletedBy().getId(), userProfile.getId()) &&
+                userProfile.getRole() == Role.INHABITANT
+        )
             throw new AccessForbiddenException("You can't change status of this task, because you are not the " +
                     "one who completed it.");
 
@@ -136,16 +128,13 @@ public class TaskService {
     }
 
     public void deleteOne(Integer apartmentId, User user, Long taskId) {
-        Role role = userService.getCurrentUserRoleInApartment(user, apartmentId);
-
-        if (role == null)
-            throw new AccessForbiddenException("You can't change task status in this apartment.");
-
-        Task task = taskRepository.findById(taskId).orElseThrow(
+        Task task = taskRepository.findByApartment_IdAndId(apartmentId, taskId).orElseThrow(
                 () -> new ResourceNotFoundException("Task not found.")
         );
 
-        if (!Objects.equals(task.getCreatedBy().getId(), user.getCurrentProfile().getId()) && role == Role.INHABITANT) {
+        Profile profile = user.getCurrentProfile();
+
+        if (!Objects.equals(task.getCreatedBy().getId(), profile.getId()) && profile.getRole() == Role.INHABITANT) {
             throw new AccessForbiddenException("You can't delete this task.");
         }
 

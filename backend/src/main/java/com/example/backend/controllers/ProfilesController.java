@@ -5,12 +5,14 @@ import com.example.backend.entities.User;
 import com.example.backend.security.CustomUserDetails;
 import com.example.backend.services.ProfileService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
+@PreAuthorize("@apartmentSecurity.hasAccess(#apartmentId, authentication)")
 @RequestMapping("/api/apartments/{apartmentId}/profiles")
 public class ProfilesController {
 

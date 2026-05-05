@@ -27,39 +27,22 @@ public class UserService {
     private final Random random;
     private final UserRepository userRepository;
     private final ProfileRepository profileRepository;
-    private final ApartmentRepository apartmentRepository;
     private final PasswordEncoder passwordEncoder;
 
     public UserService(
             UserRepository userRepository,
             ProfileRepository profileRepository,
-            ApartmentRepository apartmentRepository,
             PasswordEncoder passwordEncoder
     ) {
         this.random = new Random();
         this.userRepository = userRepository;
         this.profileRepository = profileRepository;
-        this.apartmentRepository = apartmentRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
     private Color getRandomColor() {
         Color[] colors = Color.values();
         return colors[random.nextInt(colors.length)];
-    }
-
-    public Role getCurrentUserRoleInApartment(User user, Integer apartmentId) {
-        Optional<Profile> profileOptional = profileRepository.findByUserAndApartment_id(user, apartmentId);
-
-        if (profileOptional.isEmpty())
-            return null;
-
-        Profile profile = profileOptional.get();
-
-        if (profile.getLeftAt() != null)
-            return null;
-
-        return profile.getRole();
     }
 
     public UserDto create(RegisterDto dto) {

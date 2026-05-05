@@ -14,6 +14,7 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -56,6 +57,7 @@ public class ApartmentController {
         return ResponseEntity.ok(response);
     }
 
+    @PreAuthorize("@apartmentSecurity.hasAccess(#apartmentId, authentication)")
     @GetMapping("/{apartmentId}")
     public ResponseEntity<ApartmentDto> get(
             @PathVariable Integer apartmentId,
@@ -66,13 +68,12 @@ public class ApartmentController {
         return ResponseEntity.ok(dto);
     }
 
+    @PreAuthorize("@apartmentSecurity.hasAccess(#apartmentId, authentication)")
     @PatchMapping("/{apartmentId}/code")
     public ResponseEntity<InviteCodeResponse> generateCode(
-            @PathVariable Integer apartmentId,
-            @AuthenticationPrincipal CustomUserDetails details
+            @PathVariable Integer apartmentId
     ) {
-        User user = details.getUser();
-        InviteCodeResponse response = apartmentService.generateCode(user, apartmentId);
+        InviteCodeResponse response = apartmentService.generateCode(apartmentId);
         return ResponseEntity.ok(response);
     }
 }

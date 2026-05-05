@@ -1,8 +1,10 @@
 package com.example.backend.services;
 
 import com.example.backend.exceptions.BadRequestException;
+import com.example.backend.exceptions.ResourceNotFoundException;
 import com.example.backend.intefaces.FileStorage;
 import io.minio.*;
+import io.minio.http.Method;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -60,7 +62,11 @@ public class ImageService implements FileStorage {
             validateFile(image);
 
             try {
-                String filename = UUID.randomUUID() + "-" + image.getOriginalFilename();
+                String originalName = image.getOriginalFilename();
+                assert originalName != null;
+
+                String filename = UUID.randomUUID().toString().replace("-", "") +
+                        originalName.substring(originalName.lastIndexOf("."));
 
                 boolean exists = minioClient.bucketExists(
                         BucketExistsArgs.builder().bucket(bucket).build()
@@ -86,6 +92,22 @@ public class ImageService implements FileStorage {
         }
 
         return null;
+    }
+
+    public String getPresignedUrl(String bucket, String fileName) {
+        try {
+            int timeToLive = 60 * 60;
+            return minioClient.getPresignedObjectUrl(
+                    GetPresignedObjectUrlArgs.builder()
+                            .method(Method.GET)
+                            .bucket(bucket)
+                            .object(fileName)
+                            .expiry(timeToLive)
+                            .build()
+            );
+        } catch (Exception e) {
+            throw new ResourceNotFoundException("No such image.");
+        }
     }
 
     public void delete(String bucket, String filename) {

@@ -2,6 +2,7 @@ package com.example.backend.controllers;
 
 import com.example.backend.dtos.in.expenses.CreateExpenseRequest;
 import com.example.backend.dtos.out.expenses.CreateExpenseResponse;
+import com.example.backend.dtos.out.expenses.ExpenseDto;
 import com.example.backend.entities.User;
 import com.example.backend.intefaces.FileStorage;
 import com.example.backend.security.CustomUserDetails;
@@ -14,6 +15,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 @RestController
 @PreAuthorize("@apartmentSecurity.hasAccess(#apartmentId, authentication)")
@@ -41,5 +44,15 @@ public class ExpenseController {
         String checkImageName = fileStorage.save("checks", image);
         CreateExpenseResponse response = expenseService.create(apartmentId, user, dto, checkImageName);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @GetMapping
+    public ResponseEntity<List<ExpenseDto>> get(
+            @PathVariable Integer apartmentId,
+            @RequestParam(defaultValue = "0") Short page,
+            @RequestParam(defaultValue = "10") Short size
+    ) {
+        List<ExpenseDto> expenses = expenseService.get(apartmentId, page, size);
+        return ResponseEntity.ok(expenses);
     }
 }

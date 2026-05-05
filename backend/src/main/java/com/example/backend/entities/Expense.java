@@ -19,22 +19,43 @@ public class Expense {
     private Apartment apartment;
 
     @CreationTimestamp
-    @Column(name = "create_at", nullable = false)
-    private Instant createAt;
+    @Column(name = "created_at", nullable = false)
+    private Instant createdAt;
 
-    @Column(name = "price", nullable = false)
-    private Integer price;
+    @Column(name="name", nullable = false, length = 64)
+    private String name;
+
+    @Column(name = "sum", nullable = false)
+    private Integer sum;
 
     @Enumerated
     @Column(name = "category", nullable = false)
     private ExpenseCategory category;
 
-    @Column(name = "check_image_ref", length = 32)
-    private String checkImageRef;
+    @Column(name = "check_image_name", length = 128)
+    private String checkImageName;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "profile_id", nullable = false)
     private Profile createdBy;
+
+    public Expense() {}
+
+    public Expense(
+            Apartment apartment,
+            String name,
+            Integer sum,
+            ExpenseCategory category,
+            String checkImageName,
+            Profile createdBy
+    ) {
+        this.apartment = apartment;
+        this.name = name;
+        this.sum = sum;
+        this.category = category;
+        this.checkImageName = checkImageName;
+        this.createdBy = createdBy;
+    }
 
     public Profile getCreatedBy() {
         return createdBy;
@@ -44,20 +65,28 @@ public class Expense {
         this.createdBy = createdBy;
     }
 
-    public String getCheckImageRef() {
-        return checkImageRef;
+    public String getCheckImageName() {
+        return checkImageName;
     }
 
     public ExpenseCategory getCategory() {
         return category;
     }
 
-    public Integer getPrice() {
-        return price;
+    public String getName() {
+        return name;
     }
 
-    public Instant getCreateAt() {
-        return createAt;
+    public void setName(String name) {this.name = name;}
+
+    public Integer getSum() {
+        return sum;
+    }
+
+    public void setSum(Integer sum) {this.sum = sum;}
+
+    public Instant getCreatedAt() {
+        return createdAt;
     }
 
     public Apartment getApartment() {

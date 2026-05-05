@@ -42,7 +42,7 @@ class OptionPage extends StatelessWidget {
             SizedBox(height: 15),
             EnterButton(
               filled: false,
-              onTap: () => context.go("/enter/join"),
+              onTap: () => context.push("/enter/join"),
               mainText: "Войти по коду",
               subText: "Есть пригласительный код?",
               icon: Icons.login,

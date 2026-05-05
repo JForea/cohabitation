@@ -21,7 +21,7 @@ class TasksTab extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     int apartmentId = ref.read(authProvider).value!.user!.profile!.apartmentId;
-    final tasks = ref.watch(tasksProvider);
+    final tasksState = ref.watch(tasksProvider);
 
     return RefreshIndicator(
       onRefresh: () => _refresh(ref, apartmentId),
@@ -31,13 +31,22 @@ class TasksTab extends ConsumerWidget {
         children: [
           const Text(
             "Задачи",
-            style: TextStyle(fontSize: 20, fontWeight: .w600),
+            style: TextStyle(fontSize: 20, fontWeight: .w500),
           ),
-          ...?tasks.value?.map(
-            (t) => TaskCard(
-              task: t,
-              onStatusSwitch: () => switchStatus(ref, apartmentId, t.id),
+          tasksState.when(
+            data: (tasks) => Column(
+              children: [
+                ...tasks.map(
+                  (t) => TaskCard(
+                    task: t,
+                    onStatusSwitch: () => switchStatus(ref, apartmentId, t.id),
+                  ),
+                ),
+              ],
             ),
+            error: (e, _) => Text("При загрузке произошла ошибка"),
+            loading: () =>
+                Center(child: Center(child: CircularProgressIndicator())),
           ),
         ],
       ),

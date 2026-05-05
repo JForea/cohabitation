@@ -16,7 +16,7 @@ class BuyingsTab extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final profile = ref.read(authProvider).value!.user!.profile!;
     int apartmentId = profile.apartmentId;
-    final categoryToBuyings = ref.watch(buyingsProvider).value;
+    final buyingsState = ref.watch(buyingsProvider);
 
     return RefreshIndicator(
       onRefresh: () => _refresh(ref, apartmentId),
@@ -32,14 +32,22 @@ class BuyingsTab extends ConsumerWidget {
               color: Theme.of(context).colorScheme.onSurface,
             ),
           ),
-          ...?categoryToBuyings?.keys.map(
-            (c) => CategoryBuyingList(
-              category: c,
-              buyings: categoryToBuyings[c]!,
-              onBuyingComplete: (id) => ref
-                  .read(buyingsProvider.notifier)
-                  .switchBuyingStatus(id, profile),
+          buyingsState.when(
+            data: (categoryToBuyings) => Column(
+              children: [
+                ...categoryToBuyings.keys.map(
+                  (c) => CategoryBuyingList(
+                    category: c,
+                    buyings: categoryToBuyings[c]!,
+                    onBuyingComplete: (id) => ref
+                        .read(buyingsProvider.notifier)
+                        .switchBuyingStatus(id, profile),
+                  ),
+                ),
+              ],
             ),
+            error: (e, _) => Text("При загрузке данных произошла ошибка."),
+            loading: () => Center(child: CircularProgressIndicator()),
           ),
         ],
       ),

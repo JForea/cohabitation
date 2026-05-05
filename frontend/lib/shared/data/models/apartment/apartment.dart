@@ -43,4 +43,9 @@ class Apartment {
       inviteCode: inviteCode ?? this.inviteCode,
     );
   }
+
+  @override
+  String toString() {
+    return "id: $id";
+  }
 }

@@ -16,7 +16,7 @@ class InviteHintCard extends StatelessWidget {
       child: Row(
         spacing: 12,
         children: [
-          SvgPicture.asset("icons/hint.svg", width: 28, height: 28),
+          SvgPicture.asset("assets/icons/hint.svg", width: 28, height: 28),
           Expanded(
             child: Text(
               "Код можно найти в настройках квартиры у администратора",

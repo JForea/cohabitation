@@ -9,11 +9,11 @@ final neighboursProvider =
     );
 
 class _ApartmentNotifier extends AsyncNotifier<List<Profile>> {
-  late final String baseUrl;
+  late String baseUrl;
 
   @override
   Future<List<Profile>> build() async {
-    final apartment = ref.watch(apartmentProvider).value;
+    final apartment = ref.watch(apartmentProvider);
 
     if (apartment == null) {
       throw Exception("Not in apartment.");

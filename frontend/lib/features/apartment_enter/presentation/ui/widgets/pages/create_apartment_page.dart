@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:frontend/shared/data/providers/apartment_provider.dart';
+import 'package:frontend/shared/data/providers/async_apartment_provider.dart';
+import 'package:frontend/shared/data/providers/auth_provider.dart';
 import 'package:frontend/shared/presentation/ui/widgets/buttons/custom_back_button.dart';
 import 'package:frontend/shared/presentation/ui/widgets/buttons/custom_text_button.dart';
 import 'package:frontend/shared/presentation/ui/widgets/inputs/controlled_named_text_field.dart';
 import 'package:frontend/shared/presentation/ui/widgets/wrappers/auth_page_wrapper.dart';
+import 'package:go_router/go_router.dart';
 
 class CreateApartmentPage extends ConsumerStatefulWidget {
   const CreateApartmentPage({super.key});
@@ -33,10 +35,15 @@ class _CreateApartmentPageState extends ConsumerState<CreateApartmentPage> {
     _address = "";
   }
 
-  void create() async {
-    await ref
-        .read(apartmentProvider.notifier)
+  Future<bool> create() async {
+    final profile = await ref
+        .read(asyncApartmentProvider.notifier)
         .create(name: _name, address: _address);
+    if (profile == null) {
+      return false;
+    }
+    ref.read(authProvider.notifier).setProfile(profile);
+    return true;
   }
 
   @override
@@ -77,7 +84,16 @@ class _CreateApartmentPageState extends ConsumerState<CreateApartmentPage> {
             require: false,
           ),
           Spacer(),
-          CustomTextButton(onPressed: create, text: "Создать"),
+          CustomTextButton(
+            onPressed: () async {
+              final created = await create();
+
+              if (created && context.mounted) {
+                context.go('/');
+              }
+            },
+            text: "Создать",
+          ),
         ],
       ),
     );

@@ -16,20 +16,30 @@ class HomeTab extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final neighbours = ref.watch(neighboursProvider).value;
-    final userProfile = ref.watch(authProvider).value!.user!.profile!;
-    final apartment = ref.watch(apartmentProvider).value!;
+    final neighboursState = ref.watch(neighboursProvider);
+    final authState = ref.watch(authProvider);
+    final apartment = ref.watch(apartmentProvider);
+
+    final profile = authState.value?.user?.profile;
 
     return RefreshIndicator(
       onRefresh: () async => _refresh(ref),
       child: Column(
         children: [
-          HomeAppBar(userName: userProfile.name, address: apartment.address),
+          HomeAppBar(
+            userName: profile?.name ?? "",
+            address: apartment?.address,
+          ),
           TabWrapper(
             floatingButtonExists: false,
             appBarExists: true,
             children: [
-              NeighboursPreview(neighbours: neighbours?.take(3).toList() ?? []),
+              neighboursState.when(
+                data: (neighbours) =>
+                    NeighboursPreview(neighbours: neighbours.take(3).toList()),
+                error: (e, _) => Text("Произошла ошибка при загрузке."),
+                loading: () => Center(child: CircularProgressIndicator()),
+              ),
             ],
           ),
         ],

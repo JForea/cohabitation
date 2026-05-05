@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/features/settings/presentation/ui/widgets/list_tiles/danger_list_tile.dart';
 import 'package:frontend/features/settings/presentation/ui/widgets/list_tiles/generate_invite_code_tile.dart';
 import 'package:frontend/shared/data/providers/apartment_provider.dart';
+import 'package:frontend/shared/data/providers/async_apartment_provider.dart';
 import 'package:frontend/shared/data/providers/auth_provider.dart';
 import 'package:frontend/shared/data/types/role.dart';
 import 'package:frontend/shared/presentation/ui/widgets/buttons/custom_back_button.dart';
@@ -12,14 +13,16 @@ import 'package:frontend/shared/presentation/ui/widgets/wrappers/page_wrapper.da
 class SettingsPage extends ConsumerWidget {
   const SettingsPage({super.key});
 
-  void logout(WidgetRef ref) {
-    ref.read(authProvider.notifier).logout();
+  void logout(WidgetRef ref) async {
+    await ref.read(authProvider.notifier).logout();
   }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final profile = ref.read(authProvider).value!.user!.profile!;
-    final apartment = ref.watch(apartmentProvider).value!;
+    final apartment = ref.watch(apartmentProvider);
+    final authState = ref.watch(authProvider);
+
+    final profile = authState.value!.user!.profile!;
 
     return Scaffold(
       body: PageWrapper(
@@ -38,7 +41,7 @@ class SettingsPage extends ConsumerWidget {
               ),
             ],
           ),
-          if (profile.role != Role.inhabitant)
+          if (profile.role != Role.inhabitant && apartment != null)
             CustomWidgetList(
               danger: false,
               title: "Квартира",
@@ -46,7 +49,7 @@ class SettingsPage extends ConsumerWidget {
                 GenerateInviteCodeTile(
                   inviteCode: apartment.inviteCode,
                   onGenerate: () =>
-                      ref.read(apartmentProvider.notifier).generateCode(),
+                      ref.read(asyncApartmentProvider.notifier).generateCode(),
                 ),
               ],
             ),

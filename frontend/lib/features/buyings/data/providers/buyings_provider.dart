@@ -15,7 +15,7 @@ final buyingsProvider =
     );
 
 class _BuyingNotifier extends AsyncNotifier<Map<BuyingCategory, List<Buying>>> {
-  late final String baseUrl;
+  late String baseUrl;
 
   static const _pageSize = 30;
 
@@ -25,7 +25,7 @@ class _BuyingNotifier extends AsyncNotifier<Map<BuyingCategory, List<Buying>>> {
 
   @override
   Future<Map<BuyingCategory, List<Buying>>> build() async {
-    final apartment = ref.watch(apartmentProvider).value;
+    final apartment = ref.watch(apartmentProvider);
 
     if (apartment == null) {
       throw Exception("Not in apartment.");

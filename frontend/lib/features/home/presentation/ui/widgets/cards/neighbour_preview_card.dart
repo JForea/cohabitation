@@ -38,7 +38,7 @@ class NeighbourPreviewCard extends StatelessWidget {
             mainAxisSize: .min,
             spacing: 5,
             children: [
-              SvgPicture.asset("icons/star.svg", width: 12, height: 12),
+              SvgPicture.asset("assets/icons/star.svg", width: 12, height: 12),
               Text(
                 "${profile.points}",
                 style: TextStyle(fontSize: 12, fontWeight: .w500),

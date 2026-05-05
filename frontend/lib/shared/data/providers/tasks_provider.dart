@@ -14,7 +14,7 @@ final tasksProvider = AsyncNotifierProvider<_TasksNotifier, List<Task>>(
 );
 
 class _TasksNotifier extends AsyncNotifier<List<Task>> {
-  late final String baseUrl;
+  late String baseUrl;
 
   static const _pageSize = 20;
 
@@ -26,7 +26,7 @@ class _TasksNotifier extends AsyncNotifier<List<Task>> {
 
   @override
   Future<List<Task>> build() async {
-    final apartment = ref.watch(apartmentProvider).value;
+    final apartment = ref.watch(apartmentProvider);
 
     if (apartment == null) {
       throw Exception("Not in apartment.");

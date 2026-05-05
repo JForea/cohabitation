@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_devtools/riverpod_devtools.dart';
 import 'package:frontend/shared/data/providers/auth_provider.dart';
 import 'package:frontend/shared/presentation/theme/custom_theme.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -15,7 +16,9 @@ Future<void> main() async {
     DeviceOrientation.portraitUp, // только вертикально
   ]);
 
-  runApp(const ProviderScope(child: MyApp()));
+  runApp(
+    ProviderScope(observers: [RiverpodDevToolsObserver()], child: MyApp()),
+  );
 }
 
 class MyApp extends ConsumerWidget {

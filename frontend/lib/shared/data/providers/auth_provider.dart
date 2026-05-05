@@ -87,11 +87,12 @@ class _AuthNotifier extends AsyncNotifier<AuthState> {
   }
 
   void setProfile(Profile profile) {
-    if (state.value == null) {
-      return;
-    }
+    final current = state.value;
+    if (current == null || current.user == null) return;
 
-    state = AsyncValue.data(state.value!.copyWith(profile: profile));
+    final updatedUser = current.user!.copyWith(profile: profile);
+
+    state = AsyncValue.data(current.copyWith(user: updatedUser));
   }
 
   Future<void> logout() async {

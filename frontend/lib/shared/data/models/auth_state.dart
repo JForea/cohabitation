@@ -1,4 +1,3 @@
-import 'package:frontend/shared/data/models/profile.dart';
 import 'package:frontend/shared/data/models/user.dart';
 
 class AuthState {
@@ -9,17 +8,15 @@ class AuthState {
 
   bool get isAuthenticated => token != null;
 
-  AuthState copyWith({Profile? profile, String? token}) {
+  AuthState copyWith({
+    User? user,
+    String? token,
+    bool? clearUser,
+    bool? clearToken,
+  }) {
     return AuthState(
-      user: profile != null && user != null
-          ? User(
-              id: user!.id,
-              email: user!.email,
-              name: user!.name,
-              profile: profile,
-            )
-          : user,
-      token: token ?? this.token,
+      user: clearUser != null && clearUser ? null : (user ?? this.user),
+      token: clearToken != null && clearToken ? null : (token ?? this.token),
     );
   }
 }

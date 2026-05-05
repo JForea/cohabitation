@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/features/apartment_enter/presentation/ui/widgets/cards/invite_hint_card.dart';
 import 'package:frontend/features/apartment_enter/presentation/ui/widgets/inputs/invite_code_input.dart';
-import 'package:frontend/shared/data/providers/apartment_provider.dart';
+import 'package:frontend/shared/data/providers/async_apartment_provider.dart';
 import 'package:frontend/shared/data/providers/auth_provider.dart';
 import 'package:frontend/shared/presentation/ui/widgets/buttons/custom_back_button.dart';
 import 'package:frontend/shared/presentation/ui/widgets/buttons/custom_text_button.dart';
@@ -29,7 +29,9 @@ class _JoinApartmentPageState extends ConsumerState<JoinApartmentPage> {
   }
 
   Future<void> onJoin() async {
-    final profile = await ref.read(apartmentProvider.notifier).join(inviteCode);
+    final profile = await ref
+        .read(asyncApartmentProvider.notifier)
+        .join(inviteCode);
 
     if (profile == null) {
       return;

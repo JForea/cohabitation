@@ -42,7 +42,7 @@ class RegistrationFirstPage extends StatelessWidget {
             hintText: "example@mail.ru",
             onChange: setEmail,
             secondaryColor: true,
-            password: false,
+            type: .text,
             require: true,
           ),
           ControlledNamedTextField(
@@ -51,7 +51,7 @@ class RegistrationFirstPage extends StatelessWidget {
             hintText: "********",
             onChange: setPassword,
             secondaryColor: true,
-            password: true,
+            type: .password,
             require: true,
           ),
           Spacer(),

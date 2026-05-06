@@ -10,6 +10,8 @@ import com.example.backend.exceptions.ResourceNotFoundException;
 import com.example.backend.intefaces.FileStorage;
 import com.example.backend.repositories.ApartmentRepository;
 import com.example.backend.repositories.ExpenseRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
@@ -18,6 +20,7 @@ import java.util.List;
 @Service
 public class ExpenseService {
 
+    private static final Logger log = LoggerFactory.getLogger(ExpenseService.class);
     private final ExpenseRepository expenseRepository;
 
     private final ApartmentRepository apartmentRepository;
@@ -57,21 +60,29 @@ public class ExpenseService {
 
             return new CreateExpenseResponse(
                     expense.getId(),
-                    fileStorage.getPresignedUrl(bucketName, checkImageName)
+                    checkImageName != null ? fileStorage.getPresignedUrl(bucketName, checkImageName) : null
             );
         } catch (Exception e) {
-            fileStorage.delete(bucketName, checkImageName);
+            log.error("Creating expense error: ", e);
+            if (checkImageName != null)
+                fileStorage.delete(bucketName, checkImageName);
             throw e;
         }
     }
 
     public List<ExpenseDto> get(Integer apartmentId, Short page, Short size) {
+
         return expenseRepository.findAllByApartment_Id(apartmentId, PageRequest.of(page, size))
                 .map(
-                        expense -> new ExpenseDto(expense, fileStorage.getPresignedUrl(
-                                bucketName,
-                                expense.getCheckImageName()
-                        ))
+                        expense -> {
+                            String checkImageName = expense.getCheckImageName();
+                            return new ExpenseDto(
+                                    expense,
+                                    checkImageName != null
+                                            ? fileStorage.getPresignedUrl(bucketName, checkImageName)
+                                            : null
+                            );
+                        }
                 ).toList();
     }
 }

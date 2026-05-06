@@ -71,7 +71,7 @@ class _CreateApartmentPageState extends ConsumerState<CreateApartmentPage> {
             hintText: "Наша квартира",
             onChange: setName,
             secondaryColor: true,
-            password: false,
+            type: .text,
             require: true,
           ),
           ControlledNamedTextField(
@@ -80,7 +80,7 @@ class _CreateApartmentPageState extends ConsumerState<CreateApartmentPage> {
             hintText: "ул. Ленина, 42, кв. 18",
             onChange: setAddress,
             secondaryColor: true,
-            password: false,
+            type: .text,
             require: false,
           ),
           Spacer(),

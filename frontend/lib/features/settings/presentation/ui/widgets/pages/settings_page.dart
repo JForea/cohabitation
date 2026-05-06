@@ -7,7 +7,6 @@ import 'package:frontend/shared/data/providers/async_apartment_provider.dart';
 import 'package:frontend/shared/data/providers/auth_provider.dart';
 import 'package:frontend/shared/data/providers/user_provider.dart';
 import 'package:frontend/shared/data/types/role.dart';
-import 'package:frontend/shared/presentation/ui/widgets/buttons/custom_back_button.dart';
 import 'package:frontend/shared/presentation/ui/widgets/lists/custom_widget_list.dart';
 import 'package:frontend/shared/presentation/ui/widgets/wrappers/page_wrapper.dart';
 
@@ -25,21 +24,9 @@ class SettingsPage extends ConsumerWidget {
 
     return Scaffold(
       body: PageWrapper(
+        backButton: true,
+        pageName: "Настройки",
         children: [
-          Row(
-            spacing: 15,
-            children: [
-              CustomBackButton(mainColor: false),
-              Text(
-                "Настройки",
-                style: TextStyle(
-                  color: Theme.of(context).colorScheme.onSurface,
-                  fontSize: 20,
-                  fontWeight: .w500,
-                ),
-              ),
-            ],
-          ),
           if (role != null && role != Role.inhabitant && apartment != null)
             CustomWidgetList(
               danger: false,

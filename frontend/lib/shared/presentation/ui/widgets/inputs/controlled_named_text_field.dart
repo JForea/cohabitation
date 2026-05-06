@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:frontend/shared/formatters/price_input_formatter.dart';
 import 'package:frontend/shared/presentation/theme/app_shadows.dart';
+
+enum InputType { text, password, price }
 
 class ControlledNamedTextField extends StatefulWidget {
   const ControlledNamedTextField({
@@ -10,7 +13,7 @@ class ControlledNamedTextField extends StatefulWidget {
     required this.hintText,
     required this.onChange,
     required this.secondaryColor,
-    required this.password,
+    required this.type,
     required this.require,
     this.maxLines,
   });
@@ -20,7 +23,7 @@ class ControlledNamedTextField extends StatefulWidget {
   final String hintText;
   final void Function(String) onChange;
   final bool secondaryColor;
-  final bool password;
+  final InputType type;
   final bool require;
   final int? maxLines;
 
@@ -111,9 +114,11 @@ class _ControlledNamedTextFieldState extends State<ControlledNamedTextField> {
                   onChanged: widget.onChange,
                   minLines: widget.maxLines ?? 1,
                   maxLines: widget.maxLines ?? 1,
-                  keyboardType: widget.maxLines != null && widget.maxLines! > 1
-                      ? .multiline
-                      : .text,
+                  keyboardType: widget.type == .price
+                      ? .number
+                      : (widget.maxLines != null && widget.maxLines! > 1
+                            ? .multiline
+                            : .text),
                   decoration: InputDecoration(
                     border: .none,
                     hintText: widget.hintText,
@@ -123,10 +128,13 @@ class _ControlledNamedTextFieldState extends State<ControlledNamedTextField> {
                     ),
                   ),
                   style: TextStyle(fontSize: 14),
-                  obscureText: widget.password && !_showPassword,
+                  obscureText: widget.type == .password && !_showPassword,
+                  inputFormatters: [
+                    if (widget.type == .price) PriceInputFormatter(),
+                  ],
                 ),
               ),
-              if (widget.password)
+              if (widget.type == .password)
                 IconButton(
                   onPressed: switchShow,
                   icon: SvgPicture.asset(

@@ -7,7 +7,6 @@ import 'package:frontend/shared/data/providers/neighbours_provider.dart';
 import 'package:frontend/shared/data/providers/tasks_provider.dart';
 import 'package:frontend/shared/data/types/room.dart';
 import 'package:frontend/shared/data/types/task_priority.dart';
-import 'package:frontend/shared/presentation/ui/widgets/buttons/custom_back_button.dart';
 import 'package:frontend/shared/presentation/ui/widgets/buttons/custom_text_button.dart';
 import 'package:frontend/shared/presentation/ui/widgets/chips/custom_choice_chip.dart';
 import 'package:frontend/shared/presentation/ui/widgets/inputs/controlled_named_text_field.dart';
@@ -116,28 +115,16 @@ class _CreateTaskPageState extends ConsumerState<CreateTaskPage> {
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
       body: PageWrapper(
+        backButton: true,
+        pageName: "Новая задача",
         children: [
-          Row(
-            spacing: 15,
-            children: [
-              CustomBackButton(mainColor: false),
-              Text(
-                "Новая задача",
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: .w500,
-                  color: Theme.of(context).colorScheme.onSurface,
-                ),
-              ),
-            ],
-          ),
           ControlledNamedTextField(
             text: name,
             title: "Название",
             hintText: "Что нужно сделать?",
             onChange: setName,
             secondaryColor: false,
-            password: false,
+            type: .text,
             require: true,
           ),
           ControlledNamedTextField(
@@ -146,7 +133,7 @@ class _CreateTaskPageState extends ConsumerState<CreateTaskPage> {
             hintText: "Дополнительные детали...",
             onChange: setDescription,
             secondaryColor: false,
-            password: false,
+            type: .text,
             require: false,
             maxLines: 5,
           ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/features/buyings/presentation/ui/widgets/tabs/buyings_tab.dart';
+import 'package:frontend/features/expenses/presentation/ui/widgets/tabs/expenses_tab.dart';
 import 'package:frontend/features/home/presentation/ui/widgets/navigation/custom_bottom_nav_bar.dart';
 import 'package:frontend/features/home/data/providers/page_provider.dart';
 import 'package:frontend/features/home/presentation/ui/widgets/tabs/home_tab.dart';
@@ -40,7 +41,7 @@ class _HomePageState extends ConsumerState<HomePage> {
         child: Icon(Icons.add, size: 28),
       ),
       3 => FloatingActionButton(
-        onPressed: () {},
+        onPressed: () => context.push("/expenses/create"),
         shape: CircleBorder(),
         child: Icon(Icons.add, size: 28),
       ),
@@ -86,7 +87,7 @@ class _HomePageState extends ConsumerState<HomePage> {
           HomeTab(),
           TasksTab(),
           BuyingsTab(),
-          Placeholder(),
+          ExpensesTab(),
           ProfileTab(),
         ],
       ),

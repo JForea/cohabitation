@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:riverpod_devtools/riverpod_devtools.dart';
 import 'package:frontend/shared/data/providers/auth_provider.dart';
 import 'package:frontend/shared/presentation/theme/custom_theme.dart';
@@ -15,6 +16,8 @@ Future<void> main() async {
   await SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp, // только вертикально
   ]);
+
+  await initializeDateFormatting("ru_RU");
 
   runApp(
     ProviderScope(observers: [RiverpodDevToolsObserver()], child: MyApp()),

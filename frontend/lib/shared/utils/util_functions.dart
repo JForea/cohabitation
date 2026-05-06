@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/shared/data/types/buying_category.dart';
+import 'package:frontend/shared/data/types/expense_category.dart';
 import 'package:frontend/shared/data/types/role.dart';
 import 'package:frontend/shared/data/types/room.dart';
 import 'package:frontend/shared/data/types/task_priority.dart';
@@ -81,6 +82,17 @@ class UtilFunctions {
         };
         break;
 
+      case const (ExpenseCategory):
+        result = switch (value as ExpenseCategory) {
+          ExpenseCategory.householdGoods => "Хоз. товары",
+          ExpenseCategory.housinAndCommunalServices => "ЖКХ",
+          ExpenseCategory.other => "Другое",
+          ExpenseCategory.products => "Продукты",
+          ExpenseCategory.rent => "Аренда",
+          ExpenseCategory.services => "Услуги",
+        };
+        break;
+
       default:
         throw UnsupportedError("Provided type $T is not supported.");
     }
@@ -149,6 +161,19 @@ class UtilFunctions {
         };
         break;
 
+      case const (ExpenseCategory):
+        res = switch (name) {
+          "producnts" => ExpenseCategory.products,
+          "housing_and_communal_services" =>
+            ExpenseCategory.housinAndCommunalServices,
+          "services" => ExpenseCategory.services,
+          "household_goods" => ExpenseCategory.householdGoods,
+          "rent" => ExpenseCategory.rent,
+          "other" => ExpenseCategory.other,
+          _ => null,
+        };
+        break;
+
       default:
         throw UnsupportedError("Provided type $T is not supported.");
     }
@@ -199,6 +224,18 @@ class UtilFunctions {
         };
         break;
 
+      case const (ExpenseCategory):
+        result = switch (value as ExpenseCategory) {
+          ExpenseCategory.householdGoods => "HOUSEHOLD_GOODS",
+          ExpenseCategory.housinAndCommunalServices =>
+            "HOUSING_AND_COMMUNAL_SERVICES",
+          ExpenseCategory.services => "SERVICES",
+          ExpenseCategory.other => "OTHER",
+          ExpenseCategory.products => "PRODUCTS",
+          ExpenseCategory.rent => "RENT",
+        };
+        break;
+
       default:
         throw UnsupportedError("Provided type $T is not supported.");
     }
@@ -236,5 +273,28 @@ class UtilFunctions {
     final month = months[date.month - 1];
 
     return '$weekday, ${date.day} $month ${date.year}';
+  }
+
+  static String toExpensesPageDateString(DateTime date) {
+    const months = [
+      'Январь',
+      'Февраль',
+      'Март',
+      'Апрель',
+      'Май',
+      'Июнь',
+      'Июль',
+      'Август',
+      'Сентябрь',
+      'Октябрь',
+      'Ноябрь',
+      'Декабрь',
+    ];
+
+    return '${months[date.month - 1]} ${date.year}';
+  }
+
+  static int parsePrice(String price) {
+    return int.parse(price.replaceAll(RegExp(r'\D'), ''));
   }
 }

@@ -9,7 +9,6 @@ import 'package:frontend/shared/data/providers/auth_provider.dart';
 import 'package:frontend/shared/data/providers/neighbours_provider.dart';
 import 'package:frontend/shared/data/types/buying_category.dart';
 import 'package:frontend/shared/presentation/theme/app_styles.dart';
-import 'package:frontend/shared/presentation/ui/widgets/buttons/custom_back_button.dart';
 import 'package:frontend/shared/presentation/ui/widgets/buttons/custom_text_button.dart';
 import 'package:frontend/shared/presentation/ui/widgets/chips/custom_choice_chip.dart';
 import 'package:frontend/shared/presentation/ui/widgets/inputs/controlled_named_text_field.dart';
@@ -124,21 +123,9 @@ class _CreateBuyingPageState extends ConsumerState<CreateBuyingPage> {
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
       body: PageWrapper(
+        backButton: true,
+        pageName: 'Добавить товар',
         children: [
-          Row(
-            spacing: 15,
-            children: [
-              CustomBackButton(mainColor: false),
-              Text(
-                'Добавить товар',
-                style: TextStyle(
-                  color: Theme.of(context).colorScheme.onSurface,
-                  fontSize: 20,
-                  fontWeight: .w500,
-                ),
-              ),
-            ],
-          ),
           Row(
             spacing: 15,
             children: [
@@ -156,7 +143,7 @@ class _CreateBuyingPageState extends ConsumerState<CreateBuyingPage> {
               hintText: "Хлеб",
               onChange: (s) => changeName(buyings[0], s),
               secondaryColor: false,
-              password: false,
+              type: .text,
               require: true,
             ),
             ControlledNamedTextField(
@@ -165,7 +152,7 @@ class _CreateBuyingPageState extends ConsumerState<CreateBuyingPage> {
               hintText: "1 шт",
               onChange: (s) => changeQuantity(buyings[0], s),
               secondaryColor: false,
-              password: false,
+              type: .text,
               require: true,
             ),
             ChoiceWrapper(

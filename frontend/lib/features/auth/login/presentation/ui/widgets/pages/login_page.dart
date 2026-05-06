@@ -43,7 +43,7 @@ class LoginPage extends ConsumerWidget {
             hintText: "example@mail.ru",
             onChange: setEmail,
             secondaryColor: true,
-            password: false,
+            type: .text,
             require: true,
           ),
           ControlledNamedTextField(
@@ -52,7 +52,7 @@ class LoginPage extends ConsumerWidget {
             hintText: "********",
             onChange: setPassword,
             secondaryColor: true,
-            password: true,
+            type: .password,
             require: true,
           ),
           Spacer(),

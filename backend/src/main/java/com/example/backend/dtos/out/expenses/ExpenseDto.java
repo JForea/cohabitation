@@ -4,13 +4,18 @@ import com.example.backend.dtos.out.profile.ProfileDto;
 import com.example.backend.entities.Expense;
 import com.example.backend.types.ExpenseCategory;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
+
 public record ExpenseDto(
         Long id,
         String name,
         Integer sum,
         ExpenseCategory category,
         String checkImageUrl,
-        ProfileDto profile) {
+        ProfileDto createdBy,
+        LocalDate createdAt
+) {
     public ExpenseDto(Expense expense, String checkImageRef) {
         this(
                 expense.getId(),
@@ -18,7 +23,8 @@ public record ExpenseDto(
                 expense.getSum(),
                 expense.getCategory(),
                 checkImageRef,
-                new ProfileDto(expense.getCreatedBy())
+                new ProfileDto(expense.getCreatedBy()),
+                expense.getCreatedAt().atZone(ZoneId.systemDefault()).toLocalDate()
         );
     }
 }

@@ -74,7 +74,7 @@ class _RegistrationSecondPageState
             hintText: "Александр",
             onChange: setName,
             secondaryColor: true,
-            password: false,
+            type: .text,
             require: true,
           ),
           GenderSwitch(male: widget.dataHolder.male, onPressed: switchGender),

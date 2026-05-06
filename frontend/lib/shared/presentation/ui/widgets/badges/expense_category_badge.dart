@@ -26,7 +26,7 @@ class ExpenseCategoryBadge extends StatelessWidget {
     final double iconSize = 24;
 
     return Container(
-      padding: .all(6),
+      padding: .symmetric(vertical: 6, horizontal: 8),
       decoration: BoxDecoration(
         color: color.withAlpha(37),
         borderRadius: .all(.circular(10)),

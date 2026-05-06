@@ -17,6 +17,13 @@ public class Rule {
     @Column(name = "text", nullable = false)
     private String text;
 
+    public Rule() {}
+
+    public Rule(Apartment apartment, String text) {
+        this.apartment = apartment;
+        this.text = text;
+    }
+
     public String getText() {
         return text;
     }

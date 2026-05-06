@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/shared/data/models/profile.dart';
+import 'package:frontend/shared/data/models/profile/profile.dart';
 import 'package:frontend/shared/presentation/theme/app_colors.dart';
 import 'package:frontend/shared/presentation/ui/widgets/avatars/avatar.dart';
 import 'package:frontend/shared/presentation/ui/widgets/chips/custom_choice_chip.dart';

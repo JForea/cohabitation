@@ -53,7 +53,9 @@ public class ApartmentService {
     private Integer getMonthlyExpensesInApartment(Apartment apartment) {
         Month month = Month.of(Calendar.getInstance().get(Calendar.MONTH));
 
-        return profileMonthlyExpenseRepository.getSumByApartmentAndMonth(apartment, month);
+        Integer sum = profileMonthlyExpenseRepository.getSumByApartmentAndMonth(apartment, month);
+
+        return sum == null ? 0 : sum;
     }
 
     @Transactional

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:frontend/features/profile/presentation/ui/widgets/indicators/points_indicator.dart';
-import 'package:frontend/shared/data/models/profile.dart';
+import 'package:frontend/shared/data/models/profile/profile.dart';
 import 'package:frontend/shared/presentation/theme/app_colors.dart';
 import 'package:frontend/shared/presentation/ui/widgets/avatars/avatar.dart';
 

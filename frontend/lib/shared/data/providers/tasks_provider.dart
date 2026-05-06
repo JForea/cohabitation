@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:frontend/shared/data/models/profile.dart';
+import 'package:frontend/shared/data/models/profile/profile.dart';
+import 'package:frontend/shared/data/models/profile/profile_brief.dart';
 import 'package:frontend/shared/data/models/task.dart';
 import 'package:frontend/shared/data/network/dio_client.dart';
 import 'package:frontend/shared/data/providers/apartment_provider.dart';
@@ -131,10 +132,12 @@ class _TasksNotifier extends AsyncNotifier<List<Task>> {
 
       final task = Task(
         id: response.data["id"] as int,
-        createdBy: userProfile,
+        createdBy: ProfileBrief.fromFullProfile(userProfile),
         name: name,
         description: description,
-        assignedTo: assignedTo,
+        assignedTo: assignedTo != null
+            ? ProfileBrief.fromFullProfile(assignedTo)
+            : null,
         room: room,
         priority: priority,
         dueDate: date,
@@ -169,7 +172,9 @@ class _TasksNotifier extends AsyncNotifier<List<Task>> {
               ok = false;
             }
           } else if (t.completedBy == null) {
-            return t.copyWith(completedBy: userProfile);
+            return t.copyWith(
+              completedBy: ProfileBrief.fromFullProfile(userProfile),
+            );
           }
         }
 

@@ -2,7 +2,8 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/shared/data/models/expense.dart';
-import 'package:frontend/shared/data/models/profile.dart';
+import 'package:frontend/shared/data/models/profile/profile.dart';
+import 'package:frontend/shared/data/models/profile/profile_brief.dart';
 import 'package:frontend/shared/data/network/dio_client.dart';
 import 'package:frontend/shared/data/providers/apartment_provider.dart';
 import 'package:frontend/shared/data/types/expense_category.dart';
@@ -82,7 +83,7 @@ class _ExpensesNotifier extends AsyncNotifier<List<Expense>> {
 
   Future<bool> create({
     required String name,
-    required int sum,
+    required int amount,
     required ExpenseCategory category,
     required Profile createdBy,
     XFile? image,
@@ -98,7 +99,7 @@ class _ExpensesNotifier extends AsyncNotifier<List<Expense>> {
         "data": MultipartFile.fromString('''
           {
             "name": "$name",
-            "sum": $sum,
+            "amount": $amount,
             "category": "${UtilFunctions.tValueToStringRequest(category)}"
           }
           ''', contentType: .parse('application/json')),
@@ -121,8 +122,8 @@ class _ExpensesNotifier extends AsyncNotifier<List<Expense>> {
         category: category,
         checkImageUrl: response.data["checkImageUrl"],
         name: name,
-        createdBy: createdBy,
-        sum: sum,
+        createdBy: ProfileBrief.fromFullProfile(createdBy),
+        sum: amount,
         createdAt: DateTime.now(),
       );
 

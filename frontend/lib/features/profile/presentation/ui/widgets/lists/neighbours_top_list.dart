@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/features/profile/presentation/ui/widgets/list_tiles/neighbours_top_list_tile.dart';
-import 'package:frontend/shared/data/models/profile.dart';
+import 'package:frontend/shared/data/models/profile/profile.dart';
 import 'package:frontend/shared/presentation/ui/widgets/lists/custom_widget_list.dart';
 
 class NeighboursTopList extends StatelessWidget {

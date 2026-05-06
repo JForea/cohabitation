@@ -4,7 +4,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:frontend/features/buyings/data/models/buying_redacted.dart';
 import 'package:frontend/features/buyings/data/providers/buyings_provider.dart';
 import 'package:frontend/features/buyings/presentation/ui/widgets/list_tiles/redact_buying_list_tile.dart';
-import 'package:frontend/shared/data/models/profile.dart';
+import 'package:frontend/shared/data/models/profile/profile.dart';
 import 'package:frontend/shared/data/providers/auth_provider.dart';
 import 'package:frontend/shared/data/providers/neighbours_provider.dart';
 import 'package:frontend/shared/data/types/buying_category.dart';

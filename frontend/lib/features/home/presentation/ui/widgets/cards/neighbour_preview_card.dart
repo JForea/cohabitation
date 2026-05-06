@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:frontend/shared/data/models/profile.dart';
+import 'package:frontend/shared/data/models/profile/profile.dart';
 import 'package:frontend/shared/presentation/theme/app_shadows.dart';
 import 'package:frontend/shared/presentation/ui/widgets/avatars/avatar.dart';
 

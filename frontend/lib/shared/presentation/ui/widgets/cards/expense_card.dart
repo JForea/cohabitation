@@ -42,29 +42,31 @@ class ExpenseCard extends StatelessWidget {
             spacing: 12,
             children: [
               ExpenseCategoryBadge(category: expense.category),
-              Column(
-                crossAxisAlignment: .start,
-                spacing: 4,
-                children: [
-                  Text(
-                    expense.name,
-                    maxLines: 1,
-                    overflow: .ellipsis,
-                    style: TextStyle(fontSize: 14, fontWeight: .w500),
-                  ),
-                  Text(
-                    "${expense.createdBy.name} · ${DateFormat("d MMMM", "ru_RU").format(expense.createdAt)}",
-                    maxLines: 1,
-                    overflow: .ellipsis,
-                    style: TextStyle(
-                      color: Color(0xFFA3A3A3),
-                      fontSize: 13,
-                      fontWeight: .w500,
+              Flexible(
+                fit: .tight,
+                child: Column(
+                  crossAxisAlignment: .start,
+                  spacing: 4,
+                  children: [
+                    Text(
+                      expense.name,
+                      maxLines: 1,
+                      overflow: .ellipsis,
+                      style: TextStyle(fontSize: 14, fontWeight: .w500),
                     ),
-                  ),
-                ],
+                    Text(
+                      "${expense.createdBy.name} · ${DateFormat("d MMMM", "ru_RU").format(expense.createdAt)}",
+                      maxLines: 1,
+                      overflow: .ellipsis,
+                      style: TextStyle(
+                        color: Color(0xFFA3A3A3),
+                        fontSize: 13,
+                        fontWeight: .w500,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-              Spacer(),
               Column(
                 crossAxisAlignment: .end,
                 mainAxisAlignment: .spaceBetween,

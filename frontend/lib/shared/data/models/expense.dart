@@ -1,4 +1,4 @@
-import 'package:frontend/shared/data/models/profile.dart';
+import 'package:frontend/shared/data/models/profile/profile_brief.dart';
 import 'package:frontend/shared/data/types/expense_category.dart';
 import 'package:frontend/shared/utils/util_functions.dart';
 
@@ -21,7 +21,7 @@ class Expense {
       ),
       checkImageUrl: json["checkImageUrl"] as String?,
       name: json["name"] as String,
-      createdBy: Profile.fromJson(json["createdBy"]),
+      createdBy: ProfileBrief.fromJson(json["createdBy"]),
       sum: json["sum"] as int,
       createdAt: DateTime.parse(json["createdAt"] as String),
     );
@@ -32,7 +32,7 @@ class Expense {
   final int sum;
   final ExpenseCategory category;
   final String? checkImageUrl;
-  final Profile createdBy;
+  final ProfileBrief createdBy;
   final DateTime createdAt;
 
   Expense copyWith({
@@ -41,7 +41,7 @@ class Expense {
     int? sum,
     ExpenseCategory? category,
     String? checkImageUrl,
-    Profile? createdBy,
+    ProfileBrief? createdBy,
     DateTime? createdAt,
     bool? clearCheckImageUrl,
   }) {

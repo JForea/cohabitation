@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/features/home/presentation/ui/widgets/cards/neighbour_preview_card.dart';
-import 'package:frontend/shared/data/models/profile.dart';
+import 'package:frontend/shared/data/models/profile/profile.dart';
 
 class NeighboursPreview extends StatelessWidget {
   const NeighboursPreview({super.key, required this.neighbours});

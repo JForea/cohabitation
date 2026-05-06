@@ -73,7 +73,7 @@ class _CreateApartmentPageState extends ConsumerState<CreateExpensePage> {
         .read(expensesProvider.notifier)
         .create(
           name: name,
-          sum: price,
+          amount: price,
           category: category,
           createdBy: profile,
           image: image,

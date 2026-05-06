@@ -163,7 +163,7 @@ class UtilFunctions {
 
       case const (ExpenseCategory):
         res = switch (name) {
-          "producnts" => ExpenseCategory.products,
+          "products" => ExpenseCategory.products,
           "housing_and_communal_services" =>
             ExpenseCategory.housinAndCommunalServices,
           "services" => ExpenseCategory.services,

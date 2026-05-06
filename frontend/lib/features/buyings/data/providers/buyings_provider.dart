@@ -3,7 +3,8 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/features/buyings/data/models/buying_redacted.dart';
 import 'package:frontend/shared/data/models/buying.dart';
-import 'package:frontend/shared/data/models/profile.dart';
+import 'package:frontend/shared/data/models/profile/profile.dart';
+import 'package:frontend/shared/data/models/profile/profile_brief.dart';
 import 'package:frontend/shared/data/network/dio_client.dart';
 import 'package:frontend/shared/data/providers/apartment_provider.dart';
 import 'package:frontend/shared/data/types/buying_category.dart';
@@ -84,10 +85,12 @@ class _BuyingNotifier extends AsyncNotifier<Map<BuyingCategory, List<Buying>>> {
 
       final Buying buying = Buying(
         id: response.data["id"] as int,
-        createdBy: userProfile,
+        createdBy: ProfileBrief.fromFullProfile(userProfile),
         name: buyingRedacted.name,
         quantity: buyingRedacted.quantity,
-        assignedTo: assignedTo,
+        assignedTo: assignedTo != null
+            ? ProfileBrief.fromFullProfile(assignedTo)
+            : null,
         category: buyingRedacted.category,
       );
 
@@ -144,7 +147,7 @@ class _BuyingNotifier extends AsyncNotifier<Map<BuyingCategory, List<Buying>>> {
         buyings.add(
           Buying(
             id: response.data[i]["id"] as int,
-            createdBy: userProfile,
+            createdBy: ProfileBrief.fromFullProfile(userProfile),
             name: buyingsRedacted[i].name,
             quantity: buyingsRedacted[i].quantity,
             category: buyingsRedacted[i].category,
@@ -195,7 +198,9 @@ class _BuyingNotifier extends AsyncNotifier<Map<BuyingCategory, List<Buying>>> {
                 ok = false;
               }
             } else if (b.completedBy == null) {
-              b = b.copyWith(completedBy: userProfile);
+              b = b.copyWith(
+                completedBy: ProfileBrief.fromFullProfile(userProfile),
+              );
             }
           }
 

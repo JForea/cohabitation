@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/shared/data/models/apartment/apartment.dart';
 import 'package:frontend/shared/data/models/apartment/create_apartment_response.dart';
-import 'package:frontend/shared/data/models/profile.dart';
+import 'package:frontend/shared/data/models/profile/profile.dart';
 import 'package:frontend/shared/data/network/dio_client.dart';
 import 'package:frontend/shared/data/providers/user_provider.dart';
 

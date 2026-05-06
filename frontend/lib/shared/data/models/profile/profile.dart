@@ -10,6 +10,7 @@ class Profile {
     required this.apartmentId,
     required this.role,
     required this.color,
+    required this.monthlyExpensesAmount,
   });
 
   factory Profile.fromJson(Map<String, dynamic> json) {
@@ -22,6 +23,7 @@ class Profile {
       color: UtilFunctions.getTValueFromName<Color>(
         json['avatarColor'] as String,
       ),
+      monthlyExpensesAmount: json["monthlyExpensesAmount"] as int,
     );
   }
 
@@ -31,6 +33,7 @@ class Profile {
   final int apartmentId;
   final Role role;
   final Color color;
+  final int monthlyExpensesAmount;
 
   Profile copyWith({
     int? id,
@@ -39,6 +42,7 @@ class Profile {
     int? apartmentId,
     Role? role,
     Color? color,
+    int? monthlyExpensesAmount,
   }) {
     return Profile(
       id: id ?? this.id,
@@ -47,6 +51,8 @@ class Profile {
       apartmentId: apartmentId ?? this.apartmentId,
       role: role ?? this.role,
       color: color ?? this.color,
+      monthlyExpensesAmount:
+          monthlyExpensesAmount ?? this.monthlyExpensesAmount,
     );
   }
 }

@@ -9,7 +9,6 @@ import com.example.backend.entities.*;
 import com.example.backend.exceptions.AccessForbiddenException;
 import com.example.backend.exceptions.BadRequestException;
 import com.example.backend.exceptions.ResourceNotFoundException;
-import com.example.backend.repositories.ApartmentRepository;
 import com.example.backend.repositories.BuyingRepository;
 import com.example.backend.repositories.ProfileRepository;
 import com.example.backend.specifications.BuyingSpecifications;
@@ -29,24 +28,17 @@ public class BuyingService {
 
     private final ProfileRepository profileRepository;
 
-    private final ApartmentRepository apartmentRepository;
-
     public BuyingService(
              BuyingRepository buyingRepository,
-             ProfileRepository profileRepository,
-             ApartmentRepository apartmentRepository) {
+             ProfileRepository profileRepository) {
         this.buyingRepository = buyingRepository;
         this.profileRepository = profileRepository;
-        this.apartmentRepository = apartmentRepository;
     }
 
-    public IdResponse<Long> create(Integer apartmentId, User user, CreateBuyingDto dto) {
+    public IdResponse<Long> create(User user, CreateBuyingDto dto) {
         if (!dto.isPublic() && dto.assignedTo() != null)
             throw new BadRequestException("Buying shouldn't be private and have assigned user at the same time.");
 
-        Apartment apartment = apartmentRepository.findById(apartmentId).orElseThrow(() ->
-                new ResourceNotFoundException("Apartment not found.")
-        );
         Profile createdBy = user.getCurrentProfile();
         Profile assignedTo = null;
         if (dto.assignedTo() != null) {
@@ -59,7 +51,6 @@ public class BuyingService {
                 new Buying(
                         createdBy,
                         assignedTo,
-                        apartment,
                         dto.name(),
                         dto.quantity(),
                         dto.category(),
@@ -70,13 +61,10 @@ public class BuyingService {
         return new IdResponse<>(buying.getId());
     }
 
-    public List<IdResponse<Long>> createMany(Integer apartmentId, User user, CreateManyBuyingsDto dto) {
+    public List<IdResponse<Long>> createMany(User user, CreateManyBuyingsDto dto) {
         if (!dto.isPublic() && dto.assignedTo() != null)
             throw new BadRequestException("Buying shouldn't be private and have assigned user at the same time.");
 
-        Apartment apartment = apartmentRepository.findById(apartmentId).orElseThrow(() ->
-                new ResourceNotFoundException("ApartmentNotFound")
-        );
         Profile createdBy = user.getCurrentProfile();
         Profile assignedTo;
         if (dto.assignedTo() != null) {
@@ -90,7 +78,6 @@ public class BuyingService {
         List<Buying> buyings = buyingRepository.saveAll(dto.buyings().stream().map(buyingDto -> new Buying(
                 createdBy,
                 assignedTo,
-                apartment,
                 buyingDto.name(),
                 buyingDto.quantity(),
                 buyingDto.category(),
@@ -113,7 +100,7 @@ public class BuyingService {
     }
 
     public StatusResponse changeStatus(Integer apartmentId, User user, Long buyingId) {
-        Buying buying = buyingRepository.findByApartment_IdAndId(apartmentId, buyingId).orElseThrow(
+        Buying buying = buyingRepository.findByCreatedBy_Apartment_IdAndId(apartmentId, buyingId).orElseThrow(
                 () -> new ResourceNotFoundException("Buying not found.")
         );
 
@@ -142,7 +129,7 @@ public class BuyingService {
     }
 
     public void deleteOne(Integer apartmentId, User user, Long buyingId) {
-        Buying buying = buyingRepository.findByApartment_IdAndId(apartmentId, buyingId).orElseThrow(
+        Buying buying = buyingRepository.findByCreatedBy_Apartment_IdAndId(apartmentId, buyingId).orElseThrow(
                 () -> new ResourceNotFoundException("Buying not found.")
         );
 

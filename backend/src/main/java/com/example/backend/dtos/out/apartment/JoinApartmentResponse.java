@@ -12,14 +12,19 @@ public record JoinApartmentResponse(
         Integer currentExpenseSum,
         ProfileDto profile
 ) {
-    public JoinApartmentResponse(Apartment apartment, Integer currentExpenseSum, Profile profile) {
+    public JoinApartmentResponse(
+            Apartment apartment,
+            Integer currentExpenseSum,
+            Profile profile,
+            Integer profileExpenseAmount
+    ) {
         this(
                 apartment.getId(),
                 apartment.getName(),
                 apartment.getAddress(),
                 apartment.getBudget(),
                 currentExpenseSum,
-                new ProfileDto(profile)
+                new ProfileDto(profile, profileExpenseAmount)
         );
     }
 }

@@ -16,10 +16,6 @@ public class Buying {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "apartment_id", nullable = false)
-    private Apartment apartment;
-
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "created_by", nullable = false)
     private Profile createdBy;
 
@@ -56,7 +52,6 @@ public class Buying {
     public Buying(
             Profile createdBy,
             Profile assignedTo,
-            Apartment apartment,
             String name,
             String quantity,
             BuyingCategory category,
@@ -64,7 +59,6 @@ public class Buying {
     ) {
         this.createdBy = createdBy;
         this.assignedTo = assignedTo;
-        this.apartment = apartment;
         this.name = name;
         this.quantity = quantity;
         if (category != null)
@@ -134,10 +128,6 @@ public class Buying {
 
     public Profile getCreatedBy() {
         return createdBy;
-    }
-
-    public Apartment getApartment() {
-        return apartment;
     }
 
     public Long getId() {

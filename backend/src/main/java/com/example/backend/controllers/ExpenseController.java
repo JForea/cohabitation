@@ -35,14 +35,13 @@ public class ExpenseController {
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<CreateExpenseResponse> create(
-            @PathVariable Integer apartmentId,
             @RequestPart("data") @Valid CreateExpenseRequest dto,
             @RequestPart(value = "image", required = false) MultipartFile image,
             @AuthenticationPrincipal CustomUserDetails details
     ) {
         User user = details.getUser();
         String checkImageName = fileStorage.save("checks", image);
-        CreateExpenseResponse response = expenseService.create(apartmentId, user, dto, checkImageName);
+        CreateExpenseResponse response = expenseService.create(user, dto, checkImageName);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 

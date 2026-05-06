@@ -7,5 +7,5 @@ import org.springframework.data.repository.ListCrudRepository;
 
 
 public interface ExpenseRepository extends ListCrudRepository<Expense, Long> {
-    Page<Expense> findAllByApartment_Id(Integer apartmentId, Pageable pageable);
+    Page<Expense> findAllByCreatedBy_Apartment_Id(Integer apartmentId, Pageable pageable);
 }

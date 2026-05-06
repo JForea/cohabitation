@@ -12,7 +12,7 @@ public record CreateExpenseRequest (
     String name,
     @NotNull
     @Min(1)
-    Integer sum,
+    Integer amount,
     @NotNull
     ExpenseCategory category
 ) {}

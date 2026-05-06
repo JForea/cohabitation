@@ -30,25 +30,23 @@ public class BuyingController {
 
     @PostMapping
     public ResponseEntity<IdResponse<Long>> create(
-            @PathVariable Integer apartmentId,
             @RequestBody @Valid CreateBuyingDto dto,
             @AuthenticationPrincipal CustomUserDetails details
     ) {
         User user = details.getUser();
         return ResponseEntity.status(HttpStatus.CREATED).body(
-                buyingService.create(apartmentId, user, dto)
+                buyingService.create(user, dto)
         );
     }
 
     @PostMapping("/bulk")
     public ResponseEntity<List<IdResponse<Long>>> createMany(
-            @PathVariable Integer apartmentId,
             @RequestBody @Valid CreateManyBuyingsDto dto,
             @AuthenticationPrincipal CustomUserDetails details
     ) {
         User user = details.getUser();
         return ResponseEntity.status(HttpStatus.CREATED).body(
-                buyingService.createMany(apartmentId, user, dto)
+                buyingService.createMany(user, dto)
         );
     }
 

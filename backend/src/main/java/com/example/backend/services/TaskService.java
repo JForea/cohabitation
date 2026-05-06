@@ -4,13 +4,11 @@ import com.example.backend.dtos.in.tasks.CreateTaskDto;
 import com.example.backend.dtos.out.common.IdResponse;
 import com.example.backend.dtos.out.common.StatusResponse;
 import com.example.backend.dtos.out.tasks.TaskDto;
-import com.example.backend.entities.Apartment;
 import com.example.backend.entities.Profile;
 import com.example.backend.entities.Task;
 import com.example.backend.entities.User;
 import com.example.backend.exceptions.AccessForbiddenException;
 import com.example.backend.exceptions.ResourceNotFoundException;
-import com.example.backend.repositories.ApartmentRepository;
 import com.example.backend.repositories.ProfileRepository;
 import com.example.backend.repositories.TaskRepository;
 import com.example.backend.specifications.TaskSpecifications;
@@ -28,16 +26,13 @@ import java.util.Objects;
 public class TaskService {
     private final TaskRepository taskRepository;
     private final ProfileRepository profileRepository;
-    private final ApartmentRepository apartmentRepository;
 
     public TaskService(
             TaskRepository taskRepository,
-            ProfileRepository profileRepository,
-            ApartmentRepository apartmentRepository
+            ProfileRepository profileRepository
     ) {
         this.taskRepository = taskRepository;
         this.profileRepository = profileRepository;
-        this.apartmentRepository = apartmentRepository;
     }
 
     public IdResponse<Long> create(User user, Integer apartmentId, CreateTaskDto dto) {
@@ -48,9 +43,6 @@ public class TaskService {
         if (creatorProfile.getLeftAt() != null)
             throw new AccessForbiddenException("You can't create tasks in this apartment.");
 
-        Apartment apartment = apartmentRepository.findById(apartmentId).orElseThrow(
-                () -> new ResourceNotFoundException("Apartment not found.")
-        );
         Profile assignedProfile = null;
         if (dto.assignedTo() != null)
             assignedProfile = profileRepository.findById(dto.assignedTo()).orElseThrow(
@@ -58,7 +50,6 @@ public class TaskService {
             );
 
         Task task = taskRepository.save(new Task(
-                apartment,
                 creatorProfile,
                 assignedProfile,
                 dto.name(),
@@ -93,7 +84,7 @@ public class TaskService {
 
     @Transactional
     public StatusResponse switchTaskStatus(Integer apartmentId, User user, Long taskId) {
-        Task task = taskRepository.findByApartment_IdAndId(apartmentId, taskId).orElseThrow(
+        Task task = taskRepository.findByCreatedBy_Apartment_IdAndId(apartmentId, taskId).orElseThrow(
                 () -> new ResourceNotFoundException("Task not found.")
         );
 
@@ -128,7 +119,7 @@ public class TaskService {
     }
 
     public void deleteOne(Integer apartmentId, User user, Long taskId) {
-        Task task = taskRepository.findByApartment_IdAndId(apartmentId, taskId).orElseThrow(
+        Task task = taskRepository.findByCreatedBy_Apartment_IdAndId(apartmentId, taskId).orElseThrow(
                 () -> new ResourceNotFoundException("Task not found.")
         );
 

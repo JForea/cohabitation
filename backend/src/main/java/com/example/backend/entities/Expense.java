@@ -14,10 +14,6 @@ public class Expense {
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "apartment_id", nullable = false)
-    private Apartment apartment;
-
     @CreationTimestamp
     @Column(name = "created_at", nullable = false)
     private Instant createdAt;
@@ -42,14 +38,12 @@ public class Expense {
     public Expense() {}
 
     public Expense(
-            Apartment apartment,
             String name,
             Integer sum,
             ExpenseCategory category,
             String checkImageName,
             Profile createdBy
     ) {
-        this.apartment = apartment;
         this.name = name;
         this.sum = sum;
         this.category = category;
@@ -79,7 +73,7 @@ public class Expense {
 
     public void setName(String name) {this.name = name;}
 
-    public Integer getSum() {
+    public Integer getAmount() {
         return sum;
     }
 
@@ -87,14 +81,6 @@ public class Expense {
 
     public Instant getCreatedAt() {
         return createdAt;
-    }
-
-    public Apartment getApartment() {
-        return apartment;
-    }
-
-    public void setApartment(Apartment apartment) {
-        this.apartment = apartment;
     }
 
     public Long getId() {

@@ -45,8 +45,8 @@ public class Profile {
     @OneToMany(mappedBy = "createdBy", orphanRemoval = true)
     private Set<Expense> expenses = new LinkedHashSet<>();
 
-    @OneToMany(mappedBy = "monthlyExpenseKey.profile", cascade = CascadeType.REMOVE, orphanRemoval = true)
-    private Set<MonthlyExpense> monthlyExpenses = new LinkedHashSet<>();
+    @OneToMany(mappedBy = "profileMonthlyExpenseKey.profile", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private Set<ProfileMonthlyExpense> profileMonthlyExpenses = new LinkedHashSet<>();
 
     @OneToMany(mappedBy = "createdBy", orphanRemoval = true)
     private Set<Buying> createdByings = new LinkedHashSet<>();
@@ -156,9 +156,9 @@ public class Profile {
         this.expenses = expenses;
     }
 
-    public Set<MonthlyExpense> getMonthlyExpenses() {return this.monthlyExpenses;}
+    public Set<ProfileMonthlyExpense> getMonthlyExpenses() {return this.profileMonthlyExpenses;}
 
-    public void setMonthlyExpenses(Set<MonthlyExpense> monthlyExpenses) {this.monthlyExpenses = monthlyExpenses;}
+    public void setMonthlyExpenses(Set<ProfileMonthlyExpense> profileMonthlyExpens) {this.profileMonthlyExpenses = profileMonthlyExpens;}
 
     public Apartment getApartment() {
         return apartment;

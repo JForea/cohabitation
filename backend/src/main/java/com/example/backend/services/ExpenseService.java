@@ -3,18 +3,21 @@ package com.example.backend.services;
 import com.example.backend.dtos.in.expenses.CreateExpenseRequest;
 import com.example.backend.dtos.out.expenses.CreateExpenseResponse;
 import com.example.backend.dtos.out.expenses.ExpenseDto;
-import com.example.backend.entities.Apartment;
 import com.example.backend.entities.Expense;
+import com.example.backend.entities.ProfileMonthlyExpense;
 import com.example.backend.entities.User;
-import com.example.backend.exceptions.ResourceNotFoundException;
+import com.example.backend.entities.keys.ProfileMonthlyExpenseKey;
 import com.example.backend.intefaces.FileStorage;
-import com.example.backend.repositories.ApartmentRepository;
 import com.example.backend.repositories.ExpenseRepository;
+import com.example.backend.repositories.ProfileMonthlyExpenseRepository;
+import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
+import java.time.Month;
+import java.util.Calendar;
 import java.util.List;
 
 @Service
@@ -23,40 +26,50 @@ public class ExpenseService {
     private static final Logger log = LoggerFactory.getLogger(ExpenseService.class);
     private final ExpenseRepository expenseRepository;
 
-    private final ApartmentRepository apartmentRepository;
-
     private final FileStorage fileStorage;
+
+    private final ProfileMonthlyExpenseRepository profileMonthlyExpenseRepository;
 
     private final String bucketName = "checks";
 
     public ExpenseService(ExpenseRepository expenseRepository,
-                          ApartmentRepository apartmentRepository,
-                          FileStorage fileStorage) {
+                          FileStorage fileStorage,
+                          ProfileMonthlyExpenseRepository profileMonthlyExpenseRepository) {
         this.expenseRepository = expenseRepository;
-        this.apartmentRepository = apartmentRepository;
         this.fileStorage = fileStorage;
+        this.profileMonthlyExpenseRepository = profileMonthlyExpenseRepository;
     }
 
+    @Transactional
     public CreateExpenseResponse create(
-            Integer apartmentId,
             User user,
             CreateExpenseRequest dto,
             String checkImageName) {
         try {
-            Apartment apartment = apartmentRepository.findById(apartmentId).orElseThrow(
-                    () -> new ResourceNotFoundException("Apartment not found.")
-            );
-
             Expense expense = new Expense(
-                    apartment,
                     dto.name(),
-                    dto.sum(),
+                    dto.amount(),
                     dto.category(),
                     checkImageName,
                     user.getCurrentProfile()
             );
 
             expenseRepository.save(expense);
+
+            Month month = Month.of(Calendar.getInstance().get(Calendar.MONTH));
+
+            ProfileMonthlyExpense monthlyExpense =
+                    profileMonthlyExpenseRepository.findByProfileMonthlyExpenseKey_ProfileAndProfileMonthlyExpenseKey_Month(
+                            user.getCurrentProfile(),
+                            month
+                    ).orElse(new ProfileMonthlyExpense(new ProfileMonthlyExpenseKey(
+                            user.getCurrentProfile(),
+                            month
+                    )));
+
+            monthlyExpense.addAmount(expense.getAmount());
+
+            profileMonthlyExpenseRepository.save(monthlyExpense);
 
             return new CreateExpenseResponse(
                     expense.getId(),
@@ -71,8 +84,7 @@ public class ExpenseService {
     }
 
     public List<ExpenseDto> get(Integer apartmentId, Short page, Short size) {
-
-        return expenseRepository.findAllByApartment_Id(apartmentId, PageRequest.of(page, size))
+        return expenseRepository.findAllByCreatedBy_Apartment_Id(apartmentId, PageRequest.of(page, size))
                 .map(
                         expense -> {
                             String checkImageName = expense.getCheckImageName();

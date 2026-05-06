@@ -53,6 +53,7 @@ public class UserController {
     @GetMapping("/me")
     public ResponseEntity<UserDto> me(@AuthenticationPrincipal CustomUserDetails details) {
         User user = details.getUser();
-        return ResponseEntity.ok(new UserDto(user));
+        UserDto dto = userService.getCurrentInfo(user);
+        return ResponseEntity.ok(dto);
     }
 }

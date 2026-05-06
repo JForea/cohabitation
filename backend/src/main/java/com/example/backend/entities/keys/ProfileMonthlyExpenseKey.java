@@ -1,6 +1,5 @@
 package com.example.backend.entities.keys;
 
-import com.example.backend.entities.Apartment;
 import com.example.backend.entities.Profile;
 import jakarta.persistence.*;
 import org.hibernate.proxy.HibernateProxy;
@@ -9,11 +8,7 @@ import java.time.Month;
 import java.util.Objects;
 
 @Embeddable
-public class MonthlyExpenseKey {
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "apartment_id")
-    private Apartment apartment;
-
+public class ProfileMonthlyExpenseKey {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "profile_id")
     private Profile profile;
@@ -25,16 +20,11 @@ public class MonthlyExpenseKey {
         return month;
     }
 
-    public Apartment getApartment() {
-        return apartment;
-    }
-
     public Profile getProfile() {return profile;}
 
-    public MonthlyExpenseKey() {}
+    public ProfileMonthlyExpenseKey() {}
 
-    public MonthlyExpenseKey(Apartment apartment, Profile profile, Month month) {
-        this.apartment = apartment;
+    public ProfileMonthlyExpenseKey(Profile profile, Month month) {
         this.profile = profile;
         this.month = month;
     }
@@ -60,15 +50,14 @@ public class MonthlyExpenseKey {
             return false;
         }
 
-        MonthlyExpenseKey that = (MonthlyExpenseKey) o;
+        ProfileMonthlyExpenseKey that = (ProfileMonthlyExpenseKey) o;
 
-        return getApartment() != null && Objects.equals(getApartment(), that.getApartment())
-                && getProfile() != null && Objects.equals(getProfile(), that.getProfile())
+        return getProfile() != null && Objects.equals(getProfile(), that.getProfile())
                 && getMonth() != null && Objects.equals(getMonth(), that.getMonth());
     }
 
     @Override
     public final int hashCode() {
-        return Objects.hash(apartment, profile, month);
+        return Objects.hash(profile, month);
     }
 }

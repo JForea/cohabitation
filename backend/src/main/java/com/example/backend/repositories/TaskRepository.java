@@ -7,5 +7,5 @@ import org.springframework.data.repository.ListCrudRepository;
 import java.util.Optional;
 
 public interface TaskRepository extends ListCrudRepository<Task, Long>, JpaSpecificationExecutor<Task> {
-    Optional<Task> findByApartment_IdAndId(Integer apartmentId, Long id);
+    Optional<Task> findByCreatedBy_Apartment_IdAndId(Integer apartmentId, Long id);
 }

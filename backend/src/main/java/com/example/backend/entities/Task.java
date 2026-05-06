@@ -17,10 +17,6 @@ public class Task {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "apartment_id", nullable = false)
-    private Apartment apartment;
-
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "created_by", nullable = false)
     private Profile createdBy;
 
@@ -65,7 +61,6 @@ public class Task {
     public Task() {}
 
     public Task(
-            Apartment apartment,
             Profile createdBy,
             Profile assignedTo,
             String name,
@@ -76,7 +71,6 @@ public class Task {
             Short repeatTime,
             LocalDate dueTime
     ) {
-        this.apartment = apartment;
         this.createdBy = createdBy;
         this.assignedTo = assignedTo;
         this.name = name;
@@ -177,14 +171,6 @@ public class Task {
 
     public Profile getCreatedBy() {
         return createdBy;
-    }
-
-    public Apartment getApartment() {
-        return apartment;
-    }
-
-    public void setApartment(Apartment apartment) {
-        this.apartment = apartment;
     }
 
     public Long getId() {

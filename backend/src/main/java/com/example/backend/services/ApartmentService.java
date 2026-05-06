@@ -7,15 +7,13 @@ import com.example.backend.dtos.out.apartment.InviteCodeResponse;
 import com.example.backend.dtos.out.apartment.JoinApartmentResponse;
 import com.example.backend.dtos.out.profile.ProfileDto;
 import com.example.backend.entities.Apartment;
-import com.example.backend.entities.MonthlyExpense;
 import com.example.backend.entities.Profile;
+import com.example.backend.entities.ProfileMonthlyExpense;
 import com.example.backend.entities.User;
-import com.example.backend.entities.keys.MonthlyExpenseKey;
-import com.example.backend.exceptions.AccessForbiddenException;
 import com.example.backend.exceptions.ResourceNotFoundException;
 import com.example.backend.exceptions.StateConflictException;
 import com.example.backend.repositories.ApartmentRepository;
-import com.example.backend.repositories.MonthlyExpenseRepository;
+import com.example.backend.repositories.ProfileMonthlyExpenseRepository;
 import com.example.backend.repositories.ProfileRepository;
 import com.example.backend.repositories.UserRepository;
 import com.example.backend.types.Role;
@@ -36,7 +34,7 @@ public class ApartmentService {
 
     private final UserRepository userRepository;
 
-    private final MonthlyExpenseRepository monthlyExpenseRepository;
+    private final ProfileMonthlyExpenseRepository profileMonthlyExpenseRepository;
 
     private final Random random;
 
@@ -44,24 +42,18 @@ public class ApartmentService {
             ApartmentRepository apartmentRepository,
             ProfileRepository profileRepository,
             UserRepository userRepository,
-            MonthlyExpenseRepository monthlyExpenseRepository) {
+            ProfileMonthlyExpenseRepository profileMonthlyExpenseRepository) {
         this.apartmentRepository = apartmentRepository;
         this. profileRepository = profileRepository;
         this.userRepository = userRepository;
-        this.monthlyExpenseRepository = monthlyExpenseRepository;
+        this.profileMonthlyExpenseRepository = profileMonthlyExpenseRepository;
         random = new Random();
     }
 
-    private Optional<MonthlyExpense> getMonthlyExpense(User user, Apartment apartment) {
+    private Integer getMonthlyExpensesInApartment(Apartment apartment) {
         Month month = Month.of(Calendar.getInstance().get(Calendar.MONTH));
 
-        return monthlyExpenseRepository.findById(
-                new MonthlyExpenseKey(
-                        apartment,
-                        user.getCurrentProfile(),
-                        month
-                )
-        );
+        return profileMonthlyExpenseRepository.getSumByApartmentAndMonth(apartment, month);
     }
 
     @Transactional
@@ -82,7 +74,7 @@ public class ApartmentService {
         return new CreateApartmentResponse(
                 apartment.getId(),
                 apartment.getBudget(),
-                new ProfileDto(profile)
+                new ProfileDto(profile, 0)
         );
     }
 
@@ -93,11 +85,11 @@ public class ApartmentService {
                 new ResourceNotFoundException("Apartment not found.")
         );
 
-        Optional<MonthlyExpense> monthlyExpense = getMonthlyExpense(user, apartment);
+        Integer monthlyExpenses = getMonthlyExpensesInApartment(apartment);
 
         return new ApartmentDto(
                 apartment,
-                monthlyExpense.isPresent() ? monthlyExpense.get().getSum() : 0,
+                monthlyExpenses,
                 role == Role.INHABITANT ? null : apartment.getInviteCode()
         );
     }
@@ -151,12 +143,21 @@ public class ApartmentService {
             user.setCurrentProfile(profile);
             userRepository.save(user);
 
-            Optional<MonthlyExpense> monthlyExpense = getMonthlyExpense(user, apartment);
+            Integer monthlyExpenses = getMonthlyExpensesInApartment(apartment);
+
+            Month month = Month.of(Calendar.getInstance().get(Calendar.MONTH));
+
+            Optional<ProfileMonthlyExpense> profileMonthlyExpense = profileMonthlyExpenseRepository.
+                    findByProfileMonthlyExpenseKey_ProfileAndProfileMonthlyExpenseKey_Month(
+                            user.getCurrentProfile(),
+                            month
+                    );
 
             return new JoinApartmentResponse(
                     apartment,
-                    monthlyExpense.isPresent() ? monthlyExpense.get().getSum() : 0,
-                    profile
+                    monthlyExpenses,
+                    profile,
+                    profileMonthlyExpense.isPresent() ? profileMonthlyExpense.get().getAmount() : 0
             );
         }
 
@@ -171,12 +172,21 @@ public class ApartmentService {
         user.setCurrentProfile(profile);
         userRepository.save(user);
 
-        Optional<MonthlyExpense> monthlyExpense = getMonthlyExpense(user, apartment);
+        Integer monthlyExpenses = getMonthlyExpensesInApartment(apartment);
+
+        Month month = Month.of(Calendar.getInstance().get(Calendar.MONTH));
+
+        Optional<ProfileMonthlyExpense> profileMonthlyExpense = profileMonthlyExpenseRepository.
+                findByProfileMonthlyExpenseKey_ProfileAndProfileMonthlyExpenseKey_Month(
+                        user.getCurrentProfile(),
+                        month
+                );
 
         return new JoinApartmentResponse(
                 apartment,
-                monthlyExpense.isPresent() ? monthlyExpense.get().getSum() : 0,
-                profile
+                monthlyExpenses,
+                profile,
+                profileMonthlyExpense.isPresent() ? profileMonthlyExpense.get().getAmount() : 0
         );
     }
 }

@@ -25,17 +25,8 @@ public class Apartment {
     @Column(name = "budget", nullable = false)
     private Integer budget = 50000;
 
-    @OneToMany(mappedBy = "monthlyExpenseKey.apartment", cascade = CascadeType.REMOVE, orphanRemoval = true)
-    private Set<MonthlyExpense> monthlyExpenses = new LinkedHashSet<>();
-
     @OneToMany(mappedBy = "apartment", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private Set<Rule> rules = new LinkedHashSet<>();
-
-    @OneToMany(mappedBy = "apartment", cascade = CascadeType.REMOVE, orphanRemoval = true)
-    private Set<Expense> expenses = new LinkedHashSet<>();
-
-    @OneToMany(mappedBy = "apartment", cascade = CascadeType.REMOVE, orphanRemoval = true)
-    private Set<Buying> buyings = new LinkedHashSet<>();
 
     @OneToMany(mappedBy = "apartment", orphanRemoval = true)
     private Set<Profile> profiles = new LinkedHashSet<>();
@@ -43,22 +34,11 @@ public class Apartment {
     @OneToMany(mappedBy = "apartment", orphanRemoval = true)
     private Set<Event> events = new LinkedHashSet<>();
 
-    @OneToMany(mappedBy = "apartment", orphanRemoval = true)
-    private Set<Task> tasks = new LinkedHashSet<>();
-
     public Apartment() {}
 
     public Apartment(String name, String address) {
         this.name = name;
         this.address = address;
-    }
-
-    public Set<Task> getTasks() {
-        return tasks;
-    }
-
-    public void setTasks(Set<Task> tasks) {
-        this.tasks = tasks;
     }
 
     public Set<Event> getEvents() {
@@ -77,36 +57,12 @@ public class Apartment {
         this.profiles = profiles;
     }
 
-    public Set<Buying> getBuyings() {
-        return buyings;
-    }
-
-    public void setBuyings(Set<Buying> buyings) {
-        this.buyings = buyings;
-    }
-
-    public Set<Expense> getExpenses() {
-        return expenses;
-    }
-
-    public void setExpenses(Set<Expense> expenses) {
-        this.expenses = expenses;
-    }
-
     public Set<Rule> getRules() {
         return rules;
     }
 
     public void setRules(Set<Rule> rules) {
         this.rules = rules;
-    }
-
-    public Set<MonthlyExpense> getMonthlyExpenses() {
-        return monthlyExpenses;
-    }
-
-    public void setMonthlyExpenses(Set<MonthlyExpense> monthlyExpenses) {
-        this.monthlyExpenses = monthlyExpenses;
     }
 
     public Integer getBudget() {

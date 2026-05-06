@@ -52,12 +52,13 @@ public class ApartmentService {
         random = new Random();
     }
 
-    private Optional<MonthlyExpense> getMonthlyExpense(Apartment apartment) {
+    private Optional<MonthlyExpense> getMonthlyExpense(User user, Apartment apartment) {
         Month month = Month.of(Calendar.getInstance().get(Calendar.MONTH));
 
         return monthlyExpenseRepository.findById(
                 new MonthlyExpenseKey(
                         apartment,
+                        user.getCurrentProfile(),
                         month
                 )
         );
@@ -92,7 +93,7 @@ public class ApartmentService {
                 new ResourceNotFoundException("Apartment not found.")
         );
 
-        Optional<MonthlyExpense> monthlyExpense = getMonthlyExpense(apartment);
+        Optional<MonthlyExpense> monthlyExpense = getMonthlyExpense(user, apartment);
 
         return new ApartmentDto(
                 apartment,
@@ -150,7 +151,7 @@ public class ApartmentService {
             user.setCurrentProfile(profile);
             userRepository.save(user);
 
-            Optional<MonthlyExpense> monthlyExpense = getMonthlyExpense(apartment);
+            Optional<MonthlyExpense> monthlyExpense = getMonthlyExpense(user, apartment);
 
             return new JoinApartmentResponse(
                     apartment,
@@ -170,7 +171,7 @@ public class ApartmentService {
         user.setCurrentProfile(profile);
         userRepository.save(user);
 
-        Optional<MonthlyExpense> monthlyExpense = getMonthlyExpense(apartment);
+        Optional<MonthlyExpense> monthlyExpense = getMonthlyExpense(user, apartment);
 
         return new JoinApartmentResponse(
                 apartment,

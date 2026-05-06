@@ -1,6 +1,10 @@
+import 'dart:io';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:frontend/features/expenses/presentation/ui/widgets/fields/image_uploader_field.dart';
 import 'package:frontend/shared/data/providers/expenses_provider.dart';
 import 'package:frontend/shared/data/providers/user_provider.dart';
 import 'package:frontend/shared/data/types/expense_category.dart';
@@ -12,6 +16,7 @@ import 'package:frontend/shared/presentation/ui/widgets/wrappers/choice_wrapper.
 import 'package:frontend/shared/presentation/ui/widgets/wrappers/page_wrapper.dart';
 import 'package:frontend/shared/utils/util_functions.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
 
 class CreateExpensePage extends ConsumerStatefulWidget {
   const CreateExpensePage({super.key});
@@ -25,6 +30,7 @@ class _CreateApartmentPageState extends ConsumerState<CreateExpensePage> {
   late String name;
   late String sum;
   late ExpenseCategory category;
+  XFile? image;
 
   @override
   void initState() {
@@ -48,6 +54,12 @@ class _CreateApartmentPageState extends ConsumerState<CreateExpensePage> {
     });
   }
 
+  void setImage(XFile? image) {
+    setState(() {
+      this.image = image;
+    });
+  }
+
   Future<bool> create() async {
     final profile = ref.read(userProvider.select((u) => u?.profile));
 
@@ -59,7 +71,13 @@ class _CreateApartmentPageState extends ConsumerState<CreateExpensePage> {
 
     bool created = await ref
         .read(expensesProvider.notifier)
-        .create(name: name, sum: price, category: category, createdBy: profile);
+        .create(
+          name: name,
+          sum: price,
+          category: category,
+          createdBy: profile,
+          image: image,
+        );
 
     return created;
   }
@@ -111,6 +129,21 @@ class _CreateApartmentPageState extends ConsumerState<CreateExpensePage> {
                 )
                 .toList(),
           ),
+          image == null
+              ? ImageUploaderField(
+                  onImageSelect: setImage,
+                  fieldName: "Чек",
+                  innerText: "Добавить фото чека",
+                  require: true,
+                )
+              : Center(
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(maxWidth: .infinity),
+                    child: (kIsWeb
+                        ? Image.network(image!.path)
+                        : Image.file(File(image!.path), fit: .cover)),
+                  ),
+                ),
           Spacer(),
           CustomTextButton(
             onPressed: () async {

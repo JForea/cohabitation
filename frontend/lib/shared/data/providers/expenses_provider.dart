@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/shared/data/models/expense.dart';
 import 'package:frontend/shared/data/models/profile.dart';
@@ -6,6 +7,7 @@ import 'package:frontend/shared/data/network/dio_client.dart';
 import 'package:frontend/shared/data/providers/apartment_provider.dart';
 import 'package:frontend/shared/data/types/expense_category.dart';
 import 'package:frontend/shared/utils/util_functions.dart';
+import 'package:image_picker/image_picker.dart';
 
 final expensesProvider =
     AsyncNotifierProvider<_ExpensesNotifier, List<Expense>>(
@@ -83,6 +85,7 @@ class _ExpensesNotifier extends AsyncNotifier<List<Expense>> {
     required int sum,
     required ExpenseCategory category,
     required Profile createdBy,
+    XFile? image,
   }) async {
     if (_isLoading) {
       return false;
@@ -99,6 +102,16 @@ class _ExpensesNotifier extends AsyncNotifier<List<Expense>> {
             "category": "${UtilFunctions.tValueToStringRequest(category)}"
           }
           ''', contentType: .parse('application/json')),
+        if (image != null && kIsWeb)
+          "image": MultipartFile.fromBytes(
+            await image.readAsBytes(),
+            filename: image.name,
+          )
+        else if (image != null)
+          "image": await MultipartFile.fromFile(
+            image.path,
+            filename: image.name,
+          ),
       });
 
       final response = await AppDio.dio.post(baseUrl, data: formData);

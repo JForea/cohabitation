@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:frontend/shared/formatters/price_input_formatter.dart';
 import 'package:frontend/shared/presentation/theme/app_shadows.dart';
+import 'package:frontend/shared/presentation/ui/widgets/texts/field_name.dart';
 
 enum InputType { text, password, price }
 
@@ -70,32 +71,10 @@ class _ControlledNamedTextFieldState extends State<ControlledNamedTextField> {
 
   @override
   Widget build(BuildContext context) {
-    final textColor = Theme.of(context).colorScheme.onSurfaceVariant;
-
     return Column(
       spacing: 8,
       children: [
-        Row(
-          children: [
-            Text(
-              "${widget.title.toUpperCase()} ${widget.require ? "*" : ""}",
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: .w700,
-                color: textColor,
-              ),
-            ),
-            if (!widget.require)
-              Text(
-                "(необязательно)",
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: .w500,
-                  color: textColor,
-                ),
-              ),
-          ],
-        ),
+        FieldName(title: widget.title, require: widget.require),
         Container(
           padding: .symmetric(vertical: 4, horizontal: 16),
           decoration: BoxDecoration(

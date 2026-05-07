@@ -117,6 +117,7 @@ class _CreateTaskPageState extends ConsumerState<CreateTaskPage> {
       body: PageWrapper(
         backButton: true,
         pageName: "Новая задача",
+        bottomFloatingButtonExists: false,
         children: [
           ControlledNamedTextField(
             text: name,

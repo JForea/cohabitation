@@ -88,6 +88,7 @@ class _CreateApartmentPageState extends ConsumerState<CreateExpensePage> {
       body: PageWrapper(
         backButton: true,
         pageName: "Добавить запись",
+        bottomFloatingButtonExists: false,
         children: [
           ControlledNamedTextField(
             text: name,

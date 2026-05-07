@@ -49,6 +49,7 @@ class SettingsPage extends ConsumerWidget {
       body: PageWrapper(
         backButton: true,
         pageName: "Настройки",
+        bottomFloatingButtonExists: false,
         children: [
           if (role != null && role != Role.inhabitant && apartment != null)
             CustomWidgetList(

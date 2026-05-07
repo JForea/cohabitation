@@ -28,6 +28,7 @@ class EventsPage extends ConsumerWidget {
         child: PageWrapper(
           backButton: true,
           pageName: DateFormat("d MMMM", "ru_RU").format(date),
+          bottomFloatingButtonExists: true,
           children: [
             eventsState.when(
               data: (events) => events.isEmpty

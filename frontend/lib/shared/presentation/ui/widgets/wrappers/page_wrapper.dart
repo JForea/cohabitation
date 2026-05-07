@@ -7,11 +7,13 @@ class PageWrapper extends StatelessWidget {
     required this.backButton,
     required this.pageName,
     required this.children,
+    required this.bottomFloatingButtonExists,
   });
 
   final List<Widget> children;
   final String pageName;
   final bool backButton;
+  final bool bottomFloatingButtonExists;
 
   @override
   Widget build(BuildContext context) {
@@ -20,7 +22,12 @@ class PageWrapper extends StatelessWidget {
         SliverFillRemaining(
           hasScrollBody: false,
           child: Container(
-            padding: .only(top: 60, left: 20, right: 20, bottom: 20),
+            padding: .only(
+              top: 60,
+              left: 20,
+              right: 20,
+              bottom: bottomFloatingButtonExists ? 90 : 20,
+            ),
             width: .infinity,
             child: Column(
               crossAxisAlignment: .start,

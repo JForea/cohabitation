@@ -125,6 +125,7 @@ class _CreateBuyingPageState extends ConsumerState<CreateBuyingPage> {
       body: PageWrapper(
         backButton: true,
         pageName: 'Добавить товар',
+        bottomFloatingButtonExists: false,
         children: [
           Row(
             spacing: 15,

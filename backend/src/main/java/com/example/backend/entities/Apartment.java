@@ -31,22 +31,11 @@ public class Apartment {
     @OneToMany(mappedBy = "apartment", orphanRemoval = true)
     private Set<Profile> profiles = new LinkedHashSet<>();
 
-    @OneToMany(mappedBy = "apartment", orphanRemoval = true)
-    private Set<Event> events = new LinkedHashSet<>();
-
     public Apartment() {}
 
     public Apartment(String name, String address) {
         this.name = name;
         this.address = address;
-    }
-
-    public Set<Event> getEvents() {
-        return events;
-    }
-
-    public void setEvents(Set<Event> events) {
-        this.events = events;
     }
 
     public Set<Profile> getProfiles() {

@@ -48,16 +48,17 @@ class SettingsPage extends ConsumerWidget {
                 ),
               ],
             ),
-          rulesState.when(
-            data: (rules) => RuleList(
-              titleNeeded: true,
-              rules: rules,
-              onRuleAdd: (text) => createRule(ref, text),
-              onRuleRemove: (id) async {},
+          if (role != null && role != .inhabitant)
+            rulesState.when(
+              data: (rules) => RuleList(
+                titleNeeded: true,
+                rules: rules,
+                onRuleAdd: (text) => createRule(ref, text),
+                onRuleRemove: (id) async {},
+              ),
+              error: (e, _) => Text("Произошла ошибка при загрузке."),
+              loading: () => Center(child: CircularProgressIndicator()),
             ),
-            error: (e, _) => Text("Произошла ошибка при загрузке."),
-            loading: () => Center(child: CircularProgressIndicator()),
-          ),
           Spacer(),
           CustomWidgetList(
             danger: true,

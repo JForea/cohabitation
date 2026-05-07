@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/features/apartment_enter/presentation/ui/widgets/pages/join_apartment_page.dart';
 import 'package:frontend/features/auth/login/presentation/ui/widgets/pages/login_page.dart';
 import 'package:frontend/features/buyings/presentation/ui/widgets/pages/create_buying_page.dart';
+import 'package:frontend/features/events/presentation/ui/widgets/pages/events_page.dart';
 import 'package:frontend/features/expenses/presentation/ui/widgets/pages/create_expense_page.dart';
 import 'package:frontend/features/settings/presentation/ui/widgets/pages/settings_page.dart';
 import 'package:frontend/features/tasks/presentation/ui/widgets/pages/create_task_page.dart';
@@ -84,6 +85,16 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/enter/join',
         builder: (context, state) => JoinApartmentPage(),
+      ),
+      GoRoute(
+        path: "/events/day/:date",
+        builder: (context, state) {
+          final dateString = state.pathParameters["date"];
+
+          final date = DateTime.tryParse(dateString ?? '') ?? DateTime.now();
+
+          return EventsPage(date: date);
+        },
       ),
       GoRoute(
         path: '/tasks/create',

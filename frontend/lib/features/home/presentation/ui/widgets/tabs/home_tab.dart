@@ -64,7 +64,8 @@ class _HomeTabState extends ConsumerState<HomeTab> {
                 focusedDay: focusedDay,
                 firstDay: firstDay,
                 lastDay: lastDay,
-                onDaySelected: () => context.push("/"),
+                onDaySelected: (day) =>
+                    context.push("/events/day/${day.toIso8601String()}"),
                 onPageChanged: (month) => updateMonth(ref, month),
               ),
               neighboursState.when(

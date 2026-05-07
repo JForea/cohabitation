@@ -19,7 +19,7 @@ class Calendar extends StatelessWidget {
   final DateTime focusedDay;
   final DateTime firstDay;
   final DateTime lastDay;
-  final VoidCallback onDaySelected;
+  final void Function(DateTime) onDaySelected;
   final void Function(DateTime) onPageChanged;
 
   @override
@@ -102,35 +102,29 @@ class Calendar extends StatelessWidget {
             fontWeight: .w500,
           ),
         ),
-        onDaySelected: (selectedDay, focusedDay) => onDaySelected(),
+        onDaySelected: (selectedDay, _) => onDaySelected(selectedDay),
         onPageChanged: (focusedDay) => onPageChanged(focusedDay),
         calendarBuilders: CalendarBuilders(
-          defaultBuilder: (context, day, focusedDay) {
-            if (dates == null) {
-              return null;
-            }
+          defaultBuilder: (_, day, _) {
+            final isEventDay = dates?.any((d) => isSameDay(d, day)) ?? false;
 
-            for (final date in dates!) {
-              if (date.year == day.year &&
-                  date.month == day.month &&
-                  date.day == day.day) {
-                return Container(
-                  margin: const EdgeInsets.all(4),
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    color: AppColors.blue.withAlpha(37),
-                    shape: .circle,
+            if (isEventDay) {
+              return Container(
+                margin: const EdgeInsets.all(4),
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: AppColors.blue.withAlpha(37),
+                  shape: .circle,
+                ),
+                child: Text(
+                  '${day.day}',
+                  style: TextStyle(
+                    color: AppColors.blue,
+                    fontSize: 14,
+                    fontWeight: .w600,
                   ),
-                  child: Text(
-                    '${date.day}',
-                    style: TextStyle(
-                      color: AppColors.blue,
-                      fontSize: 14,
-                      fontWeight: .w600,
-                    ),
-                  ),
-                );
-              }
+                ),
+              );
             }
 
             return null;

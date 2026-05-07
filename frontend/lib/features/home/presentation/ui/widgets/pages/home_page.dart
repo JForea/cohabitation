@@ -9,6 +9,7 @@ import 'package:frontend/features/profile/presentation/ui/widgets/tabs/profile_t
 import 'package:frontend/features/tasks/presentation/ui/widgets/tabs/tasks_tab.dart';
 import 'package:frontend/shared/data/providers/user_provider.dart';
 import 'package:frontend/shared/data/types/role.dart';
+import 'package:frontend/shared/presentation/ui/widgets/buttons/custom_app_floating_action_button.dart';
 import 'package:go_router/go_router.dart';
 
 class HomePage extends ConsumerStatefulWidget {
@@ -29,21 +30,15 @@ class _HomePageState extends ConsumerState<HomePage> {
     return switch (currentIndex) {
       1 =>
         role != Role.inhabitant
-            ? FloatingActionButton(
+            ? CustomAppFloatingActionButton(
                 onPressed: () => context.push("/tasks/create"),
-                shape: CircleBorder(),
-                child: Icon(Icons.add, size: 28),
               )
             : null,
-      2 => FloatingActionButton(
+      2 => CustomAppFloatingActionButton(
         onPressed: () => context.push("/buyings/create"),
-        shape: CircleBorder(),
-        child: Icon(Icons.add, size: 28),
       ),
-      3 => FloatingActionButton(
+      3 => CustomAppFloatingActionButton(
         onPressed: () => context.push("/expenses/create"),
-        shape: CircleBorder(),
-        child: Icon(Icons.add, size: 28),
       ),
       _ => null,
     };

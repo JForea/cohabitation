@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:frontend/shared/formatters/price_input_formatter.dart';
+import 'package:frontend/shared/formatters/time_input_formatter.dart';
 import 'package:frontend/shared/presentation/theme/app_shadows.dart';
 import 'package:frontend/shared/presentation/ui/widgets/texts/field_name.dart';
 
-enum InputType { text, password, price }
+enum InputType { text, password, price, time }
 
 class ControlledNamedTextField extends StatefulWidget {
   const ControlledNamedTextField({
@@ -110,6 +111,7 @@ class _ControlledNamedTextFieldState extends State<ControlledNamedTextField> {
                   obscureText: widget.type == .password && !_showPassword,
                   inputFormatters: [
                     if (widget.type == .price) PriceInputFormatter(),
+                    if (widget.type == .time) TimeInputFormatter(),
                   ],
                 ),
               ),

@@ -3,31 +3,167 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:frontend/features/events/data/providers/events_provider.dart';
 import 'package:frontend/features/events/presentation/ui/widgets/cards/event_card.dart';
+import 'package:frontend/shared/data/providers/user_provider.dart';
 import 'package:frontend/shared/presentation/theme/app_colors.dart';
 import 'package:frontend/shared/presentation/ui/widgets/buttons/custom_app_floating_action_button.dart';
+import 'package:frontend/shared/presentation/ui/widgets/buttons/custom_text_button.dart';
+import 'package:frontend/shared/presentation/ui/widgets/inputs/controlled_named_text_field.dart';
+import 'package:frontend/shared/presentation/ui/widgets/modals/app_modal.dart';
 import 'package:frontend/shared/presentation/ui/widgets/wrappers/page_wrapper.dart';
 import 'package:intl/intl.dart';
 
-class EventsPage extends ConsumerWidget {
+class EventsPage extends ConsumerStatefulWidget {
   const EventsPage({super.key, required this.date});
 
   final DateTime date;
 
+  @override
+  ConsumerState<ConsumerStatefulWidget> createState() => _EventsPageState();
+}
+
+class _EventsPageState extends ConsumerState<EventsPage> {
+  late String name;
+  late String time;
+  late String description;
+
   Future<void> _refresh(WidgetRef ref) async {
-    ref.read(eventsProvider(date).notifier).refresh();
+    ref.read(eventsProvider(widget.date).notifier).refresh();
+  }
+
+  void setName(String s) {
+    name = s;
+  }
+
+  void setTime(String s) {
+    time = s;
+  }
+
+  void setDescription(String s) {
+    description = s;
+  }
+
+  TimeOfDay parseTime(String time) {
+    final timeSplitted = time.split(":");
+    return TimeOfDay(
+      hour: int.parse(timeSplitted[0]),
+      minute: int.parse(timeSplitted[1]),
+    );
+  }
+
+  Future<bool> create() async {
+    if (time.isNotEmpty && time.length < 5) {
+      return false;
+    }
+
+    TimeOfDay? timeOfDay;
+    if (time.isNotEmpty) {
+      timeOfDay = parseTime(time);
+    }
+
+    final createdBy = ref.read(userProvider)?.profile;
+
+    if (createdBy == null) {
+      return false;
+    }
+
+    final created = await ref
+        .watch(eventsProvider(widget.date).notifier)
+        .create(
+          name: name,
+          createdBy: createdBy,
+          description: description,
+          time: timeOfDay,
+        );
+
+    if (created) {
+      setState(() {
+        name = "";
+        time = "";
+        description = "";
+      });
+    }
+
+    return created;
+  }
+
+  void _onAdd(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) => AppModal(
+        children: [
+          Text(
+            "Новое событие",
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onSurface,
+              fontSize: 18,
+              fontWeight: .w500,
+            ),
+          ),
+          ControlledNamedTextField(
+            text: name,
+            title: "Название",
+            hintText: "Собрание",
+            onChange: setName,
+            secondaryColor: true,
+            type: .text,
+            require: true,
+          ),
+          ControlledNamedTextField(
+            text: time,
+            title: "Время начала",
+            hintText: "14:30",
+            onChange: setTime,
+            secondaryColor: true,
+            type: .time,
+            require: false,
+          ),
+          ControlledNamedTextField(
+            text: description,
+            title: "Описание",
+            hintText: "Обсудим планы",
+            onChange: setDescription,
+            secondaryColor: true,
+            type: .text,
+            maxLines: 3,
+            require: false,
+          ),
+          CustomTextButton(
+            onPressed: () async {
+              bool created = await create();
+
+              if (created && context.mounted) {
+                Navigator.pop(context);
+              }
+            },
+            text: "Создать",
+          ),
+        ],
+      ),
+    );
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final eventsState = ref.watch(eventsProvider(date));
+  void initState() {
+    name = "";
+    time = "";
+    description = "";
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final eventsState = ref.watch(eventsProvider(widget.date));
 
     return Scaffold(
-      floatingActionButton: CustomAppFloatingActionButton(onPressed: () {}),
+      floatingActionButton: CustomAppFloatingActionButton(
+        onPressed: () => _onAdd(context),
+      ),
       body: RefreshIndicator(
         onRefresh: () => _refresh(ref),
         child: PageWrapper(
           backButton: true,
-          pageName: DateFormat("d MMMM", "ru_RU").format(date),
+          pageName: DateFormat("d MMMM", "ru_RU").format(widget.date),
           bottomFloatingButtonExists: true,
           children: [
             eventsState.when(

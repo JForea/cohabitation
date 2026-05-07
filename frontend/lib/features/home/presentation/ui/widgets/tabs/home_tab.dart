@@ -4,7 +4,7 @@ import 'package:frontend/features/home/presentation/ui/widgets/app_bars/home_app
 import 'package:frontend/features/home/presentation/ui/widgets/calendars/calendar.dart';
 import 'package:frontend/features/home/presentation/ui/widgets/previews/neighbours_preview.dart';
 import 'package:frontend/shared/data/providers/apartment_provider.dart';
-import 'package:frontend/shared/data/providers/calendar_provider.dart';
+import 'package:frontend/features/home/data/providers/calendar_provider.dart';
 import 'package:frontend/shared/data/providers/neighbours_provider.dart';
 import 'package:frontend/shared/data/providers/user_provider.dart';
 import 'package:frontend/shared/presentation/ui/widgets/wrappers/tab_wrapper.dart';

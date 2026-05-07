@@ -1,25 +1,31 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/shared/presentation/theme/app_shadows.dart';
 
-class ControlledSmallTextField extends StatefulWidget {
-  const ControlledSmallTextField({
+class ControlledTextField extends StatefulWidget {
+  const ControlledTextField({
     super.key,
     this.text = "",
     required this.hintText,
     required this.onChange,
     required this.secondaryColor,
+    this.padding = const .symmetric(horizontal: 10, vertical: 8),
+    this.borderRadius = 30,
+    this.fontSize = 14,
   });
 
   final String text;
   final String hintText;
   final void Function(String) onChange;
   final bool secondaryColor;
+  final EdgeInsets padding;
+  final double borderRadius;
+  final double fontSize;
 
   @override
-  State<StatefulWidget> createState() => _ControlledSmallTextFieldState();
+  State<StatefulWidget> createState() => _ControlledTextFieldState();
 }
 
-class _ControlledSmallTextFieldState extends State<ControlledSmallTextField> {
+class _ControlledTextFieldState extends State<ControlledTextField> {
   final _textEditingController = TextEditingController();
 
   @override
@@ -37,7 +43,7 @@ class _ControlledSmallTextFieldState extends State<ControlledSmallTextField> {
   }
 
   @override
-  void didUpdateWidget(ControlledSmallTextField oldWidget) {
+  void didUpdateWidget(ControlledTextField oldWidget) {
     super.didUpdateWidget(oldWidget);
 
     if (oldWidget != widget) {
@@ -52,12 +58,12 @@ class _ControlledSmallTextFieldState extends State<ControlledSmallTextField> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: .symmetric(horizontal: 10, vertical: 8),
+      padding: widget.padding,
       decoration: BoxDecoration(
         color: widget.secondaryColor
             ? Theme.of(context).colorScheme.surface
             : Colors.white,
-        borderRadius: .all(.circular(30)),
+        borderRadius: .all(.circular(widget.borderRadius)),
         boxShadow: [AppShadows.standard()],
       ),
       child: TextField(
@@ -68,9 +74,12 @@ class _ControlledSmallTextFieldState extends State<ControlledSmallTextField> {
           contentPadding: .zero,
           border: .none,
           hintText: widget.hintText,
-          hintStyle: TextStyle(fontSize: 14, color: Color(0xFF9A9A9A)),
+          hintStyle: TextStyle(
+            fontSize: widget.fontSize,
+            color: Color(0xFF9A9A9A),
+          ),
         ),
-        style: TextStyle(fontSize: 14),
+        style: TextStyle(fontSize: widget.fontSize),
       ),
     );
   }

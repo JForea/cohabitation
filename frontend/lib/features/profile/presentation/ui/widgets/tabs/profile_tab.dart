@@ -4,6 +4,8 @@ import 'package:frontend/features/profile/presentation/ui/widgets/app_bars/profi
 import 'package:frontend/features/profile/presentation/ui/widgets/lists/neighbours_top_list.dart';
 import 'package:frontend/shared/data/providers/auth_provider.dart';
 import 'package:frontend/shared/data/providers/neighbours_provider.dart';
+import 'package:frontend/shared/data/providers/rules_provider.dart';
+import 'package:frontend/shared/presentation/ui/widgets/lists/rule_list.dart';
 import 'package:frontend/shared/presentation/ui/widgets/wrappers/tab_wrapper.dart';
 
 class ProfileTab extends ConsumerWidget {
@@ -15,6 +17,7 @@ class ProfileTab extends ConsumerWidget {
       authProvider.select((s) => s.value!.user!.profile!),
     );
     final neighboursState = ref.watch(neighboursProvider);
+    final rulesState = ref.watch(rulesProvider);
 
     return Column(
       children: [
@@ -30,6 +33,25 @@ class ProfileTab extends ConsumerWidget {
               ),
               error: (e, _) => Text("Произошла ошибка."),
               loading: () => Center(child: CircularProgressIndicator()),
+            ),
+            Column(
+              spacing: 8,
+              crossAxisAlignment: .start,
+              children: [
+                Text(
+                  "Правила",
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSurface,
+                    fontSize: 16,
+                    fontWeight: .w500,
+                  ),
+                ),
+                rulesState.when(
+                  data: (rules) => RuleList(titleNeeded: false, rules: rules),
+                  error: (e, _) => Text("Произошла ошибка при загрузке."),
+                  loading: () => Center(child: CircularProgressIndicator()),
+                ),
+              ],
             ),
           ],
         ),

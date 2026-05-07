@@ -55,10 +55,21 @@ class ExpensesTab extends ConsumerWidget {
               budget: budget,
               currentExpenses: currentExpenses,
             ),
-          expenseState.when(
-            data: (expenses) => ExpenseList(expenses: expenses),
-            error: (e, _) => Text("Произошла ошибка при загрузке."),
-            loading: () => Center(child: CircularProgressIndicator()),
+          Column(
+            crossAxisAlignment: .start,
+            spacing: 8,
+            children: [
+              Text(
+                "История",
+                style: TextStyle(fontWeight: .w500, fontSize: 16),
+              ),
+              expenseState.when(
+                data: (expenses) => ExpenseList(expenses: expenses),
+
+                error: (e, _) => Text("Произошла ошибка при загрузке."),
+                loading: () => Center(child: CircularProgressIndicator()),
+              ),
+            ],
           ),
         ],
       ),

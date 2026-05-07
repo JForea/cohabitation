@@ -12,10 +12,7 @@ class ExpenseList extends StatelessWidget {
     return Column(
       crossAxisAlignment: .start,
       spacing: 10,
-      children: [
-        Text("История", style: TextStyle(fontWeight: .w500, fontSize: 16)),
-        ...expenses.map((e) => ExpenseCard(expense: e)),
-      ],
+      children: expenses.map((e) => ExpenseCard(expense: e)).toList(),
     );
   }
 }

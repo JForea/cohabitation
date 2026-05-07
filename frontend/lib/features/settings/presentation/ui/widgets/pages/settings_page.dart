@@ -5,9 +5,11 @@ import 'package:frontend/features/settings/presentation/ui/widgets/list_tiles/ge
 import 'package:frontend/shared/data/providers/apartment_provider.dart';
 import 'package:frontend/shared/data/providers/async_apartment_provider.dart';
 import 'package:frontend/shared/data/providers/auth_provider.dart';
+import 'package:frontend/shared/data/providers/rules_provider.dart';
 import 'package:frontend/shared/data/providers/user_provider.dart';
 import 'package:frontend/shared/data/types/role.dart';
 import 'package:frontend/shared/presentation/ui/widgets/lists/custom_widget_list.dart';
+import 'package:frontend/shared/presentation/ui/widgets/lists/rule_list.dart';
 import 'package:frontend/shared/presentation/ui/widgets/wrappers/page_wrapper.dart';
 
 class SettingsPage extends ConsumerWidget {
@@ -17,10 +19,17 @@ class SettingsPage extends ConsumerWidget {
     await ref.read(authProvider.notifier).logout();
   }
 
+  Future<bool> createRule(WidgetRef ref, String text) async {
+    bool created = await ref.read(rulesProvider.notifier).create(text);
+
+    return created;
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final apartment = ref.watch(apartmentProvider);
     final role = ref.watch(userProvider.select((u) => u?.profile?.role));
+    final rulesState = ref.watch(rulesProvider);
 
     return Scaffold(
       body: PageWrapper(
@@ -39,6 +48,16 @@ class SettingsPage extends ConsumerWidget {
                 ),
               ],
             ),
+          rulesState.when(
+            data: (rules) => RuleList(
+              titleNeeded: true,
+              rules: rules,
+              onRuleAdd: (text) => createRule(ref, text),
+              onRuleRemove: (id) async {},
+            ),
+            error: (e, _) => Text("Произошла ошибка при загрузке."),
+            loading: () => Center(child: CircularProgressIndicator()),
+          ),
           Spacer(),
           CustomWidgetList(
             danger: true,

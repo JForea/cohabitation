@@ -2,10 +2,16 @@ package com.example.backend.services;
 
 import com.example.backend.dtos.in.events.CreateEventRequest;
 import com.example.backend.dtos.out.common.IdResponse;
+import com.example.backend.dtos.out.events.EventDto;
 import com.example.backend.entities.Event;
 import com.example.backend.entities.User;
 import com.example.backend.repositories.EventRepository;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDate;
+import java.time.Month;
+import java.time.YearMonth;
+import java.util.List;
 
 @Service
 public class EventService {
@@ -26,5 +32,17 @@ public class EventService {
         ));
 
         return new IdResponse<>(event.getId());
+    }
+
+    public List<LocalDate> getEventDates(Integer apartmentId, Integer year, Month month) {
+        LocalDate start = YearMonth.of(year, month).atDay(1);
+        LocalDate end = start.withDayOfMonth(start.lengthOfMonth());
+
+        return eventRepository.findDistinctDatesByApartmentIdAndDateBetween(apartmentId, start, end);
+    }
+
+    public List<EventDto> getEventsByDay(Integer apartmentId, LocalDate date) {
+        return eventRepository.findAllByCreatedBy_Apartment_IdAndDate(apartmentId, date)
+                .stream().map(EventDto::new).toList();
     }
 }

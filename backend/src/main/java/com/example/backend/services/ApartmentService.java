@@ -21,6 +21,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.time.Month;
+import java.time.Year;
 import java.util.Calendar;
 import java.util.Optional;
 import java.util.Random;
@@ -51,9 +52,16 @@ public class ApartmentService {
     }
 
     private Integer getMonthlyExpensesInApartment(Apartment apartment) {
-        Month month = Month.of(Calendar.getInstance().get(Calendar.MONTH));
+        Calendar calendar = Calendar.getInstance();
 
-        Integer sum = profileMonthlyExpenseRepository.getSumByApartmentAndMonth(apartment, month);
+        Month month = Month.of(calendar.get(Calendar.MONTH));
+        Year year = Year.of(calendar.get(Calendar.YEAR));
+
+        Integer sum = profileMonthlyExpenseRepository.getSumByApartmentAndYearAndMonth(
+                apartment,
+                year.getValue(),
+                month
+        );
 
         return sum == null ? 0 : sum;
     }
@@ -147,11 +155,15 @@ public class ApartmentService {
 
             Integer monthlyExpenses = getMonthlyExpensesInApartment(apartment);
 
-            Month month = Month.of(Calendar.getInstance().get(Calendar.MONTH));
+            Calendar calendar = Calendar.getInstance();
 
-            Optional<ProfileMonthlyExpense> profileMonthlyExpense = profileMonthlyExpenseRepository.
-                    findByProfileMonthlyExpenseKey_ProfileAndProfileMonthlyExpenseKey_Month(
+            Month month = Month.of(calendar.get(Calendar.MONTH));
+            Year year = Year.of(calendar.get(Calendar.YEAR));
+
+            Integer profileMonthlyExpense = profileMonthlyExpenseRepository.
+                    getSumByProfileAndYearAndMonth(
                             user.getCurrentProfile(),
+                            year.getValue(),
                             month
                     );
 
@@ -159,7 +171,7 @@ public class ApartmentService {
                     apartment,
                     monthlyExpenses,
                     profile,
-                    profileMonthlyExpense.isPresent() ? profileMonthlyExpense.get().getAmount() : 0
+                    profileMonthlyExpense != null ? profileMonthlyExpense : 0
             );
         }
 
@@ -176,19 +188,11 @@ public class ApartmentService {
 
         Integer monthlyExpenses = getMonthlyExpensesInApartment(apartment);
 
-        Month month = Month.of(Calendar.getInstance().get(Calendar.MONTH));
-
-        Optional<ProfileMonthlyExpense> profileMonthlyExpense = profileMonthlyExpenseRepository.
-                findByProfileMonthlyExpenseKey_ProfileAndProfileMonthlyExpenseKey_Month(
-                        user.getCurrentProfile(),
-                        month
-                );
-
         return new JoinApartmentResponse(
                 apartment,
                 monthlyExpenses,
                 profile,
-                profileMonthlyExpense.isPresent() ? profileMonthlyExpense.get().getAmount() : 0
+                0
         );
     }
 }

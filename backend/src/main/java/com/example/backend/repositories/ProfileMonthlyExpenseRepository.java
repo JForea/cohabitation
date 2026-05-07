@@ -3,7 +3,7 @@ package com.example.backend.repositories;
 import com.example.backend.entities.Apartment;
 import com.example.backend.entities.Profile;
 import com.example.backend.entities.ProfileMonthlyExpense;
-import com.example.backend.entities.keys.ProfileMonthlyExpenseKey;
+import com.example.backend.types.ExpenseCategory;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.ListCrudRepository;
 import org.springframework.data.repository.query.Param;
@@ -11,16 +11,35 @@ import org.springframework.data.repository.query.Param;
 import java.time.Month;
 import java.util.Optional;
 
-public interface ProfileMonthlyExpenseRepository extends ListCrudRepository<ProfileMonthlyExpense, ProfileMonthlyExpenseKey> {
+public interface ProfileMonthlyExpenseRepository extends ListCrudRepository<ProfileMonthlyExpense, Long> {
     @Query("""
         SELECT sum(e.amount)
         FROM ProfileMonthlyExpense e
-        WHERE e.profileMonthlyExpenseKey.profile.apartment = :apartment
-            AND e.profileMonthlyExpenseKey.month = :month
+        WHERE e.profile.apartment = :apartment
+            AND e.year = :year
+            AND e.month = :month
     """)
-    Integer getSumByApartmentAndMonth(@Param("apartment") Apartment apartment, @Param("month") Month month);
-    Optional<ProfileMonthlyExpense> findByProfileMonthlyExpenseKey_ProfileAndProfileMonthlyExpenseKey_Month(
+    Integer getSumByApartmentAndYearAndMonth(
+            @Param("apartment") Apartment apartment,
+            @Param("year") Integer year,
+            @Param("month") Month month
+    );
+    @Query("""
+        SELECT sum(e.amount)
+        FROM ProfileMonthlyExpense e
+        WHERE e.profile = :profile
+            AND e.year = :year
+            AND e.month = :month
+    """)
+    Integer getSumByProfileAndYearAndMonth(
+            @Param("profile") Profile profile,
+            @Param("year") Integer year,
+            @Param("month") Month month
+    );
+    Optional<ProfileMonthlyExpense> findByYearAndMonthAndProfileAndExpenseCategory(
+            Integer year,
+            Month month,
             Profile profile,
-            Month month
+            ExpenseCategory category
     );
 }

@@ -1,67 +1,76 @@
 package com.example.backend.entities;
 
-import com.example.backend.entities.keys.ProfileMonthlyExpenseKey;
-import jakarta.persistence.Column;
-import jakarta.persistence.EmbeddedId;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
-import org.hibernate.proxy.HibernateProxy;
+import com.example.backend.types.ExpenseCategory;
+import jakarta.persistence.*;
 
-import java.util.Objects;
+import java.time.Month;
+import java.time.Year;
 
 @Entity
 @Table(name = "monthly_expense")
 public class ProfileMonthlyExpense {
-    @EmbeddedId
-    private ProfileMonthlyExpenseKey profileMonthlyExpenseKey;
+    @Id
+    @GeneratedValue
+    @Column(name = "id")
+    private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "profile_id", nullable = false)
+    private Profile profile;
+
+    @Column(name = "expense_category", nullable = false)
+    private ExpenseCategory expenseCategory;
+
+    @Column(name = "year", nullable = false)
+    private Integer year;
+
+    @Column(name = "month", nullable = false)
+    private Month month;
 
     @Column(name = "amount", nullable = false)
     private Integer amount = 0;
+
+    @Column(name = "expenses_count", nullable = false)
+    private Short expensesCount = 0;
+
+    public Long getId() {
+        return id;
+    }
+
+    public ExpenseCategory getExpenseCategory() {
+        return expenseCategory;
+    }
+
+    public Integer getYear() {
+        return year;
+    }
+
+    public Month getMonth() {
+        return month;
+    }
+
+    public Profile getProfile() {return profile;}
 
     public Integer getAmount() {
         return amount;
     }
 
+    public Short getExpensesCount() {
+        return expensesCount;
+    }
+
     public void addAmount(Integer amount) {
         this.amount += amount;
-    }
-
-    public ProfileMonthlyExpenseKey getProfileMonthlyExpenseKey() {
-        return profileMonthlyExpenseKey;
-    }
-
-    public void setProfileMonthlyExpenseKey(ProfileMonthlyExpenseKey profileMonthlyExpenseKey) {
-        this.profileMonthlyExpenseKey = profileMonthlyExpenseKey;
+        expensesCount++;
     }
 
     public ProfileMonthlyExpense() {}
 
-    public ProfileMonthlyExpense(ProfileMonthlyExpenseKey key) {
-        profileMonthlyExpenseKey = key;
+    public ProfileMonthlyExpense(Profile profile, ExpenseCategory category, Year year, Month month) {
+        expenseCategory = category;
+        this.month = month;
+        this.profile = profile;
+        this.year = year.getValue();
     }
 
-    @Override
-    public final boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null) {
-            return false;
-        }
-        Class<?> objectEffectiveClass = o instanceof HibernateProxy proxy ?
-                proxy.getHibernateLazyInitializer().getPersistentClass() : o.getClass();
-        Class<?> thisEffectiveClass = this instanceof HibernateProxy proxy ?
-                proxy.getHibernateLazyInitializer().getPersistentClass() : this.getClass();
-        if (thisEffectiveClass != objectEffectiveClass) {
-            return false;
-        }
-        ProfileMonthlyExpense that = (ProfileMonthlyExpense) o;
-        return getProfileMonthlyExpenseKey() != null &&
-                Objects.equals(getProfileMonthlyExpenseKey(), that.getProfileMonthlyExpenseKey());
-    }
-
-    @Override
-    public final int hashCode() {
-        return Objects.hash(profileMonthlyExpenseKey);
-    }
 }

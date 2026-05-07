@@ -6,7 +6,6 @@ import com.example.backend.dtos.out.expenses.ExpenseDto;
 import com.example.backend.entities.Expense;
 import com.example.backend.entities.ProfileMonthlyExpense;
 import com.example.backend.entities.User;
-import com.example.backend.entities.keys.ProfileMonthlyExpenseKey;
 import com.example.backend.intefaces.FileStorage;
 import com.example.backend.repositories.ExpenseRepository;
 import com.example.backend.repositories.ProfileMonthlyExpenseRepository;
@@ -17,6 +16,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.time.Month;
+import java.time.Year;
 import java.util.Calendar;
 import java.util.List;
 
@@ -56,16 +56,23 @@ public class ExpenseService {
 
             expenseRepository.save(expense);
 
-            Month month = Month.of(Calendar.getInstance().get(Calendar.MONTH));
+            Calendar calendar = Calendar.getInstance();
+
+            Month month = Month.of(calendar.get(Calendar.MONTH));
+            Year year = Year.of(calendar.get(Calendar.YEAR));
 
             ProfileMonthlyExpense monthlyExpense =
-                    profileMonthlyExpenseRepository.findByProfileMonthlyExpenseKey_ProfileAndProfileMonthlyExpenseKey_Month(
+                    profileMonthlyExpenseRepository.findByYearAndMonthAndProfileAndExpenseCategory(
+                            year.getValue(),
+                            month,
                             user.getCurrentProfile(),
-                            month
-                    ).orElse(new ProfileMonthlyExpense(new ProfileMonthlyExpenseKey(
+                            dto.category()
+                    ).orElse(new ProfileMonthlyExpense(
                             user.getCurrentProfile(),
+                            dto.category(),
+                            year,
                             month
-                    )));
+                    ));
 
             monthlyExpense.addAmount(expense.getAmount());
 

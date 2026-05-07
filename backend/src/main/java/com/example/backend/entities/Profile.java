@@ -45,7 +45,7 @@ public class Profile {
     @OneToMany(mappedBy = "createdBy", orphanRemoval = true)
     private Set<Expense> expenses = new LinkedHashSet<>();
 
-    @OneToMany(mappedBy = "profileMonthlyExpenseKey.profile", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    @OneToMany(mappedBy = "profile", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private Set<ProfileMonthlyExpense> profileMonthlyExpenses = new LinkedHashSet<>();
 
     @OneToMany(mappedBy = "createdBy", orphanRemoval = true)

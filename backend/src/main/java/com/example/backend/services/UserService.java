@@ -13,6 +13,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.Month;
+import java.time.Year;
 import java.util.Calendar;
 import java.util.Optional;
 import java.util.Random;
@@ -59,26 +60,34 @@ public class UserService {
         if (!passwordEncoder.matches(dto.password(), user.getPassword()))
             throw new UsernameNotFoundException("User not found.");
 
-        Month month = Month.of(Calendar.getInstance().get(Calendar.MONTH));
+        Calendar calendar = Calendar.getInstance();
 
-        Optional<ProfileMonthlyExpense> monthlyExpense = profileMonthlyExpenseRepository.
-                findByProfileMonthlyExpenseKey_ProfileAndProfileMonthlyExpenseKey_Month(
+        Year year = Year.of(calendar.get(Calendar.YEAR));
+        Month month = Month.of(calendar.get(Calendar.MONTH));
+
+        Integer monthlyExpense = profileMonthlyExpenseRepository.
+                getSumByProfileAndYearAndMonth(
                         user.getCurrentProfile(),
+                        year.getValue(),
                         month
                 );
 
-        return new UserDto(user, monthlyExpense.isPresent() ? monthlyExpense.get().getAmount() : 0);
+        return new UserDto(user, monthlyExpense != null ? monthlyExpense : 0);
     }
 
     public UserDto getCurrentInfo(User user) {
-        Month month = Month.of(Calendar.getInstance().get(Calendar.MONTH));
+        Calendar calendar = Calendar.getInstance();
 
-        Optional<ProfileMonthlyExpense> monthlyExpense = profileMonthlyExpenseRepository.
-                findByProfileMonthlyExpenseKey_ProfileAndProfileMonthlyExpenseKey_Month(
+        Year year = Year.of(calendar.get(Calendar.YEAR));
+        Month month = Month.of(calendar.get(Calendar.MONTH));
+
+        Integer monthlyExpense = profileMonthlyExpenseRepository.
+                getSumByProfileAndYearAndMonth(
                         user.getCurrentProfile(),
+                        year.getValue(),
                         month
                 );
 
-        return new UserDto(user, monthlyExpense.isPresent() ? monthlyExpense.get().getAmount() : 0);
+        return new UserDto(user, monthlyExpense != null ? monthlyExpense : 0);
     }
 }

@@ -35,7 +35,7 @@ class GenerateInviteCodeTile extends StatelessWidget {
             children: [
               Expanded(
                 child: Container(
-                  padding: .symmetric(horizontal: 20, vertical: 10),
+                  padding: .symmetric(horizontal: 16, vertical: 10),
                   decoration: BoxDecoration(
                     color: AppColors.blue.withAlpha(37),
                     borderRadius: .all(.circular(10)),

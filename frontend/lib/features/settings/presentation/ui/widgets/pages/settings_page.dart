@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/features/settings/presentation/ui/widgets/list_tiles/danger_list_tile.dart';
 import 'package:frontend/features/settings/presentation/ui/widgets/list_tiles/generate_invite_code_tile.dart';
@@ -10,6 +11,7 @@ import 'package:frontend/shared/data/providers/user_provider.dart';
 import 'package:frontend/shared/data/types/role.dart';
 import 'package:frontend/shared/presentation/ui/widgets/lists/custom_widget_list.dart';
 import 'package:frontend/shared/presentation/ui/widgets/lists/rule_list.dart';
+import 'package:frontend/shared/presentation/ui/widgets/snack_bars/message_snack_bar.dart';
 import 'package:frontend/shared/presentation/ui/widgets/wrappers/page_wrapper.dart';
 
 class SettingsPage extends ConsumerWidget {
@@ -23,6 +25,18 @@ class SettingsPage extends ConsumerWidget {
     bool created = await ref.read(rulesProvider.notifier).create(text);
 
     return created;
+  }
+
+  Future<void> copyInviteCode(BuildContext context, String? inviteCode) async {
+    if (inviteCode != null) {
+      await Clipboard.setData(ClipboardData(text: inviteCode));
+
+      if (context.mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(MessageSnackBar(message: "Скопировано"));
+      }
+    }
   }
 
   @override
@@ -43,6 +57,7 @@ class SettingsPage extends ConsumerWidget {
               children: [
                 GenerateInviteCodeTile(
                   inviteCode: apartment.inviteCode,
+                  onCopy: () => copyInviteCode(context, apartment.inviteCode),
                   onGenerate: () =>
                       ref.read(asyncApartmentProvider.notifier).generateCode(),
                 ),

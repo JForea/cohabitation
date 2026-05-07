@@ -6,10 +6,12 @@ class GenerateInviteCodeTile extends StatelessWidget {
   const GenerateInviteCodeTile({
     super.key,
     required this.inviteCode,
+    required this.onCopy,
     required this.onGenerate,
   });
 
   final String? inviteCode;
+  final VoidCallback onCopy;
   final VoidCallback onGenerate;
 
   @override
@@ -55,7 +57,7 @@ class GenerateInviteCodeTile extends StatelessWidget {
                 color: AppColors.blue.withAlpha(37),
                 icon: Icons.copy,
                 size: 42,
-                onPressed: () {},
+                onPressed: onCopy,
                 iconColor: AppColors.blue,
               ),
               CustomIconButton(

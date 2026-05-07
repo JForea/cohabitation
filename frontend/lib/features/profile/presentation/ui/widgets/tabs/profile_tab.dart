@@ -11,6 +11,11 @@ import 'package:frontend/shared/presentation/ui/widgets/wrappers/tab_wrapper.dar
 class ProfileTab extends ConsumerWidget {
   const ProfileTab({super.key});
 
+  Future<void> _refresh(WidgetRef ref) async {
+    ref.read(neighboursProvider.notifier).refresh();
+    ref.read(rulesProvider.notifier).refresh();
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final profile = ref.watch(
@@ -19,43 +24,46 @@ class ProfileTab extends ConsumerWidget {
     final neighboursState = ref.watch(neighboursProvider);
     final rulesState = ref.watch(rulesProvider);
 
-    return Column(
-      children: [
-        ProfileAppBar(profile: profile),
-        TabWrapper(
-          floatingButtonExists: false,
-          appBarExists: true,
-          children: [
-            neighboursState.when(
-              data: (neighbours) => NeighboursTopList(
-                userProfile: profile,
-                neighbours: neighbours,
+    return RefreshIndicator(
+      onRefresh: () => _refresh(ref),
+      child: Column(
+        children: [
+          ProfileAppBar(profile: profile),
+          TabWrapper(
+            floatingButtonExists: false,
+            appBarExists: true,
+            children: [
+              neighboursState.when(
+                data: (neighbours) => NeighboursTopList(
+                  userProfile: profile,
+                  neighbours: neighbours,
+                ),
+                error: (e, _) => Text("Произошла ошибка."),
+                loading: () => Center(child: CircularProgressIndicator()),
               ),
-              error: (e, _) => Text("Произошла ошибка."),
-              loading: () => Center(child: CircularProgressIndicator()),
-            ),
-            Column(
-              spacing: 8,
-              crossAxisAlignment: .start,
-              children: [
-                Text(
-                  "Правила",
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.onSurface,
-                    fontSize: 16,
-                    fontWeight: .w500,
+              Column(
+                spacing: 8,
+                crossAxisAlignment: .start,
+                children: [
+                  Text(
+                    "Правила",
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onSurface,
+                      fontSize: 16,
+                      fontWeight: .w500,
+                    ),
                   ),
-                ),
-                rulesState.when(
-                  data: (rules) => RuleList(titleNeeded: false, rules: rules),
-                  error: (e, _) => Text("Произошла ошибка при загрузке."),
-                  loading: () => Center(child: CircularProgressIndicator()),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ],
+                  rulesState.when(
+                    data: (rules) => RuleList(titleNeeded: false, rules: rules),
+                    error: (e, _) => Text("Произошла ошибка при загрузке."),
+                    loading: () => Center(child: CircularProgressIndicator()),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }

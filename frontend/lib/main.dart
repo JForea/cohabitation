@@ -1,6 +1,10 @@
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:frontend/firebase_options.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:riverpod_devtools/riverpod_devtools.dart';
 import 'package:frontend/shared/data/providers/auth_provider.dart';
@@ -17,7 +21,40 @@ Future<void> main() async {
     DeviceOrientation.portraitUp, // только вертикально
   ]);
 
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
   await initializeDateFormatting("ru_RU");
+
+  await FirebaseMessaging.instance.requestPermission(provisional: true);
+
+  String? fcmToken;
+  if (kIsWeb) {
+    fcmToken = await FirebaseMessaging.instance.getToken(
+      vapidKey: dotenv.get("FIREBASE_WEB_PUBLIC_KEY"),
+    );
+  } else {
+    fcmToken = await FirebaseMessaging.instance.getToken();
+  }
+
+  if (fcmToken != null) {
+    print("FCM TOKEN: $fcmToken");
+  } else {
+    print("NO TOKEN :(");
+  }
+
+  FirebaseMessaging.instance.onTokenRefresh
+      .listen((fcmToken) {
+        print(fcmToken);
+      })
+      .onError((err) {
+        print(err);
+      });
+
+  FirebaseMessaging.onMessage.listen((message) {
+    debugPrint("NEW MESSAGE");
+    debugPrint("TITLE: ${message.notification?.title}");
+    debugPrint("BODY: ${message.notification?.body}");
+  });
 
   runApp(
     ProviderScope(observers: [RiverpodDevToolsObserver()], child: MyApp()),

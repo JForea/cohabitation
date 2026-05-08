@@ -12,6 +12,8 @@ import com.example.backend.repositories.ProfileNotificationRepository;
 import com.example.backend.repositories.ProfileRepository;
 import com.example.backend.repositories.TaskRepository;
 import com.example.backend.specifications.TaskSpecifications;
+import com.example.backend.types.EntityType;
+import com.example.backend.types.NotificationType;
 import com.example.backend.types.Role;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.PageRequest;
@@ -77,8 +79,8 @@ public class TaskService {
 
         Notification notification = new Notification(
                 creatorProfile,
-                "task.create",
-                "task",
+                NotificationType.TASK_CREATED,
+                EntityType.TASK,
                 getBaseNotificationPayload(creatorProfile, task)
         );
 
@@ -153,8 +155,8 @@ public class TaskService {
         notificationRepository.save(
                 new Notification(
                 user.getCurrentProfile(),
-                "task." + (task.getCompletedAt() != null ? "done" : "reopened"),
-                "task",
+                task.getCompletedAt() != null ? NotificationType.TASK_DONE : NotificationType.TASK_REOPENED,
+                EntityType.TASK,
                 payload
                 )
         );

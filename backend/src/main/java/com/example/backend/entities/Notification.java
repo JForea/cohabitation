@@ -1,12 +1,16 @@
 package com.example.backend.entities;
 
+import com.example.backend.types.EntityType;
+import com.example.backend.types.NotificationType;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
 import java.time.Instant;
+import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Set;
 
 @Entity
 @Table(name = "notification")
@@ -21,10 +25,10 @@ public class Notification {
     private Profile actor;
 
     @Column(name = "type", nullable = false)
-    private String type;
+    private NotificationType type;
 
     @Column(name = "entity_type", nullable = false)
-    private String entityType;
+    private EntityType entityType;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false)
@@ -34,12 +38,15 @@ public class Notification {
     @Column(name = "payload", columnDefinition = "jsonb")
     private Map<String, Object> payload;
 
+    @OneToMany(mappedBy = "key.notification", orphanRemoval = true)
+    private Set<ProfileNotification> profileNotifications = new LinkedHashSet<>();
+
     public Notification() {}
 
     public Notification(
             Profile actor,
-            String type,
-            String entityType,
+            NotificationType type,
+            EntityType entityType,
             Map<String, Object> payload
     ) {
         this.actor = actor;
@@ -60,15 +67,19 @@ public class Notification {
         return actor;
     }
 
-    public String getEntityType() {
+    public EntityType getEntityType() {
         return entityType;
     }
 
-    public String getType() {
+    public NotificationType getType() {
         return type;
     }
 
     public Map<String, Object> getPayload() {
         return payload;
+    }
+
+    public Set<ProfileNotification> getProfileNotifications() {
+        return profileNotifications;
     }
 }

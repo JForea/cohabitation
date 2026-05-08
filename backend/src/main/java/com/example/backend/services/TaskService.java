@@ -4,11 +4,11 @@ import com.example.backend.dtos.in.tasks.CreateTaskDto;
 import com.example.backend.dtos.out.common.IdResponse;
 import com.example.backend.dtos.out.common.StatusResponse;
 import com.example.backend.dtos.out.tasks.TaskDto;
-import com.example.backend.entities.Profile;
-import com.example.backend.entities.Task;
-import com.example.backend.entities.User;
+import com.example.backend.entities.*;
 import com.example.backend.exceptions.AccessForbiddenException;
 import com.example.backend.exceptions.ResourceNotFoundException;
+import com.example.backend.repositories.NotificationRepository;
+import com.example.backend.repositories.ProfileNotificationRepository;
 import com.example.backend.repositories.ProfileRepository;
 import com.example.backend.repositories.TaskRepository;
 import com.example.backend.specifications.TaskSpecifications;
@@ -19,29 +19,43 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 @Service
 public class TaskService {
     private final TaskRepository taskRepository;
+
     private final ProfileRepository profileRepository;
+
+    private final NotificationRepository notificationRepository;
+
+    private final ProfileNotificationRepository profileNotificationRepository;
 
     public TaskService(
             TaskRepository taskRepository,
-            ProfileRepository profileRepository
-    ) {
+            ProfileRepository profileRepository,
+            NotificationRepository notificationRepository,
+            ProfileNotificationRepository profileNotificationRepository) {
         this.taskRepository = taskRepository;
         this.profileRepository = profileRepository;
+        this.notificationRepository = notificationRepository;
+        this.profileNotificationRepository = profileNotificationRepository;
     }
 
-    public IdResponse<Long> create(User user, Integer apartmentId, CreateTaskDto dto) {
-        Profile creatorProfile = profileRepository.findByUserAndApartment_id(user, apartmentId).orElseThrow(
-                () -> new AccessForbiddenException("You can't create tasks in this apartment.")
+    private Map<String, Object> getBaseNotificationPayload(Profile profile, Task task) {
+        return Map.of(
+                "taskId", task.getId(),
+                "taskName", task.getName(),
+                "userName", profile.getName()
         );
+    }
 
-        if (creatorProfile.getLeftAt() != null)
-            throw new AccessForbiddenException("You can't create tasks in this apartment.");
+    @Transactional
+    public IdResponse<Long> create(User user, CreateTaskDto dto) {
+        Profile creatorProfile = user.getCurrentProfile();
 
         Profile assignedProfile = null;
         if (dto.assignedTo() != null)
@@ -60,6 +74,24 @@ public class TaskService {
                 dto.repeatTime(),
                 dto.dueDate()
         ));
+
+        Notification notification = new Notification(
+                creatorProfile,
+                "task.create",
+                "task",
+                getBaseNotificationPayload(creatorProfile, task)
+        );
+
+        notification = notificationRepository.save(notification);
+
+        if (assignedProfile != null && !Objects.equals(assignedProfile.getId(), creatorProfile.getId())) {
+            ProfileNotification profileNotification = new ProfileNotification(
+                assignedProfile,
+                notification
+            );
+
+            profileNotificationRepository.save(profileNotification);
+        }
 
         return new IdResponse<>(task.getId());
     }
@@ -83,8 +115,8 @@ public class TaskService {
     }
 
     @Transactional
-    public StatusResponse switchTaskStatus(Integer apartmentId, User user, Long taskId) {
-        Task task = taskRepository.findByCreatedBy_Apartment_IdAndId(apartmentId, taskId).orElseThrow(
+    public StatusResponse switchTaskStatus(User user, Long taskId) {
+        Task task = taskRepository.findById(taskId).orElseThrow(
                 () -> new ResourceNotFoundException("Task not found.")
         );
 
@@ -96,6 +128,9 @@ public class TaskService {
         )
             throw new AccessForbiddenException("You can't change status of this task, because you are not the " +
                     "one who completed it.");
+
+        Map<String, Object> payload = new HashMap<>(getBaseNotificationPayload(user.getCurrentProfile(), task));
+        payload.put("points", task.getPoints());
 
         Profile profile;
         if (task.getCompletedAt() != null) {
@@ -114,6 +149,15 @@ public class TaskService {
 
         profileRepository.save(profile);
         taskRepository.save(task);
+
+        notificationRepository.save(
+                new Notification(
+                user.getCurrentProfile(),
+                "task." + (task.getCompletedAt() != null ? "done" : "reopened"),
+                "task",
+                payload
+                )
+        );
 
         return new StatusResponse(task.getCompletedAt() != null);
     }

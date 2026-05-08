@@ -66,6 +66,9 @@ public class Profile {
     @OneToMany(mappedBy = "completedBy", orphanRemoval = true)
     private Set<Task> completedTasks = new LinkedHashSet<>();
 
+    @OneToMany(mappedBy = "key.profile", orphanRemoval = true)
+    private Set<ProfileNotification> notifications = new LinkedHashSet<>();
+
     @Enumerated
     @Column(name = "role", nullable = false)
     private Role role = Role.INHABITANT;
@@ -206,5 +209,13 @@ public class Profile {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public Set<ProfileNotification> getNotifications() {
+        return notifications;
+    }
+
+    public Set<ProfileMonthlyExpense> getProfileMonthlyExpenses() {
+        return profileMonthlyExpenses;
     }
 }

@@ -30,11 +30,10 @@ public class TaskController {
     @PostMapping
     public ResponseEntity<IdResponse<Long>> create(
             @RequestBody @Valid CreateTaskDto dto,
-            @PathVariable Integer apartmentId,
             @AuthenticationPrincipal CustomUserDetails details
     ) {
         User user = details.getUser();
-        return ResponseEntity.status(HttpStatus.CREATED).body(taskService.create(user, apartmentId, dto));
+        return ResponseEntity.status(HttpStatus.CREATED).body(taskService.create(user, dto));
     }
 
     @GetMapping
@@ -52,13 +51,12 @@ public class TaskController {
 
     @PatchMapping("/{taskId}")
     public ResponseEntity<StatusResponse> changeTaskStatus(
-            @PathVariable Integer apartmentId,
             @PathVariable Long taskId,
             @AuthenticationPrincipal CustomUserDetails details
     ) {
         User user = details.getUser();
         return ResponseEntity.ok(
-                taskService.switchTaskStatus(apartmentId, user, taskId)
+                taskService.switchTaskStatus(user, taskId)
         );
     }
 

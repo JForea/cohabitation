@@ -5,6 +5,7 @@ import com.example.backend.entities.Notification;
 import com.example.backend.entities.ProfileNotification;
 import com.example.backend.entities.User;
 import com.example.backend.entities.keys.ProfileNotificationKey;
+import com.example.backend.exceptions.BadRequestException;
 import com.example.backend.exceptions.ResourceNotFoundException;
 import com.example.backend.repositories.NotificationRepository;
 import com.example.backend.repositories.ProfileNotificationRepository;
@@ -23,7 +24,6 @@ public class NotificationService {
     private final NotificationRepository notificationRepository;
 
     private final ProfileNotificationRepository profileNotificationRepository;
-
 
     public NotificationService(NotificationRepository notificationRepository,
                                ProfileNotificationRepository profileNotificationRepository) {
@@ -72,5 +72,28 @@ public class NotificationService {
                     profileNotification.getRead()
             );
         }).toList();
+    }
+
+    public void markAsRead(Long notificationId, User user) {
+        ProfileNotification profileNotification = profileNotificationRepository.findByKey_ProfileAndKey_Notification_Id(
+                user.getCurrentProfile(),
+                notificationId
+        ).orElseThrow(() -> new ResourceNotFoundException("Notification not found."));
+
+        if (profileNotification.getRead() == true)
+            throw new BadRequestException("Notification is already read.");
+
+        profileNotification.setRead(true);
+
+        profileNotificationRepository.save(profileNotification);
+    }
+
+    public void markAsReadAll(User user) {
+        List<ProfileNotification> profileNotifications = profileNotificationRepository
+                .findAllByKey_ProfileAndIsReadFalse(user.getCurrentProfile());
+
+        profileNotifications.forEach(n -> n.setRead(true));
+
+        profileNotificationRepository.saveAll(profileNotifications);
     }
 }

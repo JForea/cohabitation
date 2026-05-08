@@ -4,6 +4,7 @@ import com.example.backend.dtos.out.notifications.NotificationDto;
 import com.example.backend.entities.User;
 import com.example.backend.security.CustomUserDetails;
 import com.example.backend.services.NotificationService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -30,5 +31,24 @@ public class NotificationController {
     ) {
         User user = details.getUser();
         return ResponseEntity.ok(notificationService.findPersonal(user, page, size));
+    }
+
+    @PatchMapping
+    public ResponseEntity<Void> readAll(
+            @AuthenticationPrincipal CustomUserDetails details
+    ) {
+        User user = details.getUser();
+        notificationService.markAsReadAll(user);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
+    @PatchMapping("/{notificationId}")
+    public ResponseEntity<Void> read(
+            @PathVariable Long notificationId,
+            @AuthenticationPrincipal CustomUserDetails details
+    ) {
+        User user = details.getUser();
+        notificationService.markAsRead(notificationId, user);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 }

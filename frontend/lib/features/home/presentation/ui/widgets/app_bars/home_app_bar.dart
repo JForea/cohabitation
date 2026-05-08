@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/shared/presentation/theme/app_colors.dart';
 import 'package:frontend/shared/presentation/types/bubble.dart';
+import 'package:frontend/shared/presentation/ui/widgets/buttons/custom_icon_button.dart';
 import 'package:frontend/shared/presentation/ui/widgets/other/bubble_widget.dart';
 import 'package:frontend/shared/utils/util_functions.dart';
+import 'package:go_router/go_router.dart';
 
 class HomeAppBar extends StatelessWidget {
   const HomeAppBar({super.key, required this.address, required this.userName});
@@ -32,33 +34,46 @@ class HomeAppBar extends StatelessWidget {
           Container(
             width: .infinity,
             margin: .only(top: 60, left: 20, right: 20),
-            child: Column(
-              spacing: 6,
+            child: Row(
+              mainAxisAlignment: .spaceBetween,
               crossAxisAlignment: .start,
               children: [
-                Text(
-                  UtilFunctions.toHomeDateString(DateTime.now()),
-                  style: TextStyle(
-                    color: Color(0xFFD8D8D8),
-                    fontSize: 14,
-                    fontWeight: .w500,
-                  ),
+                Column(
+                  spacing: 6,
+                  crossAxisAlignment: .start,
+                  children: [
+                    Text(
+                      UtilFunctions.toHomeDateString(DateTime.now()),
+                      style: TextStyle(
+                        color: Color(0xFFD8D8D8),
+                        fontSize: 14,
+                        fontWeight: .w500,
+                      ),
+                    ),
+                    Text(
+                      "Привет, $userName! 👋",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: .w600,
+                      ),
+                    ),
+                    Text(
+                      address ?? "",
+                      style: TextStyle(
+                        color: Color(0xFFD8D8D8),
+                        fontSize: 14,
+                        fontWeight: .w500,
+                      ),
+                    ),
+                  ],
                 ),
-                Text(
-                  "Привет, $userName! 👋",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 18,
-                    fontWeight: .w600,
-                  ),
-                ),
-                Text(
-                  address ?? "",
-                  style: TextStyle(
-                    color: Color(0xFFD8D8D8),
-                    fontSize: 14,
-                    fontWeight: .w500,
-                  ),
+                CustomIconButton(
+                  color: Color(0xFFAAA3FF),
+                  icon: Icons.notifications_outlined,
+                  size: 40,
+                  onPressed: () => context.push("/notifications"),
+                  iconColor: Colors.white,
                 ),
               ],
             ),

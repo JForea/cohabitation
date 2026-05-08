@@ -28,12 +28,16 @@ Future<void> main() async {
   await FirebaseMessaging.instance.requestPermission(provisional: true);
 
   String? fcmToken;
-  if (kIsWeb) {
-    fcmToken = await FirebaseMessaging.instance.getToken(
-      vapidKey: dotenv.get("FIREBASE_WEB_PUBLIC_KEY"),
-    );
-  } else {
-    fcmToken = await FirebaseMessaging.instance.getToken();
+  try {
+    if (kIsWeb) {
+      fcmToken = await FirebaseMessaging.instance.getToken(
+        vapidKey: dotenv.get("FIREBASE_WEB_PUBLIC_KEY"),
+      );
+    } else {
+      fcmToken = await FirebaseMessaging.instance.getToken();
+    }
+  } catch (e) {
+    print(e);
   }
 
   if (fcmToken != null) {

@@ -5,6 +5,7 @@ import 'package:frontend/features/auth/login/presentation/ui/widgets/pages/login
 import 'package:frontend/features/buyings/presentation/ui/widgets/pages/create_buying_page.dart';
 import 'package:frontend/features/events/presentation/ui/widgets/pages/events_page.dart';
 import 'package:frontend/features/expenses/presentation/ui/widgets/pages/create_expense_page.dart';
+import 'package:frontend/features/notifications/ui/presentation/widgets/pages/notifications_page.dart';
 import 'package:frontend/features/settings/presentation/ui/widgets/pages/settings_page.dart';
 import 'package:frontend/features/tasks/presentation/ui/widgets/pages/create_task_page.dart';
 import 'package:frontend/features/onboarding/presentation/ui/widgets/pages/onboarding_page.dart';
@@ -85,6 +86,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/enter/join',
         builder: (context, state) => JoinApartmentPage(),
+      ),
+      GoRoute(
+        path: "/notifications",
+        builder: (context, state) => NotificationsPage(),
       ),
       GoRoute(
         path: "/events/day/:date",

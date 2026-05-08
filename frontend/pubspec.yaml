@@ -75,6 +75,7 @@ flutter:
     - assets/icons/buying_categories/
     - assets/icons/top/
     - assets/icons/expense_categories/
+    - assets/icons/notification_types/
 
   fonts:
     - family: Manrope

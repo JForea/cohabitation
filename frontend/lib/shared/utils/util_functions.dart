@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/shared/data/types/buying_category.dart';
 import 'package:frontend/shared/data/types/expense_category.dart';
+import 'package:frontend/shared/data/types/notification_type.dart';
 import 'package:frontend/shared/data/types/role.dart';
 import 'package:frontend/shared/data/types/room.dart';
 import 'package:frontend/shared/data/types/task_priority.dart';
@@ -174,6 +175,13 @@ class UtilFunctions {
         };
         break;
 
+      case const (NotificationType):
+        res = switch (name) {
+          "task" => NotificationType.task,
+          _ => null,
+        };
+        break;
+
       default:
         throw UnsupportedError("Provided type $T is not supported.");
     }
@@ -296,5 +304,36 @@ class UtilFunctions {
 
   static int parsePrice(String price) {
     return int.parse(price.replaceAll(RegExp(r'\D'), ''));
+  }
+
+  static String timeAgo(DateTime date) {
+    final now = DateTime.now();
+    final diff = now.difference(date);
+
+    if (diff.inSeconds < 60) {
+      return 'Только что';
+    }
+
+    if (diff.inMinutes < 60) {
+      return '${diff.inMinutes} мин назад';
+    }
+
+    if (diff.inHours < 24) {
+      return '${diff.inHours} ч назад';
+    }
+
+    if (diff.inDays == 1) {
+      return 'Вчера';
+    }
+
+    if (diff.inDays == 2) {
+      return 'Позавчера';
+    }
+
+    if (diff.inDays < 7) {
+      return '${diff.inDays} дн назад';
+    }
+
+    return '${date.day.toString().padLeft(2, '0')}.${date.month.toString().padLeft(2, '0')}.${date.year}';
   }
 }

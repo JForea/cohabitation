@@ -40,7 +40,9 @@ class NotificationCard extends StatelessWidget {
                   Text(
                     notification.text,
                     style: TextStyle(
-                      color: Theme.of(context).colorScheme.onSurface,
+                      color: notification.isRead
+                          ? Theme.of(context).colorScheme.onSurfaceVariant
+                          : Theme.of(context).colorScheme.onSurface,
                       fontSize: 14,
                       fontWeight: .w500,
                     ),

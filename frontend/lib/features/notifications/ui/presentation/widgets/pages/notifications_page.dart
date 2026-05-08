@@ -11,6 +11,10 @@ class NotificationsPage extends ConsumerWidget {
     ref.read(notificationsProvider.notifier).refresh();
   }
 
+  void _markAsRead(WidgetRef ref, int notificationId) {
+    ref.read(notificationsProvider.notifier).markAsRead(notificationId);
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final notifications = ref.watch(notificationsProvider);
@@ -26,7 +30,7 @@ class NotificationsPage extends ConsumerWidget {
             notifications.when(
               data: (notifications) => NotificationList(
                 notifications: notifications,
-                onNotificationTap: () {},
+                onNotificationTap: (id) => _markAsRead(ref, id),
               ),
               error: (_, _) => Text("Произошла ошибка при загрузке"),
               loading: () => Center(child: CircularProgressIndicator()),

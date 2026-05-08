@@ -12,7 +12,7 @@ class NotificationListPart extends StatelessWidget {
 
   final List<NotificationValue> notifications;
   final bool today;
-  final VoidCallback onTap;
+  final void Function(int) onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +30,7 @@ class NotificationListPart extends StatelessWidget {
             ),
           ),
           ...notifications.map(
-            (n) => NotificationCard(notification: n, onTap: onTap),
+            (n) => NotificationCard(notification: n, onTap: () => onTap(n.id)),
           ),
         ],
       );

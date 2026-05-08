@@ -10,7 +10,7 @@ class NotificationList extends StatelessWidget {
   });
 
   final List<NotificationValue> notifications;
-  final VoidCallback onNotificationTap;
+  final void Function(int) onNotificationTap;
 
   @override
   Widget build(BuildContext context) {

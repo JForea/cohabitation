@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/features/notifications/data/providers/notifications_provider.dart';
 import 'package:frontend/features/notifications/ui/presentation/widgets/lists/notification_list.dart';
+import 'package:frontend/shared/presentation/ui/widgets/buttons/custom_app_floating_action_button.dart';
 import 'package:frontend/shared/presentation/ui/widgets/wrappers/page_wrapper.dart';
 
 class NotificationsPage extends ConsumerWidget {
@@ -15,6 +16,10 @@ class NotificationsPage extends ConsumerWidget {
     ref.read(notificationsProvider.notifier).markAsRead(notificationId);
   }
 
+  void _markAsReadAll(WidgetRef ref) {
+    ref.read(notificationsProvider.notifier).markAsReadAll();
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final notifications = ref.watch(notificationsProvider);
@@ -22,10 +27,14 @@ class NotificationsPage extends ConsumerWidget {
     return RefreshIndicator(
       onRefresh: () => _refresh(ref),
       child: Scaffold(
+        floatingActionButton: CustomAppFloatingActionButton(
+          onPressed: () => _markAsReadAll(ref),
+          iconData: Icons.visibility,
+        ),
         body: PageWrapper(
           backButton: true,
           pageName: "Уведомления",
-          bottomFloatingButtonExists: false,
+          bottomFloatingButtonExists: true,
           children: [
             notifications.when(
               data: (notifications) => NotificationList(

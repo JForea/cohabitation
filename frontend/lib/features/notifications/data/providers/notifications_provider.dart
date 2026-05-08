@@ -88,6 +88,25 @@ class _NotificationsNotifier extends AsyncNotifier<List<NotificationValue>> {
     }
   }
 
+  Future<void> markAsReadAll() async {
+    final current = state.value ?? [];
+
+    final updated = current.map((n) {
+      if (!n.isRead) {
+        return n.copyWith(isRead: true);
+      }
+      return n;
+    }).toList();
+
+    state = AsyncValue.data(updated);
+
+    try {
+      AppDio.dio.patch(_baseUrl);
+    } catch (_) {
+      state = AsyncValue.data(current);
+    }
+  }
+
   Future<void> refresh() async {
     if (_isLoading) {
       return;

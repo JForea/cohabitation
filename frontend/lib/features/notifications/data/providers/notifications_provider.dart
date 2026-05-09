@@ -23,6 +23,8 @@ class _NotificationsNotifier extends AsyncNotifier<List<NotificationValue>> {
 
   @override
   FutureOr<List<NotificationValue>> build() async {
+    print("BUILD NOTIFICATIONS");
+
     final apartmentId = ref.watch(apartmentProvider.select((a) => a?.id));
 
     if (apartmentId == null) {
@@ -40,15 +42,15 @@ class _NotificationsNotifier extends AsyncNotifier<List<NotificationValue>> {
 
   Future<List<NotificationValue>> _loadPage() async {
     if (_isLoading || !_hasMore) {
-      return [];
+      return state.value ?? [];
     }
+
+    _isLoading = true;
 
     try {
       final query = {"page": _page, "size": _pageSize};
 
       final response = await AppDio.dio.get(_baseUrl, queryParameters: query);
-
-      _isLoading = true;
 
       final notifications = (response.data as List)
           .map((n) => NotificationValue.fromJson(n))
@@ -57,23 +59,21 @@ class _NotificationsNotifier extends AsyncNotifier<List<NotificationValue>> {
       if (notifications.length < _pageSize) {
         _hasMore = false;
       }
+
       _page++;
-      _isLoading = false;
 
       return notifications;
-    } catch (e) {
+    } finally {
       _isLoading = false;
-      _hasMore = false;
-      return [];
     }
   }
 
-  Future<void> markAsRead(int notificationId) async {
+  Future<bool> markAsRead(int notificationId) async {
     final current = state.value ?? [];
 
     final index = current.indexWhere((n) => n.id == notificationId);
 
-    if (index == -1 || current[index].isRead) return;
+    if (index == -1 || current[index].isRead) return false;
 
     final updated = [...current];
 
@@ -82,13 +82,15 @@ class _NotificationsNotifier extends AsyncNotifier<List<NotificationValue>> {
     state = AsyncValue.data(updated);
 
     try {
-      AppDio.dio.patch("$_baseUrl/$notificationId");
+      await AppDio.dio.patch("$_baseUrl/$notificationId");
+      return true;
     } catch (_) {
       state = AsyncValue.data(current);
+      return false;
     }
   }
 
-  Future<void> markAsReadAll() async {
+  Future<bool> markAsReadAll() async {
     final current = state.value ?? [];
 
     final updated = current.map((n) {
@@ -101,9 +103,11 @@ class _NotificationsNotifier extends AsyncNotifier<List<NotificationValue>> {
     state = AsyncValue.data(updated);
 
     try {
-      AppDio.dio.patch(_baseUrl);
+      await AppDio.dio.patch(_baseUrl);
+      return true;
     } catch (_) {
       state = AsyncValue.data(current);
+      return false;
     }
   }
 

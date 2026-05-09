@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:frontend/features/home/data/providers/unread_notifications_count_provider.dart';
 import 'package:frontend/features/home/presentation/ui/widgets/app_bars/home_app_bar.dart';
 import 'package:frontend/features/home/presentation/ui/widgets/calendars/calendar.dart';
 import 'package:frontend/features/home/presentation/ui/widgets/previews/neighbours_preview.dart';
@@ -25,6 +26,7 @@ class _HomeTabState extends ConsumerState<HomeTab> {
   Future<void> refresh(WidgetRef ref) async {
     ref.read(neighboursProvider.notifier).refresh();
     ref.read(calendarProvider.notifier).refresh();
+    ref.read(unreadNotificationsCountProvider.notifier).refresh();
   }
 
   Future<void> updateMonth(WidgetRef ref, DateTime month) async {
@@ -49,12 +51,19 @@ class _HomeTabState extends ConsumerState<HomeTab> {
     final name = ref.watch(userProvider.select((u) => u?.profile?.name));
     final address = ref.watch(apartmentProvider.select((a) => a?.address));
     final calendarDates = ref.watch(calendarProvider.select((s) => s.value));
+    final unreadNotificationsCount = ref.watch(
+      unreadNotificationsCountProvider.select((s) => s.value),
+    );
 
     return RefreshIndicator(
       onRefresh: () async => refresh(ref),
       child: Column(
         children: [
-          HomeAppBar(userName: name ?? "", address: address),
+          HomeAppBar(
+            userName: name ?? "",
+            address: address,
+            unreadNotificationsCount: unreadNotificationsCount ?? 0,
+          ),
           TabWrapper(
             floatingButtonExists: false,
             appBarExists: true,

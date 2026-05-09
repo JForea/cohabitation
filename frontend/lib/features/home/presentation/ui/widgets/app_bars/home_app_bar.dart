@@ -7,10 +7,16 @@ import 'package:frontend/shared/utils/util_functions.dart';
 import 'package:go_router/go_router.dart';
 
 class HomeAppBar extends StatelessWidget {
-  const HomeAppBar({super.key, required this.address, required this.userName});
+  const HomeAppBar({
+    super.key,
+    required this.address,
+    required this.userName,
+    required this.unreadNotificationsCount,
+  });
 
   final String userName;
   final String? address;
+  final int unreadNotificationsCount;
 
   @override
   Widget build(BuildContext context) {
@@ -68,12 +74,42 @@ class HomeAppBar extends StatelessWidget {
                     ),
                   ],
                 ),
-                CustomIconButton(
-                  color: Color(0xFFAAA3FF),
-                  icon: Icons.notifications_outlined,
-                  size: 40,
-                  onPressed: () => context.push("/notifications"),
-                  iconColor: Colors.white,
+                SizedBox(
+                  width: 70,
+                  height: 70,
+                  child: Stack(
+                    children: [
+                      Center(
+                        child: CustomIconButton(
+                          color: Color(0xFFAAA3FF),
+                          icon: Icons.notifications_outlined,
+                          size: 40,
+                          onPressed: () => context.push("/notifications"),
+                          iconColor: Colors.white,
+                        ),
+                      ),
+                      if (unreadNotificationsCount > 0)
+                        Align(
+                          alignment: .topRight,
+                          child: Container(
+                            padding: .all(8),
+                            decoration: BoxDecoration(
+                              color: AppColors.red,
+                              border: .all(color: Colors.white),
+                              shape: .circle,
+                            ),
+                            child: Text(
+                              "$unreadNotificationsCount",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 10,
+                                fontWeight: .w600,
+                              ),
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
                 ),
               ],
             ),

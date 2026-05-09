@@ -29,7 +29,7 @@ public class NotificationService {
     }
 
     public Integer getUnreadCount(User user) {
-        return profileNotificationRepository.getCountUnreadByProfile(user.getCurrentProfile());
+        return profileNotificationRepository.countByKey_ProfileAndIsReadFalse(user.getCurrentProfile());
     }
 
     public List<NotificationDto> findPersonal(User user, Short page, Short size) {

@@ -65,17 +65,20 @@ class NeighboursTopListTile extends StatelessWidget {
           SizedBox(width: 16),
           Avatar(name: profile.name, size: 32, color: profile.color),
           SizedBox(width: 12),
-          Text(
-            "${profile.name}${isActiveUser ? " (вы)" : ""}",
-            style: TextStyle(
-              color: isActiveUser
-                  ? AppColors.blue
-                  : Theme.of(context).colorScheme.onSurface,
-              fontSize: 14,
-              fontWeight: .w500,
+          Expanded(
+            child: Text(
+              "${profile.name}${isActiveUser ? " (вы)" : ""}",
+              maxLines: 1,
+              overflow: .ellipsis,
+              style: TextStyle(
+                color: isActiveUser
+                    ? AppColors.blue
+                    : Theme.of(context).colorScheme.onSurface,
+                fontSize: 14,
+                fontWeight: .w500,
+              ),
             ),
           ),
-          Spacer(),
           PointsIndicator(pointsCount: profile.points),
         ],
       ),

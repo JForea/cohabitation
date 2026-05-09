@@ -44,35 +44,40 @@ class HomeAppBar extends StatelessWidget {
               mainAxisAlignment: .spaceBetween,
               crossAxisAlignment: .start,
               children: [
-                Column(
-                  spacing: 6,
-                  crossAxisAlignment: .start,
-                  children: [
-                    Text(
-                      UtilFunctions.toHomeDateString(DateTime.now()),
-                      style: TextStyle(
-                        color: Color(0xFFD8D8D8),
-                        fontSize: 12,
-                        fontWeight: .w500,
+                Expanded(
+                  child: Column(
+                    spacing: 6,
+                    crossAxisAlignment: .start,
+                    children: [
+                      Text(
+                        UtilFunctions.toHomeDateString(DateTime.now()),
+                        style: TextStyle(
+                          color: Color(0xFFD8D8D8),
+                          fontSize: 12,
+                          fontWeight: .w500,
+                        ),
                       ),
-                    ),
-                    Text(
-                      "Привет, $userName!",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: .w600,
+                      Text(
+                        "Привет, $userName!",
+                        maxLines: 1,
+                        overflow: .ellipsis,
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: .w600,
+                        ),
                       ),
-                    ),
-                    Text(
-                      address ?? "",
-                      style: TextStyle(
-                        color: Color(0xFFD8D8D8),
-                        fontSize: 12,
-                        fontWeight: .w500,
+
+                      Text(
+                        address ?? "",
+                        style: TextStyle(
+                          color: Color(0xFFD8D8D8),
+                          fontSize: 12,
+                          fontWeight: .w500,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
                 SizedBox(
                   width: 70,

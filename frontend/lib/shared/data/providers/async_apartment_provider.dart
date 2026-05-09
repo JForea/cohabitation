@@ -37,11 +37,14 @@ class _ApartmentNotifier extends AsyncNotifier<Apartment?> {
     try {
       state = const AsyncLoading();
 
+      final minutesOffset = DateTime.now().timeZoneOffset.inMinutes;
+
       final response = await AppDio.dio.post(
         baseUrl,
         data: {
           "name": name,
           "address": address?.isEmpty == true ? null : address,
+          "minutesOffset": minutesOffset,
         },
       );
 

@@ -23,6 +23,14 @@ public class NotificationController {
         this.notificationService = notificationService;
     }
 
+    @GetMapping("/unread-count")
+    public ResponseEntity<Integer> getUnreadCount(
+            @AuthenticationPrincipal CustomUserDetails details
+    ) {
+        User user = details.getUser();
+        return ResponseEntity.ok(notificationService.getUnreadCount(user));
+    }
+
     @GetMapping
     public ResponseEntity<List<NotificationDto>> get(
             @RequestParam(defaultValue = "0") Short page,

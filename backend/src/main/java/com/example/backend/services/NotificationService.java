@@ -28,7 +28,9 @@ public class NotificationService {
         this.notificationTextFactory = notificationTextFactory;
     }
 
-
+    public Integer getUnreadCount(User user) {
+        return profileNotificationRepository.getCountUnreadByProfile(user.getCurrentProfile());
+    }
 
     public List<NotificationDto> findPersonal(User user, Short page, Short size) {
         return profileNotificationRepository.findAllByKey_Profile(

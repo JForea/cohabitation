@@ -1,6 +1,7 @@
 package com.example.backend.services;
 
 import com.example.backend.dtos.inner.TokenDto;
+import com.example.backend.intefaces.IPushNotificationService;
 import com.example.backend.repositories.DeviceTokenRepository;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.messaging.*;
@@ -11,7 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
-public class PushNotificationService {
+public class PushNotificationService implements IPushNotificationService {
 
     private final DeviceTokenRepository deviceTokenRepository;
 

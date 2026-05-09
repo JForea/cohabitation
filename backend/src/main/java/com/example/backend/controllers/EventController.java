@@ -29,11 +29,12 @@ public class EventController {
 
     @PostMapping
     public ResponseEntity<IdResponse<Long>> create(
+            @PathVariable Integer apartmentId,
             @RequestBody CreateEventRequest dto,
             @AuthenticationPrincipal CustomUserDetails details
             ) {
         User user = details.getUser();
-        return ResponseEntity.status(HttpStatus.CREATED).body(eventService.create(user, dto));
+        return ResponseEntity.status(HttpStatus.CREATED).body(eventService.create(user, apartmentId, dto));
     }
 
     @GetMapping("/calendar")

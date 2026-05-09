@@ -6,6 +6,7 @@ import com.example.backend.dtos.out.expenses.ExpenseDto;
 import com.example.backend.entities.Expense;
 import com.example.backend.entities.ProfileMonthlyExpense;
 import com.example.backend.entities.User;
+import com.example.backend.intefaces.ExpenseNotificationHandler;
 import com.example.backend.intefaces.FileStorage;
 import com.example.backend.repositories.ExpenseRepository;
 import com.example.backend.repositories.ProfileMonthlyExpenseRepository;
@@ -30,14 +31,18 @@ public class ExpenseService {
 
     private final ProfileMonthlyExpenseRepository profileMonthlyExpenseRepository;
 
+    private final ExpenseNotificationHandler expenseNotificationHandler;
+
     private final String bucketName = "checks";
 
     public ExpenseService(ExpenseRepository expenseRepository,
                           FileStorage fileStorage,
-                          ProfileMonthlyExpenseRepository profileMonthlyExpenseRepository) {
+                          ProfileMonthlyExpenseRepository profileMonthlyExpenseRepository,
+                          ExpenseNotificationHandler expenseNotificationHandler) {
         this.expenseRepository = expenseRepository;
         this.fileStorage = fileStorage;
         this.profileMonthlyExpenseRepository = profileMonthlyExpenseRepository;
+        this.expenseNotificationHandler = expenseNotificationHandler;
     }
 
     @Transactional
@@ -77,6 +82,8 @@ public class ExpenseService {
             monthlyExpense.addAmount(expense.getAmount());
 
             profileMonthlyExpenseRepository.save(monthlyExpense);
+
+            expenseNotificationHandler.handleExpenseNotification(user, expense, true);
 
             return new CreateExpenseResponse(
                     expense.getId(),

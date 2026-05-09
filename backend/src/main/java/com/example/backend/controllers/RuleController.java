@@ -3,10 +3,13 @@ package com.example.backend.controllers;
 import com.example.backend.dtos.in.rules.CreateRuleRequest;
 import com.example.backend.dtos.out.common.IdResponse;
 import com.example.backend.dtos.out.rules.RuleDto;
+import com.example.backend.entities.User;
+import com.example.backend.security.CustomUserDetails;
 import com.example.backend.services.RuleService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -25,9 +28,11 @@ public class RuleController {
     @PostMapping
     public ResponseEntity<IdResponse<Long>> create(
             @PathVariable Integer apartmentId,
-            @RequestBody CreateRuleRequest dto
+            @RequestBody CreateRuleRequest dto,
+            @AuthenticationPrincipal CustomUserDetails details
     ) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(ruleService.create(apartmentId, dto));
+        User user = details.getUser();
+        return ResponseEntity.status(HttpStatus.CREATED).body(ruleService.create(user, apartmentId, dto));
     }
 
     @GetMapping
@@ -39,9 +44,11 @@ public class RuleController {
 
     @DeleteMapping("/{ruleId}")
     public ResponseEntity<Void> delete(
-            @PathVariable Long ruleId
+            @PathVariable Long ruleId,
+            @AuthenticationPrincipal CustomUserDetails details
     ) {
-        ruleService.deleteOne(ruleId);
+        User user = details.getUser();
+        ruleService.deleteOne(user, ruleId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 }

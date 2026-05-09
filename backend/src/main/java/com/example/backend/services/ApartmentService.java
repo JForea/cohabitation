@@ -6,16 +6,11 @@ import com.example.backend.dtos.out.apartment.CreateApartmentResponse;
 import com.example.backend.dtos.out.apartment.InviteCodeResponse;
 import com.example.backend.dtos.out.apartment.JoinApartmentResponse;
 import com.example.backend.dtos.out.profile.ProfileDto;
-import com.example.backend.entities.Apartment;
-import com.example.backend.entities.Profile;
-import com.example.backend.entities.ProfileMonthlyExpense;
-import com.example.backend.entities.User;
+import com.example.backend.entities.*;
 import com.example.backend.exceptions.ResourceNotFoundException;
 import com.example.backend.exceptions.StateConflictException;
-import com.example.backend.repositories.ApartmentRepository;
-import com.example.backend.repositories.ProfileMonthlyExpenseRepository;
-import com.example.backend.repositories.ProfileRepository;
-import com.example.backend.repositories.UserRepository;
+import com.example.backend.intefaces.ApartmentNotificationHandler;
+import com.example.backend.repositories.*;
 import com.example.backend.types.Role;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
@@ -37,18 +32,22 @@ public class ApartmentService {
 
     private final ProfileMonthlyExpenseRepository profileMonthlyExpenseRepository;
 
+    private final ApartmentNotificationHandler apartmentNotificationHandler;
+
     private final Random random;
 
     public ApartmentService(
             ApartmentRepository apartmentRepository,
             ProfileRepository profileRepository,
             UserRepository userRepository,
-            ProfileMonthlyExpenseRepository profileMonthlyExpenseRepository) {
+            ProfileMonthlyExpenseRepository profileMonthlyExpenseRepository,
+            ApartmentNotificationHandler apartmentNotificationHandler) {
         this.apartmentRepository = apartmentRepository;
         this. profileRepository = profileRepository;
         this.userRepository = userRepository;
         this.profileMonthlyExpenseRepository = profileMonthlyExpenseRepository;
         random = new Random();
+        this.apartmentNotificationHandler = apartmentNotificationHandler;
     }
 
     private Integer getMonthlyExpensesInApartment(Apartment apartment) {
@@ -135,6 +134,7 @@ public class ApartmentService {
         return new InviteCodeResponse(inviteCode);
     }
 
+    @Transactional
     public JoinApartmentResponse join(User user, String code) throws StateConflictException {
         Apartment apartment = apartmentRepository.findByInviteCode(code).orElseThrow(() ->
                 new ResourceNotFoundException("Apartment with such invite code wasn't found.")
@@ -167,6 +167,8 @@ public class ApartmentService {
                             month
                     );
 
+            apartmentNotificationHandler.handleJoinNotification(profile, true);
+
             return new JoinApartmentResponse(
                     apartment,
                     monthlyExpenses,
@@ -187,6 +189,8 @@ public class ApartmentService {
         userRepository.save(user);
 
         Integer monthlyExpenses = getMonthlyExpensesInApartment(apartment);
+
+        apartmentNotificationHandler.handleJoinNotification(profile, false);
 
         return new JoinApartmentResponse(
                 apartment,

@@ -9,6 +9,7 @@ import com.example.backend.entities.*;
 import com.example.backend.exceptions.AccessForbiddenException;
 import com.example.backend.exceptions.BadRequestException;
 import com.example.backend.exceptions.ResourceNotFoundException;
+import com.example.backend.intefaces.BuyingNotificationHandler;
 import com.example.backend.repositories.BuyingRepository;
 import com.example.backend.repositories.ProfileRepository;
 import com.example.backend.specifications.BuyingSpecifications;
@@ -16,6 +17,7 @@ import com.example.backend.types.Role;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.List;
@@ -28,13 +30,18 @@ public class BuyingService {
 
     private final ProfileRepository profileRepository;
 
+    private final BuyingNotificationHandler buyingNotificationHandler;
+
     public BuyingService(
              BuyingRepository buyingRepository,
-             ProfileRepository profileRepository) {
+             ProfileRepository profileRepository,
+             BuyingNotificationHandler buyingNotificationHandler) {
         this.buyingRepository = buyingRepository;
         this.profileRepository = profileRepository;
+        this.buyingNotificationHandler = buyingNotificationHandler;
     }
 
+    @Transactional
     public IdResponse<Long> create(User user, CreateBuyingDto dto) {
         if (!dto.isPublic() && dto.assignedTo() != null)
             throw new BadRequestException("Buying shouldn't be private and have assigned user at the same time.");
@@ -58,9 +65,12 @@ public class BuyingService {
                 )
         );
 
+        buyingNotificationHandler.handleBuyingCreate(createdBy, assignedTo);
+
         return new IdResponse<>(buying.getId());
     }
 
+    @Transactional
     public List<IdResponse<Long>> createMany(User user, CreateManyBuyingsDto dto) {
         if (!dto.isPublic() && dto.assignedTo() != null)
             throw new BadRequestException("Buying shouldn't be private and have assigned user at the same time.");
@@ -83,6 +93,8 @@ public class BuyingService {
                 buyingDto.category(),
                 dto.isPublic()
         )).toList());
+
+        buyingNotificationHandler.handleBuyingCreate(createdBy, assignedTo);
 
         return buyings.stream().map(buying -> new IdResponse<>(buying.getId())).toList();
     }

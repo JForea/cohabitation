@@ -11,6 +11,8 @@ import com.example.backend.exceptions.ResourceNotFoundException;
 import com.example.backend.exceptions.StateConflictException;
 import com.example.backend.factories.NotificationTextFactory;
 import com.example.backend.intefaces.INotificationTextFactory;
+import com.example.backend.intefaces.IPushNotificationService;
+import com.example.backend.intefaces.TaskNotificationHandler;
 import com.example.backend.repositories.*;
 import com.example.backend.specifications.TaskSpecifications;
 import com.example.backend.types.EntityType;
@@ -35,33 +37,17 @@ public class TaskService {
 
     private final NotificationRepository notificationRepository;
 
-    private final ProfileNotificationRepository profileNotificationRepository;
-
-    private final PushNotificationService pushNotificationService;
-
-    private final INotificationTextFactory notificationTextFactory;
+    private final TaskNotificationHandler taskNotificationHandler;
 
     public TaskService(
             TaskRepository taskRepository,
             ProfileRepository profileRepository,
             NotificationRepository notificationRepository,
-            ProfileNotificationRepository profileNotificationRepository,
-            PushNotificationService pushNotificationService,
-            NotificationTextFactory notificationTextFactory) {
+            TaskNotificationHandler taskNotificationHandler) {
         this.taskRepository = taskRepository;
         this.profileRepository = profileRepository;
         this.notificationRepository = notificationRepository;
-        this.profileNotificationRepository = profileNotificationRepository;
-        this.pushNotificationService = pushNotificationService;
-        this.notificationTextFactory = notificationTextFactory;
-    }
-
-    private Map<String, Object> getBaseNotificationPayload(Profile profile, Task task) {
-        return Map.of(
-                "taskId", task.getId(),
-                "taskName", task.getName(),
-                "userName", profile.getName()
-        );
+        this.taskNotificationHandler = taskNotificationHandler;
     }
 
     @Transactional
@@ -89,32 +75,7 @@ public class TaskService {
                 dto.dueDate()
         ));
 
-        Notification notification = new Notification(
-                creatorProfile,
-                NotificationType.TASK_CREATED,
-                EntityType.TASK,
-                getBaseNotificationPayload(creatorProfile, task)
-        );
-
-        notification = notificationRepository.save(notification);
-
-        if (assignedProfile != null &&
-                !Objects.equals(assignedProfile.getId(), creatorProfile.getId())) {
-            ProfileNotification profileNotification = new ProfileNotification(
-                assignedProfile,
-                notification
-            );
-
-            profileNotificationRepository.save(profileNotification);
-
-            pushNotificationService.send(
-                    assignedProfile.getUser().getDeviceTokens()
-                            .stream().map(TokenDto::new)
-                            .toList(),
-                    notificationTextFactory.getTitle(NotificationType.TASK_CREATED),
-                    notificationTextFactory.getBody(NotificationType.TASK_CREATED, notification.getPayload(), true)
-            );
-        }
+        taskNotificationHandler.handleTaskCreate(user, assignedProfile, task);
 
         return new IdResponse<>(task.getId());
     }
@@ -152,9 +113,6 @@ public class TaskService {
             throw new AccessForbiddenException("You can't change status of this task, because you are not the " +
                     "one who completed it.");
 
-        Map<String, Object> payload = new HashMap<>(getBaseNotificationPayload(user.getCurrentProfile(), task));
-        payload.put("points", task.getPoints());
-
         Profile profile;
         if (task.getCompletedAt() != null) {
             profile = task.getCompletedBy();
@@ -173,14 +131,7 @@ public class TaskService {
         profileRepository.save(profile);
         taskRepository.save(task);
 
-        notificationRepository.save(
-                new Notification(
-                user.getCurrentProfile(),
-                task.getCompletedAt() != null ? NotificationType.TASK_DONE : NotificationType.TASK_REOPENED,
-                EntityType.TASK,
-                payload
-                )
-        );
+        taskNotificationHandler.handleSwitchStatus(user, task);
 
         return new StatusResponse(task.getCompletedAt() != null);
     }

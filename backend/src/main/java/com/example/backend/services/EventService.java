@@ -5,7 +5,9 @@ import com.example.backend.dtos.out.common.IdResponse;
 import com.example.backend.dtos.out.events.EventDto;
 import com.example.backend.entities.Event;
 import com.example.backend.entities.User;
+import com.example.backend.intefaces.EventNotificationHandler;
 import com.example.backend.repositories.EventRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -18,11 +20,16 @@ public class EventService {
 
     private final EventRepository eventRepository;
 
-    public EventService(EventRepository eventRepository) {
+    private final EventNotificationHandler eventNotificationHandler;
+
+    public EventService(EventRepository eventRepository,
+                        EventNotificationHandler eventNotificationHandler) {
         this.eventRepository = eventRepository;
+        this.eventNotificationHandler = eventNotificationHandler;
     }
 
-    public IdResponse<Long> create(User user, CreateEventRequest dto) {
+    @Transactional
+    public IdResponse<Long> create(User user, Integer apartmentId, CreateEventRequest dto) {
         Event event = eventRepository.save(new Event(
                 user.getCurrentProfile(),
                 dto.name(),
@@ -30,6 +37,8 @@ public class EventService {
                 dto.time(),
                 dto.description()
         ));
+
+        eventNotificationHandler.handleEventNotification(user, apartmentId, event, true);
 
         return new IdResponse<>(event.getId());
     }

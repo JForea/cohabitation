@@ -1,16 +1,17 @@
 package com.example.backend.services;
 
 import com.example.backend.dtos.in.tasks.CreateTaskDto;
+import com.example.backend.dtos.inner.TokenDto;
 import com.example.backend.dtos.out.common.IdResponse;
 import com.example.backend.dtos.out.common.StatusResponse;
 import com.example.backend.dtos.out.tasks.TaskDto;
 import com.example.backend.entities.*;
 import com.example.backend.exceptions.AccessForbiddenException;
 import com.example.backend.exceptions.ResourceNotFoundException;
-import com.example.backend.repositories.NotificationRepository;
-import com.example.backend.repositories.ProfileNotificationRepository;
-import com.example.backend.repositories.ProfileRepository;
-import com.example.backend.repositories.TaskRepository;
+import com.example.backend.exceptions.StateConflictException;
+import com.example.backend.factories.NotificationTextFactory;
+import com.example.backend.intefaces.INotificationTextFactory;
+import com.example.backend.repositories.*;
 import com.example.backend.specifications.TaskSpecifications;
 import com.example.backend.types.EntityType;
 import com.example.backend.types.NotificationType;
@@ -36,15 +37,23 @@ public class TaskService {
 
     private final ProfileNotificationRepository profileNotificationRepository;
 
+    private final PushNotificationService pushNotificationService;
+
+    private final INotificationTextFactory notificationTextFactory;
+
     public TaskService(
             TaskRepository taskRepository,
             ProfileRepository profileRepository,
             NotificationRepository notificationRepository,
-            ProfileNotificationRepository profileNotificationRepository) {
+            ProfileNotificationRepository profileNotificationRepository,
+            PushNotificationService pushNotificationService,
+            NotificationTextFactory notificationTextFactory) {
         this.taskRepository = taskRepository;
         this.profileRepository = profileRepository;
         this.notificationRepository = notificationRepository;
         this.profileNotificationRepository = profileNotificationRepository;
+        this.pushNotificationService = pushNotificationService;
+        this.notificationTextFactory = notificationTextFactory;
     }
 
     private Map<String, Object> getBaseNotificationPayload(Profile profile, Task task) {
@@ -64,6 +73,9 @@ public class TaskService {
             assignedProfile = profileRepository.findById(dto.assignedTo()).orElseThrow(
                     () -> new ResourceNotFoundException("Assigned user not found.")
             );
+
+        if (assignedProfile != null && assignedProfile.getLeftAt() != null)
+            throw new StateConflictException("Can't assign task for user, who left the apartment.");
 
         Task task = taskRepository.save(new Task(
                 creatorProfile,
@@ -86,13 +98,22 @@ public class TaskService {
 
         notification = notificationRepository.save(notification);
 
-        if (assignedProfile != null && !Objects.equals(assignedProfile.getId(), creatorProfile.getId())) {
+        if (assignedProfile != null &&
+                !Objects.equals(assignedProfile.getId(), creatorProfile.getId())) {
             ProfileNotification profileNotification = new ProfileNotification(
                 assignedProfile,
                 notification
             );
 
             profileNotificationRepository.save(profileNotification);
+
+            pushNotificationService.send(
+                    assignedProfile.getUser().getDeviceTokens()
+                            .stream().map(TokenDto::new)
+                            .toList(),
+                    notificationTextFactory.getTitle(NotificationType.TASK_CREATED),
+                    notificationTextFactory.getBody(NotificationType.TASK_CREATED, notification.getPayload(), true)
+            );
         }
 
         return new IdResponse<>(task.getId());

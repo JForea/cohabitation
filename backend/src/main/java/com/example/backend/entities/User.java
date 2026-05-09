@@ -33,6 +33,9 @@ public class User {
     @OneToMany(mappedBy = "user", orphanRemoval = true)
     private Set<Profile> profiles = new LinkedHashSet<>();
 
+    @OneToMany(mappedBy = "user", orphanRemoval = true)
+    private Set<DeviceToken> deviceTokens = new LinkedHashSet<>();
+
     @OneToOne(fetch = FetchType.LAZY, orphanRemoval = true)
     @JoinColumn(name = "current_profile_id")
     private Profile currentProfile;
@@ -105,4 +108,7 @@ public class User {
         return id;
     }
 
+    public Set<DeviceToken> getDeviceTokens() {
+        return deviceTokens;
+    }
 }

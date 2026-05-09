@@ -34,6 +34,9 @@ class _AuthNotifier extends AsyncNotifier<AuthState> {
     String password,
     String name,
     bool male,
+    String? deviceId,
+    String? fcmToken,
+    String? platform,
   ) async {
     state = const AsyncValue.loading();
 
@@ -45,6 +48,12 @@ class _AuthNotifier extends AsyncNotifier<AuthState> {
           "password": password,
           "name": name,
           "male": male,
+          if (deviceId != null && fcmToken != null && platform != null)
+            "deviceToken": {
+              "deviceId": deviceId,
+              "token": fcmToken,
+              "platform": platform,
+            },
         },
       );
 
@@ -60,13 +69,28 @@ class _AuthNotifier extends AsyncNotifier<AuthState> {
     });
   }
 
-  Future<void> login(String email, String password) async {
+  Future<void> login(
+    String email,
+    String password,
+    String? deviceId,
+    String? fcmToken,
+    String? platform,
+  ) async {
     state = const AsyncValue.loading();
 
     state = await AsyncValue.guard(() async {
       final response = await AppDio.dio.post(
         '/users/auth/login',
-        data: {"email": email, "password": password},
+        data: {
+          "email": email,
+          "password": password,
+          if (deviceId != null && fcmToken != null && platform != null)
+            "deviceToken": {
+              "deviceId": deviceId,
+              "token": fcmToken,
+              "platform": platform,
+            },
+        },
       );
 
       final token = response.headers['Authorization']?.first;

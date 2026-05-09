@@ -7,6 +7,7 @@ import 'package:frontend/shared/data/providers/auth_provider.dart';
 import 'package:frontend/shared/presentation/ui/widgets/buttons/custom_back_button.dart';
 import 'package:frontend/shared/presentation/ui/widgets/buttons/custom_text_button.dart';
 import 'package:frontend/shared/presentation/ui/widgets/wrappers/auth_page_wrapper.dart';
+import 'package:frontend/shared/utils/fcm_helper.dart';
 
 class JoinApartmentPage extends ConsumerStatefulWidget {
   const JoinApartmentPage({super.key});
@@ -38,6 +39,7 @@ class _JoinApartmentPageState extends ConsumerState<JoinApartmentPage> {
     }
 
     ref.read(authProvider.notifier).setProfile(profile);
+    await FcmHelper.requestPermission();
   }
 
   @override

@@ -8,6 +8,8 @@ import 'package:frontend/shared/data/types/task_priority.dart';
 import 'package:frontend/shared/presentation/theme/app_colors.dart';
 
 class UtilFunctions {
+  UtilFunctions._internal();
+
   static String getDateDisplayFromDateTime(DateTime date) {
     final now = DateTime.now();
 

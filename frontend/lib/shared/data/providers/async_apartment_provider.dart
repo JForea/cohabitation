@@ -17,15 +17,11 @@ class _ApartmentNotifier extends AsyncNotifier<Apartment?> {
 
   @override
   Future<Apartment?> build() async {
-    ref.onDispose(() => print("disposed."));
-
     baseUrl = "/apartments";
 
     apartmentId = ref.watch(
       userProvider.select((s) => s?.profile?.apartmentId),
     );
-
-    print("Apartment change.");
 
     if (apartmentId == null) {
       return null;
@@ -33,8 +29,6 @@ class _ApartmentNotifier extends AsyncNotifier<Apartment?> {
 
     final response = await AppDio.dio.get("$baseUrl/$apartmentId");
     Apartment apartment = Apartment.fromJson(response.data);
-
-    print(apartment.id);
 
     return apartment;
   }
@@ -101,8 +95,6 @@ class _ApartmentNotifier extends AsyncNotifier<Apartment?> {
       });
 
       final profile = Profile.fromJson(response.data["profile"]);
-
-      print(profile);
 
       return profile;
     } catch (e) {

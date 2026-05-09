@@ -6,6 +6,7 @@ import 'package:frontend/shared/presentation/ui/widgets/buttons/custom_back_butt
 import 'package:frontend/shared/presentation/ui/widgets/buttons/custom_text_button.dart';
 import 'package:frontend/shared/presentation/ui/widgets/inputs/controlled_named_text_field.dart';
 import 'package:frontend/shared/presentation/ui/widgets/wrappers/auth_page_wrapper.dart';
+import 'package:frontend/shared/utils/fcm_helper.dart';
 import 'package:go_router/go_router.dart';
 
 class CreateApartmentPage extends ConsumerStatefulWidget {
@@ -43,6 +44,7 @@ class _CreateApartmentPageState extends ConsumerState<CreateApartmentPage> {
       return false;
     }
     ref.read(authProvider.notifier).setProfile(profile);
+    await FcmHelper.requestPermission();
     return true;
   }
 

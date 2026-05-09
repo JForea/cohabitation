@@ -1,4 +1,7 @@
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/features/auth/data/auth_data_holder.dart';
 import 'package:frontend/shared/data/providers/auth_provider.dart';
@@ -7,6 +10,7 @@ import 'package:frontend/shared/presentation/ui/widgets/buttons/custom_text_butt
 import 'package:frontend/shared/presentation/ui/widgets/inputs/controlled_named_text_field.dart';
 import 'package:frontend/shared/presentation/ui/widgets/switches/gender_switch.dart';
 import 'package:frontend/shared/presentation/ui/widgets/wrappers/auth_page_wrapper.dart';
+import 'package:frontend/shared/utils/fcm_helper.dart';
 
 class RegistrationSecondPage extends ConsumerStatefulWidget {
   RegistrationSecondPage({super.key}) {
@@ -33,7 +37,22 @@ class _RegistrationSecondPageState
   }
 
   Future<void> register() async {
+    if (kIsWeb) {
+      await FirebaseMessaging.instance.requestPermission(provisional: true);
+    }
+
     AuthDataHolder dataHolder = widget.dataHolder;
+
+    String? fcmToken;
+    if (kIsWeb) {
+      fcmToken = await FirebaseMessaging.instance.getToken(
+        vapidKey: dotenv.get("FIREBASE_WEB_PUBLIC_KEY"),
+      );
+    } else {
+      fcmToken = await FirebaseMessaging.instance.getToken();
+    }
+
+    if (fcmToken == null) return;
 
     await ref
         .read(authProvider.notifier)
@@ -42,6 +61,9 @@ class _RegistrationSecondPageState
           dataHolder.password,
           dataHolder.name,
           dataHolder.male,
+          await FcmHelper.getDeviceId(),
+          await FcmHelper.getToken(),
+          FcmHelper.getPlatform(),
         );
   }
 

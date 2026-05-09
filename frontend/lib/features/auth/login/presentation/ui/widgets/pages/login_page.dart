@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/features/auth/data/auth_data_holder.dart';
@@ -6,6 +7,7 @@ import 'package:frontend/shared/presentation/ui/widgets/buttons/custom_back_butt
 import 'package:frontend/shared/presentation/ui/widgets/buttons/custom_text_button.dart';
 import 'package:frontend/shared/presentation/ui/widgets/inputs/controlled_named_text_field.dart';
 import 'package:frontend/shared/presentation/ui/widgets/wrappers/auth_page_wrapper.dart';
+import 'package:frontend/shared/utils/fcm_helper.dart';
 
 class LoginPage extends ConsumerWidget {
   LoginPage({super.key});
@@ -21,9 +23,19 @@ class LoginPage extends ConsumerWidget {
   }
 
   Future<void> login(WidgetRef ref) async {
+    if (kIsWeb) {
+      await FcmHelper.requestPermission();
+    }
+
     await ref
         .read(authProvider.notifier)
-        .login(dataHolder.email, dataHolder.password);
+        .login(
+          dataHolder.email,
+          dataHolder.password,
+          await FcmHelper.getDeviceId(),
+          await FcmHelper.getToken(),
+          FcmHelper.getPlatform(),
+        );
   }
 
   @override

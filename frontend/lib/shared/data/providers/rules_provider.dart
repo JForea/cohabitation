@@ -56,22 +56,19 @@ class _RulesNotifier extends AsyncNotifier<List<Rule>> {
   }
 
   Future<bool> delete(int id) async {
+    final previous = state.value ?? [];
+
     try {
-      final value = state.value;
+      final newList = previous.where((rule) => rule.id != id).toList();
 
-      AppDio.dio.delete("$baseUrl/$id");
+      state = AsyncData(newList);
 
-      if (value != null) {
-        for (final rule in value) {
-          if (rule.id == id) {
-            value.remove(rule);
-          }
-        }
-      }
+      await AppDio.dio.delete("$baseUrl/$id");
 
       return true;
     } catch (e) {
       print(e);
+      state = AsyncData(previous);
       return false;
     }
   }

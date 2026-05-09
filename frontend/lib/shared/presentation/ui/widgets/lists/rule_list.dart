@@ -16,7 +16,7 @@ class RuleList extends StatefulWidget {
   });
 
   final List<Rule> rules;
-  final Future<void> Function(String)? onRuleAdd;
+  final Future<bool> Function(String)? onRuleAdd;
   final Future<void> Function(int)? onRuleRemove;
   final bool titleNeeded;
 
@@ -72,7 +72,17 @@ class _RuleListState extends State<RuleList> {
                   ),
                 ),
                 CustomTextButton(
-                  onPressed: () => widget.onRuleAdd!(text),
+                  onPressed: () async {
+                    setState(() {
+                      addingNow = false;
+                    });
+                    final added = await widget.onRuleAdd!(text);
+                    if (added) {
+                      setState(() {
+                        text = "";
+                      });
+                    }
+                  },
                   text: "Добавить",
                   paddinH: 10,
                   paddingW: 8,

@@ -27,6 +27,10 @@ class SettingsPage extends ConsumerWidget {
     return created;
   }
 
+  Future<void> deleteRule(WidgetRef ref, int ruleId) async {
+    await ref.read(rulesProvider.notifier).delete(ruleId);
+  }
+
   Future<void> copyInviteCode(BuildContext context, String? inviteCode) async {
     if (inviteCode != null) {
       await Clipboard.setData(ClipboardData(text: inviteCode));
@@ -69,8 +73,8 @@ class SettingsPage extends ConsumerWidget {
               data: (rules) => RuleList(
                 titleNeeded: true,
                 rules: rules,
-                onRuleAdd: (text) => createRule(ref, text),
-                onRuleRemove: (id) async {},
+                onRuleAdd: (text) async => await createRule(ref, text),
+                onRuleRemove: (id) async => await deleteRule(ref, id),
               ),
               error: (e, _) => Text("Произошла ошибка при загрузке."),
               loading: () => Center(child: CircularProgressIndicator()),

@@ -28,10 +28,10 @@ class AppDio {
               handler.next(options);
             },
           ),
+        )
+        ..interceptors.add(
+          LogInterceptor(requestBody: false, responseBody: false),
         );
-  // ..interceptors.add(
-  //   LogInterceptor(requestBody: false, responseBody: false),
-  // );
 
   static Future<void> updateToken(String? token) async {
     _cachedToken = token;

@@ -3,7 +3,6 @@ package com.example.backend.services;
 import com.example.backend.dtos.in.user.AuthenticationDto;
 import com.example.backend.dtos.in.user.RegisterDto;
 import com.example.backend.dtos.out.user.UserDto;
-import com.example.backend.entities.ProfileMonthlyExpense;
 import com.example.backend.entities.User;
 import com.example.backend.repositories.ProfileMonthlyExpenseRepository;
 import com.example.backend.repositories.UserRepository;
@@ -15,7 +14,6 @@ import org.springframework.stereotype.Service;
 import java.time.Month;
 import java.time.Year;
 import java.util.Calendar;
-import java.util.Optional;
 import java.util.Random;
 
 @Service

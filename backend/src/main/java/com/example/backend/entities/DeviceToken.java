@@ -7,7 +7,12 @@ import org.hibernate.annotations.CreationTimestamp;
 import java.time.Instant;
 
 @Entity
-@Table(name = "device_token")
+@Table(
+        name = "device_token",
+        uniqueConstraints = {
+                @UniqueConstraint(columnNames = {"user_id", "device_id"})
+        }
+)
 public class DeviceToken {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -17,6 +22,9 @@ public class DeviceToken {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "user_id", nullable = false)
     User user;
+
+    @Column(name = "device_id", nullable = false)
+    String deviceId;
 
     @Column(name = "token", nullable = false)
     String token;
@@ -35,10 +43,12 @@ public class DeviceToken {
 
     public DeviceToken(
            User user,
+           String deviceId,
            String token,
            Platform platform
     ) {
         this.user = user;
+        this.deviceId = deviceId;
         this.token = token;
         this.platform = platform;
     }
@@ -63,6 +73,10 @@ public class DeviceToken {
         return platform;
     }
 
+    public void setPlatform(Platform platform) {
+        this.platform = platform;
+    }
+
     public Instant getCreatedAt() {
         return createdAt;
     }
@@ -73,5 +87,9 @@ public class DeviceToken {
 
     public void setUpdatedAt(Instant updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public String getDeviceId() {
+        return deviceId;
     }
 }

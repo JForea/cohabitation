@@ -5,6 +5,7 @@ import com.example.backend.dtos.in.user.RegisterDto;
 import com.example.backend.dtos.out.user.UserDto;
 import com.example.backend.entities.User;
 import com.example.backend.security.CustomUserDetails;
+import com.example.backend.services.DeviceTokenService;
 import com.example.backend.services.JwtService;
 import com.example.backend.services.UserService;
 import jakarta.servlet.http.HttpServletResponse;
@@ -22,10 +23,14 @@ public class UserController {
 
     private final JwtService jwtService;
 
+    private final DeviceTokenService deviceTokenService;
+
     public UserController(UserService userService,
-                          JwtService jwtService) {
+                          JwtService jwtService,
+                          DeviceTokenService deviceTokenService) {
         this.userService = userService;
         this.jwtService = jwtService;
+        this.deviceTokenService = deviceTokenService;
     }
 
     @PostMapping("/auth/registry")
@@ -34,6 +39,7 @@ public class UserController {
             HttpServletResponse servletResponse
     ) {
         UserDto userDto = userService.create(dto);
+        deviceTokenService.save(userDto, dto.deviceToken());
         String token = jwtService.generateToken(userDto);
         servletResponse.addHeader(HttpHeaders.AUTHORIZATION, "Bearer " + token);
         return ResponseEntity.ok(userDto);
@@ -45,6 +51,7 @@ public class UserController {
             HttpServletResponse servletResponse
     ) {
         UserDto userDto = userService.authenticate(dto);
+        deviceTokenService.save(userDto, dto.deviceToken());
         String token = jwtService.generateToken(userDto);
         servletResponse.addHeader(HttpHeaders.AUTHORIZATION, "Bearer " + token);
         return ResponseEntity.ok(userDto);

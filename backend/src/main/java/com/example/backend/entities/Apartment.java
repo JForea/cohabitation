@@ -31,11 +31,15 @@ public class Apartment {
     @OneToMany(mappedBy = "apartment", orphanRemoval = true)
     private Set<Profile> profiles = new LinkedHashSet<>();
 
+    @Column(name = "minutes_offset", nullable = false)
+    private Short minutesOffset;
+
     public Apartment() {}
 
-    public Apartment(String name, String address) {
+    public Apartment(String name, String address, Short minutesOffset) {
         this.name = name;
         this.address = address;
+        this.minutesOffset = minutesOffset;
     }
 
     public Set<Profile> getProfiles() {
@@ -90,4 +94,11 @@ public class Apartment {
         return id;
     }
 
+    public Short getMinutesOffset() {
+        return minutesOffset;
+    }
+
+    public void setMinutesOffset(Short minutesOffset) {
+        this.minutesOffset = minutesOffset;
+    }
 }

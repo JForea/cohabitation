@@ -72,7 +72,8 @@ public class ApartmentService {
 
         Apartment apartment = apartmentRepository.save(new Apartment(
                 dto.name(),
-                dto.address()
+                dto.address(),
+                dto.minutesOffset()
         ));
 
         Profile profile = profileRepository.save(new Profile(user, apartment, true));

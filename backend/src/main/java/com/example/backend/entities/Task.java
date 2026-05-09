@@ -58,6 +58,9 @@ public class Task {
     @Column(name = "completed_at")
     private Instant completedAt;
 
+    @Column(name = "last_reminder_date")
+    private LocalDate lastReminderDate;
+
     public Task() {}
 
     public Task(
@@ -181,4 +184,11 @@ public class Task {
         this.id = id;
     }
 
+    public LocalDate getLastReminderDate() {
+        return lastReminderDate;
+    }
+
+    public void setLastReminderDate(LocalDate lastReminderDate) {
+        this.lastReminderDate = lastReminderDate;
+    }
 }

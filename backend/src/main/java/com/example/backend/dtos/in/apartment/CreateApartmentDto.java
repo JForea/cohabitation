@@ -1,7 +1,10 @@
 package com.example.backend.dtos.in.apartment;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import org.hibernate.validator.constraints.Length;
+
+import java.time.ZoneOffset;
 
 public record CreateApartmentDto (
     @NotBlank(message = "Name must be provided.")
@@ -10,5 +13,7 @@ public record CreateApartmentDto (
     )
     String name,
     @Length(max = 64, message = "Address max length is 64 characters")
-    String address
+    String address,
+    @NotNull
+    Short minutesOffset
 ) {}

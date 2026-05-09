@@ -52,15 +52,15 @@ class HomeAppBar extends StatelessWidget {
                       UtilFunctions.toHomeDateString(DateTime.now()),
                       style: TextStyle(
                         color: Color(0xFFD8D8D8),
-                        fontSize: 14,
+                        fontSize: 12,
                         fontWeight: .w500,
                       ),
                     ),
                     Text(
-                      "Привет, $userName! 👋",
+                      "Привет, $userName!",
                       style: TextStyle(
                         color: Colors.white,
-                        fontSize: 18,
+                        fontSize: 16,
                         fontWeight: .w600,
                       ),
                     ),
@@ -68,7 +68,7 @@ class HomeAppBar extends StatelessWidget {
                       address ?? "",
                       style: TextStyle(
                         color: Color(0xFFD8D8D8),
-                        fontSize: 14,
+                        fontSize: 12,
                         fontWeight: .w500,
                       ),
                     ),

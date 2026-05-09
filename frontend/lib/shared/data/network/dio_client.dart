@@ -30,7 +30,7 @@ class AppDio {
           ),
         )
         ..interceptors.add(
-          LogInterceptor(requestBody: false, responseBody: false),
+          LogInterceptor(requestBody: false, responseBody: true),
         );
 
   static Future<void> updateToken(String? token) async {

@@ -23,8 +23,6 @@ class _NotificationsNotifier extends AsyncNotifier<List<NotificationValue>> {
 
   @override
   FutureOr<List<NotificationValue>> build() async {
-    print("BUILD NOTIFICATIONS");
-
     final apartmentId = ref.watch(apartmentProvider.select((a) => a?.id));
 
     if (apartmentId == null) {

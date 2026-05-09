@@ -180,6 +180,11 @@ class UtilFunctions {
       case const (NotificationType):
         res = switch (name) {
           "task" => NotificationType.task,
+          "buying" => NotificationType.buying,
+          "event" => NotificationType.event,
+          "expense" => NotificationType.expense,
+          "rule" => NotificationType.rule,
+          "user" => NotificationType.user,
           _ => null,
         };
         break;

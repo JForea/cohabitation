@@ -11,6 +11,11 @@ class NotificationTypeBadge extends StatelessWidget {
   Color _getColor() {
     return switch (type) {
       .task => AppColors.blue,
+      .buying => AppColors.yellow,
+      .event => AppColors.purple,
+      .expense => AppColors.orange,
+      .rule => AppColors.brown,
+      .user => AppColors.green,
     };
   }
 
@@ -27,8 +32,8 @@ class NotificationTypeBadge extends StatelessWidget {
       child: SvgPicture.asset(
         "assets/icons/notification_types/${type.name}.svg",
         colorFilter: ColorFilter.mode(color, .srcIn),
-        height: 16,
-        width: 16,
+        height: 24,
+        width: 24,
       ),
     );
   }

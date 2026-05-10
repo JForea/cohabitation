@@ -54,4 +54,11 @@ public class ExpenseController {
         List<ExpenseDto> expenses = expenseService.get(apartmentId, page, size);
         return ResponseEntity.ok(expenses);
     }
+
+    @GetMapping("/amount")
+    public ResponseEntity<Integer> getAmount(
+            @PathVariable Integer apartmentId
+    ) {
+        return ResponseEntity.ok(expenseService.getAmount(apartmentId));
+    }
 }

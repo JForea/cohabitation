@@ -27,6 +27,18 @@ public interface ProfileMonthlyExpenseRepository extends ListCrudRepository<Prof
     @Query("""
         SELECT sum(e.amount)
         FROM ProfileMonthlyExpense e
+        WHERE e.profile.apartment.id = :apartmentId
+            AND e.year = :year
+            AND e.month = :month
+    """)
+    Integer getSumByApartmentIdAndYearAndMonth(
+            @Param("apartmentId") Integer apartmentId,
+            @Param("year") Integer year,
+            @Param("month") Month month
+    );
+    @Query("""
+        SELECT sum(e.amount)
+        FROM ProfileMonthlyExpense e
         WHERE e.profile = :profile
             AND e.year = :year
             AND e.month = :month

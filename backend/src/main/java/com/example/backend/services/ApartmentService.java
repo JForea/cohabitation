@@ -13,6 +13,7 @@ import com.example.backend.intefaces.ApartmentNotificationHandler;
 import com.example.backend.repositories.*;
 import com.example.backend.types.Role;
 import jakarta.transaction.Transactional;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Service;
 
 import java.time.Month;
@@ -104,37 +105,6 @@ public class ApartmentService {
         );
     }
 
-    public InviteCodeResponse generateCode(Integer apartmentId) {
-        int inviteCodeLength = 8;
-        String charset = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-
-        Apartment apartment = apartmentRepository.findById(apartmentId).orElseThrow(
-                () -> new ResourceNotFoundException("Apartment not found.")
-        );
-
-        boolean generated = false;
-        StringBuilder inviteCodeBuilder = new StringBuilder();
-        while (!generated) {
-            for (int i = 0; i < inviteCodeLength; i++) {
-                inviteCodeBuilder.append(charset.charAt(random.nextInt(charset.length())));
-            }
-
-            Optional<Apartment> conflictingApartment = apartmentRepository.findByInviteCode(inviteCodeBuilder.toString());
-
-            if (conflictingApartment.isEmpty())
-                generated = true;
-            else
-                inviteCodeBuilder.delete(0, inviteCodeLength);
-        }
-
-        String inviteCode = inviteCodeBuilder.toString();
-        apartment.setInviteCode(inviteCode);
-
-        apartmentRepository.save(apartment);
-
-        return new InviteCodeResponse(inviteCode);
-    }
-
     @Transactional
     public JoinApartmentResponse join(User user, String code) throws StateConflictException {
         Apartment apartment = apartmentRepository.findByInviteCode(code).orElseThrow(() ->
@@ -199,5 +169,39 @@ public class ApartmentService {
                 profile,
                 0
         );
+    }
+
+    @Transactional
+    @Modifying
+    public InviteCodeResponse generateCode(Integer apartmentId) {
+        int inviteCodeLength = 8;
+        String charset = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+
+        boolean generated = false;
+        StringBuilder inviteCodeBuilder = new StringBuilder();
+        while (!generated) {
+            for (int i = 0; i < inviteCodeLength; i++) {
+                inviteCodeBuilder.append(charset.charAt(random.nextInt(charset.length())));
+            }
+
+            Optional<Apartment> conflictingApartment = apartmentRepository.findByInviteCode(inviteCodeBuilder.toString());
+
+            if (conflictingApartment.isEmpty())
+                generated = true;
+            else
+                inviteCodeBuilder.delete(0, inviteCodeLength);
+        }
+
+        String inviteCode = inviteCodeBuilder.toString();
+
+        apartmentRepository.updateInviteCodeById(apartmentId, inviteCode);
+
+        return new InviteCodeResponse(inviteCode);
+    }
+
+    @Transactional
+    @Modifying
+    public void setBudget(Integer apartmentId, Integer budget) {
+        apartmentRepository.updateBudgetById(apartmentId, budget);
     }
 }

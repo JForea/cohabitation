@@ -11,6 +11,8 @@ import com.example.backend.services.ApartmentService;
 import com.example.backend.services.JwtService;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -75,5 +77,15 @@ public class ApartmentController {
     ) {
         InviteCodeResponse response = apartmentService.generateCode(apartmentId);
         return ResponseEntity.ok(response);
+    }
+
+    @PreAuthorize("@apartmentSecurity.hasAccess(#apartmentId, authentication)")
+    @PatchMapping("/{apartmentId}/budget")
+    public ResponseEntity<Void> patchBudget(
+        @PathVariable Integer apartmentId,
+        @RequestBody @Min(0) @Max(1000000) Integer budget
+    ) {
+        apartmentService.setBudget(apartmentId, budget);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 }

@@ -97,6 +97,7 @@ public class ExpenseService {
         }
     }
 
+    @Transactional
     public List<ExpenseDto> get(Integer apartmentId, Short page, Short size) {
         return expenseRepository.findAllByCreatedBy_Apartment_Id(apartmentId, PageRequest.of(page, size))
                 .map(
@@ -110,5 +111,18 @@ public class ExpenseService {
                             );
                         }
                 ).toList();
+    }
+
+    public Integer getAmount(Integer apartmentId) {
+        Calendar calendar = Calendar.getInstance();
+
+        Month month = Month.of(calendar.get(Calendar.MONTH));
+        Year year = Year.of(calendar.get(Calendar.YEAR));
+
+        return profileMonthlyExpenseRepository.getSumByApartmentIdAndYearAndMonth(
+                apartmentId,
+                year.getValue(),
+                month
+        );
     }
 }

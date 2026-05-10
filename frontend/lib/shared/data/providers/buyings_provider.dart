@@ -26,13 +26,13 @@ class _BuyingNotifier extends AsyncNotifier<Map<BuyingCategory, List<Buying>>> {
 
   @override
   Future<Map<BuyingCategory, List<Buying>>> build() async {
-    final apartment = ref.watch(apartmentProvider);
+    final apartmentId = ref.watch(apartmentProvider.select((a) => a?.id));
 
-    if (apartment == null) {
+    if (apartmentId == null) {
       throw Exception("Not in apartment.");
     }
 
-    baseUrl = "/apartments/${apartment.id}/buyings";
+    baseUrl = "/apartments/$apartmentId/buyings";
 
     final buyings = await _fetchPage();
 

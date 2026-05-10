@@ -8,7 +8,7 @@ final pageProvider = NotifierProvider<_PageNotifier, int>(
 class _PageNotifier extends Notifier<int> {
   @override
   int build() {
-    ref.listen(apartmentProvider, (_, _) {
+    ref.listen(apartmentProvider.select((a) => a?.id), (_, _) {
       Future(() => state = 0);
     });
 

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:frontend/features/buyings/data/providers/buyings_provider.dart';
+import 'package:frontend/shared/data/providers/buyings_provider.dart';
 import 'package:frontend/features/buyings/presentation/ui/widgets/lists/category_buying_list.dart';
 import 'package:frontend/shared/data/providers/user_provider.dart';
 import 'package:frontend/shared/presentation/ui/widgets/wrappers/tab_wrapper.dart';

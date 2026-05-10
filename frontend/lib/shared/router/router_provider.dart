@@ -29,7 +29,7 @@ final routerProvider = Provider<GoRouter>((ref) {
     initialLocation: '/',
     refreshListenable: notifier,
     redirect: (context, state) {
-      final flags = ref.read(authFlagsProvider); // 👈 read, НЕ watch
+      final flags = ref.read(authFlagsProvider);
 
       if (flags.isLoading) return null;
 

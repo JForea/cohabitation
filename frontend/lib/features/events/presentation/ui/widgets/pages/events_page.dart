@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:frontend/features/events/data/providers/events_provider.dart';
+import 'package:frontend/shared/data/providers/events_provider.dart';
 import 'package:frontend/features/events/presentation/ui/widgets/cards/event_card.dart';
 import 'package:frontend/shared/data/providers/user_provider.dart';
 import 'package:frontend/shared/presentation/theme/app_colors.dart';

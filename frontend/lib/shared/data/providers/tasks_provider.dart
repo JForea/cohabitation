@@ -27,13 +27,13 @@ class _TasksNotifier extends AsyncNotifier<List<Task>> {
 
   @override
   Future<List<Task>> build() async {
-    final apartment = ref.watch(apartmentProvider);
+    final apartmentId = ref.watch(apartmentProvider.select((a) => a?.id));
 
-    if (apartment == null) {
+    if (apartmentId == null) {
       throw Exception("Not in apartment.");
     }
 
-    baseUrl = "/apartments/${apartment.id}/tasks";
+    baseUrl = "/apartments/$apartmentId/tasks";
 
     return _fetchPage();
   }

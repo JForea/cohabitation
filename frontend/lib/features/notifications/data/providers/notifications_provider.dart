@@ -30,7 +30,7 @@ class _NotificationsNotifier extends AsyncNotifier<List<NotificationValue>> {
     }
 
     _baseUrl = "/apartments/$apartmentId/notifications";
-    _isPersonal = false;
+    _isPersonal = true;
     _page = 0;
     _hasMore = true;
     _isLoading = false;

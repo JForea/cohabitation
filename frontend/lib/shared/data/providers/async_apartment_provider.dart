@@ -117,4 +117,16 @@ class _ApartmentNotifier extends AsyncNotifier<Apartment?> {
 
     state = AsyncValue.data(apartment);
   }
+
+  void addExpenseAmount(int amount) {
+    final current = state.value;
+
+    if (current == null) {
+      return;
+    }
+
+    state = AsyncData(
+      current.copyWith(currentExpenseSum: current.currentExpenseSum + amount),
+    );
+  }
 }

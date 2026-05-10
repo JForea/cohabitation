@@ -27,7 +27,7 @@ class RegistrationFirstPage extends StatelessWidget {
       backgroundColor: Colors.white,
       body: AuthPageWrapper(
         children: [
-          CustomBackButton(mainColor: true),
+          CustomBackButton(mainColor: true, pathIfCantPop: "/auth"),
           Text(
             "Заполните данные",
             style: TextStyle(

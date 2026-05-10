@@ -52,6 +52,7 @@ class SettingsPage extends ConsumerWidget {
     return Scaffold(
       body: PageWrapper(
         backButton: true,
+        pathIfCantPop: "/",
         pageName: "Настройки",
         bottomFloatingButtonExists: false,
         children: [

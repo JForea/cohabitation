@@ -87,6 +87,7 @@ class _CreateApartmentPageState extends ConsumerState<CreateExpensePage> {
     return Scaffold(
       body: PageWrapper(
         backButton: true,
+        pathIfCantPop: "/",
         pageName: "Добавить запись",
         bottomFloatingButtonExists: false,
         children: [

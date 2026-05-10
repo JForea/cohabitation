@@ -54,7 +54,7 @@ class _CreateApartmentPageState extends ConsumerState<CreateApartmentPage> {
       backgroundColor: Colors.white,
       body: AuthPageWrapper(
         children: [
-          CustomBackButton(mainColor: true),
+          CustomBackButton(mainColor: true, pathIfCantPop: "/enter"),
           Text(
             "Создать квартиру",
             style: TextStyle(fontSize: 20, fontWeight: .w500),

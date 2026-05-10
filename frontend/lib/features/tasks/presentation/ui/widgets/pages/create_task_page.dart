@@ -116,6 +116,7 @@ class _CreateTaskPageState extends ConsumerState<CreateTaskPage> {
       backgroundColor: Theme.of(context).colorScheme.surface,
       body: PageWrapper(
         backButton: true,
+        pathIfCantPop: "/",
         pageName: "Новая задача",
         bottomFloatingButtonExists: false,
         children: [

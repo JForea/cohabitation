@@ -49,7 +49,7 @@ class _JoinApartmentPageState extends ConsumerState<JoinApartmentPage> {
     return Scaffold(
       body: AuthPageWrapper(
         children: [
-          CustomBackButton(mainColor: false),
+          CustomBackButton(mainColor: false, pathIfCantPop: "/enter"),
           Text(
             "Войти в квартиру",
             style: TextStyle(

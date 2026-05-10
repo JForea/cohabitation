@@ -8,12 +8,14 @@ class PageWrapper extends StatelessWidget {
     required this.pageName,
     required this.children,
     required this.bottomFloatingButtonExists,
+    required this.pathIfCantPop,
   });
 
   final List<Widget> children;
   final String pageName;
   final bool backButton;
   final bool bottomFloatingButtonExists;
+  final String pathIfCantPop;
 
   @override
   Widget build(BuildContext context) {
@@ -36,7 +38,10 @@ class PageWrapper extends StatelessWidget {
                 Row(
                   spacing: 15,
                   children: [
-                    CustomBackButton(mainColor: false),
+                    CustomBackButton(
+                      mainColor: false,
+                      pathIfCantPop: pathIfCantPop,
+                    ),
                     Text(
                       pageName,
                       style: TextStyle(

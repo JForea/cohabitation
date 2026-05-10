@@ -73,7 +73,7 @@ class _RegistrationSecondPageState
       backgroundColor: Colors.white,
       body: AuthPageWrapper(
         children: [
-          CustomBackButton(mainColor: true),
+          CustomBackButton(mainColor: true, pathIfCantPop: "/auth/register/1"),
           Text(
             "Как вас зовут?",
             style: TextStyle(

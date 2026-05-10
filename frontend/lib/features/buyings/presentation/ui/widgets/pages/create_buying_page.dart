@@ -124,6 +124,7 @@ class _CreateBuyingPageState extends ConsumerState<CreateBuyingPage> {
       backgroundColor: Theme.of(context).colorScheme.surface,
       body: PageWrapper(
         backButton: true,
+        pathIfCantPop: "/",
         pageName: 'Добавить товар',
         bottomFloatingButtonExists: false,
         children: [

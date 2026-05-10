@@ -163,6 +163,7 @@ class _EventsPageState extends ConsumerState<EventsPage> {
         onRefresh: () => _refresh(ref),
         child: PageWrapper(
           backButton: true,
+          pathIfCantPop: "/",
           pageName: DateFormat("d MMMM", "ru_RU").format(widget.date),
           bottomFloatingButtonExists: true,
           children: [

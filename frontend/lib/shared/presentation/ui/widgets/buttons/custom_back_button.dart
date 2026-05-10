@@ -3,15 +3,26 @@ import 'package:frontend/shared/presentation/theme/app_shadows.dart';
 import 'package:go_router/go_router.dart';
 
 class CustomBackButton extends StatelessWidget {
-  const CustomBackButton({super.key, required this.mainColor});
+  const CustomBackButton({
+    super.key,
+    required this.mainColor,
+    required this.pathIfCantPop,
+  });
 
   final bool mainColor;
+  final String pathIfCantPop;
 
   @override
   Widget build(BuildContext context) {
     return Ink(
       child: InkWell(
-        onTap: () => context.pop(),
+        onTap: () {
+          if (context.canPop()) {
+            context.pop();
+          } else {
+            context.go(pathIfCantPop);
+          }
+        },
         borderRadius: .all(.circular(10)),
         child: Container(
           width: 42,

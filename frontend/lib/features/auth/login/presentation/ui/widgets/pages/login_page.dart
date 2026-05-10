@@ -44,7 +44,7 @@ class LoginPage extends ConsumerWidget {
       backgroundColor: Colors.white,
       body: AuthPageWrapper(
         children: [
-          CustomBackButton(mainColor: true),
+          CustomBackButton(mainColor: true, pathIfCantPop: "/auth"),
           Text(
             "Введите данные",
             style: TextStyle(fontSize: 20, fontWeight: .w500),

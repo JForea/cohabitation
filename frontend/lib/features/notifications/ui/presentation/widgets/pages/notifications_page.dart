@@ -59,6 +59,7 @@ class NotificationsPage extends ConsumerWidget {
         ),
         body: PageWrapper(
           backButton: true,
+          pathIfCantPop: "/",
           pageName: "Уведомления",
           bottomFloatingButtonExists: true,
           children: [

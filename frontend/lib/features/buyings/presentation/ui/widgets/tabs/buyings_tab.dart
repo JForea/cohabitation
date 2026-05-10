@@ -2,14 +2,26 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/shared/data/providers/buyings_provider.dart';
 import 'package:frontend/features/buyings/presentation/ui/widgets/lists/category_buying_list.dart';
+import 'package:frontend/shared/data/providers/selected_provider.dart';
 import 'package:frontend/shared/data/providers/user_provider.dart';
 import 'package:frontend/shared/presentation/ui/widgets/wrappers/tab_wrapper.dart';
 
 class BuyingsTab extends ConsumerWidget {
   const BuyingsTab({super.key});
 
+  final String selectedKey = "buyings";
+
   Future<void> _refresh(WidgetRef ref, int apartmentId) async {
+    ref.invalidate(selectedProvider(selectedKey));
     await ref.read(buyingsProvider.notifier).refresh();
+  }
+
+  void onSelect(WidgetRef ref, int id) {
+    ref.read(selectedProvider(selectedKey).notifier).select(id);
+  }
+
+  void onSelectCancel(WidgetRef ref, int id) {
+    ref.read(selectedProvider(selectedKey).notifier).selectCancel(id);
   }
 
   @override
@@ -17,6 +29,7 @@ class BuyingsTab extends ConsumerWidget {
     final profile = ref.watch(userProvider.select((u) => u!.profile!));
     int apartmentId = profile.apartmentId;
     final buyingsState = ref.watch(buyingsProvider);
+    final buyingsSelected = ref.watch(selectedProvider(selectedKey));
 
     return RefreshIndicator(
       onRefresh: () => _refresh(ref, apartmentId),
@@ -43,6 +56,9 @@ class BuyingsTab extends ConsumerWidget {
                     onBuyingComplete: (id) => ref
                         .read(buyingsProvider.notifier)
                         .switchBuyingStatus(id, profile),
+                    selected: buyingsSelected,
+                    onSelect: (id) => onSelect(ref, id),
+                    onSelectCancel: (id) => onSelectCancel(ref, id),
                   ),
                 ),
               ],

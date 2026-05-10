@@ -1,18 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/shared/data/models/expense.dart';
-import 'package:frontend/shared/presentation/ui/widgets/cards/expense_card.dart';
+import 'package:frontend/features/tasks/presentation/ui/widgets/cards/task_card.dart';
+import 'package:frontend/shared/data/models/task.dart';
 
-class ExpenseList extends StatelessWidget {
-  const ExpenseList({
+class TaskList extends StatelessWidget {
+  const TaskList({
     super.key,
-    required this.expenses,
+    required this.tasks,
+    required this.onSwitchStatus,
     this.onSelect,
     this.onSelectCancel,
     this.selected,
   });
 
-  final List<Expense> expenses;
+  final List<Task> tasks;
   final Set<int>? selected;
+  final void Function(Task task) onSwitchStatus;
   final void Function(int)? onSelect;
   final void Function(int)? onSelectCancel;
 
@@ -21,15 +23,17 @@ class ExpenseList extends StatelessWidget {
     return ListView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      itemCount: expenses.length,
+      itemCount: tasks.length,
       itemBuilder: (context, index) {
-        final expense = expenses[index];
+        final task = tasks[index];
+
         return Padding(
-          padding: const EdgeInsets.only(bottom: 10),
-          child: ExpenseCard(
-            key: ValueKey(expense.id),
-            expense: expense,
+          padding: const EdgeInsets.only(bottom: 20),
+          child: TaskCard(
+            key: ValueKey(task.id),
+            task: task,
             selectionMode: selected?.isNotEmpty,
+            onStatusSwitch: onSwitchStatus,
             onSelect: onSelect,
             onSelectCancel: onSelectCancel,
           ),

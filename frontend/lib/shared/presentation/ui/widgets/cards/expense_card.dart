@@ -1,15 +1,26 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:frontend/shared/data/models/expense.dart';
+import 'package:frontend/shared/data/providers/selected_provider.dart';
 import 'package:frontend/shared/presentation/theme/app_colors.dart';
-import 'package:frontend/shared/presentation/theme/app_shadows.dart';
+import 'package:frontend/shared/presentation/theme/app_decorations.dart';
 import 'package:frontend/shared/presentation/ui/widgets/badges/expense_category_badge.dart';
 import 'package:intl/intl.dart';
 
-class ExpenseCard extends StatelessWidget {
-  const ExpenseCard({super.key, required this.expense});
+class ExpenseCard extends ConsumerWidget {
+  const ExpenseCard({
+    super.key,
+    required this.expense,
+    this.onSelect,
+    this.onSelectCancel,
+    this.selectionMode,
+  });
 
   final Expense expense;
+  final void Function(int)? onSelect;
+  final void Function(int)? onSelectCancel;
+  final bool? selectionMode;
 
   void showImage(BuildContext context) {
     if (expense.checkImageUrl != null) {
@@ -26,66 +37,111 @@ class ExpenseCard extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isSelected = ref.watch(
+      selectedProvider("expenses").select((s) => s.contains(expense.id)),
+    );
+
+    void handleTap() {
+      if (isSelected) {
+        onSelectCancel?.call(expense.id);
+        return;
+      }
+
+      if (selectionMode != null && selectionMode!) {
+        onSelect?.call(expense.id);
+        return;
+      }
+
+      showImage(context);
+    }
+
+    void handleLongPress() {
+      if (!isSelected) {
+        onSelect?.call(expense.id);
+      }
+    }
+
     return GestureDetector(
-      onTap: () => showImage(context),
+      onTap: handleTap,
+      onLongPress: handleLongPress,
       child: Container(
-        padding: .symmetric(horizontal: 12, vertical: 15),
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surfaceContainer,
-          boxShadow: [AppShadows.standard()],
-          borderRadius: .all(.circular(15)),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 15),
+        decoration: AppDecorations.cardDecoration(
+          context: context,
+          selected: isSelected,
+          borderRadius: 15,
         ),
         child: IntrinsicHeight(
           child: Row(
-            crossAxisAlignment: .stretch,
-            spacing: 12,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               ExpenseCategoryBadge(category: expense.category),
+
+              const SizedBox(width: 12),
+
               Flexible(
-                fit: .tight,
+                fit: FlexFit.tight,
                 child: Column(
-                  crossAxisAlignment: .start,
-                  spacing: 4,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       expense.name,
                       maxLines: 1,
-                      overflow: .ellipsis,
-                      style: TextStyle(fontSize: 14, fontWeight: .w500),
-                    ),
-                    Text(
-                      "${expense.createdBy.name} · ${DateFormat("d MMMM", "ru_RU").format(expense.createdAt)}",
-                      maxLines: 1,
-                      overflow: .ellipsis,
+                      overflow: TextOverflow.ellipsis,
                       style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: isSelected
+                            ? FontWeight.w600
+                            : FontWeight.w500,
+                        color: isSelected
+                            ? AppColors.blue
+                            : Theme.of(context).colorScheme.onSurface,
+                      ),
+                    ),
+
+                    const SizedBox(height: 4),
+
+                    Text(
+                      "${expense.createdBy.name} · "
+                      "${DateFormat("d MMMM", "ru_RU").format(expense.createdAt)}",
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
                         color: Color(0xFFA3A3A3),
                         fontSize: 13,
-                        fontWeight: .w500,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
                   ],
                 ),
               ),
+
+              const SizedBox(width: 12),
+
               Column(
-                crossAxisAlignment: .end,
-                mainAxisAlignment: .spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   if (expense.checkImageUrl != null)
                     SvgPicture.asset(
                       "assets/icons/attachment.svg",
                       height: 20,
                       width: 20,
-                      colorFilter: ColorFilter.mode(AppColors.greyBlue, .srcIn),
-                    ),
-                  if (expense.checkImageUrl == null) SizedBox(),
+                      colorFilter: ColorFilter.mode(
+                        AppColors.greyBlue,
+                        BlendMode.srcIn,
+                      ),
+                    )
+                  else
+                    const SizedBox(height: 20),
 
                   Text(
                     "${NumberFormat("#,###", "ru_RU").format(expense.sum)} ₽",
                     style: TextStyle(
                       color: Theme.of(context).colorScheme.onSurface,
                       fontSize: 13,
-                      fontWeight: .w500,
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
                 ],

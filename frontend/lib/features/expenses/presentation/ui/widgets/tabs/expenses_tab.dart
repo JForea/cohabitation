@@ -5,6 +5,7 @@ import 'package:frontend/features/expenses/presentation/ui/widgets/lists/expense
 import 'package:frontend/shared/data/providers/apartment_provider.dart';
 import 'package:frontend/shared/data/providers/async_apartment_provider.dart';
 import 'package:frontend/shared/data/providers/expenses_provider.dart';
+import 'package:frontend/shared/data/providers/selected_provider.dart';
 import 'package:frontend/shared/data/providers/user_provider.dart';
 import 'package:frontend/shared/presentation/ui/widgets/buttons/custom_text_button.dart';
 import 'package:frontend/shared/presentation/ui/widgets/inputs/controlled_named_text_field.dart';
@@ -22,9 +23,12 @@ class ExpensesTab extends ConsumerStatefulWidget {
 class _ExpensesTabState extends ConsumerState<ExpensesTab> {
   late String budget;
 
+  final String key = "expenses";
+
   Future<void> refresh(WidgetRef ref) async {
     ref.invalidate(asyncApartmentProvider);
     ref.invalidate(expensesProvider);
+    ref.invalidate(selectedProvider(key));
   }
 
   void setBudget(String s) {
@@ -67,6 +71,14 @@ class _ExpensesTabState extends ConsumerState<ExpensesTab> {
     );
   }
 
+  void onSelect(int id) {
+    ref.read(selectedProvider(key).notifier).select(id);
+  }
+
+  void onSelectCancel(int id) {
+    ref.read(selectedProvider(key).notifier).selectCancel(id);
+  }
+
   @override
   void initState() {
     budget = "";
@@ -81,6 +93,7 @@ class _ExpensesTabState extends ConsumerState<ExpensesTab> {
       expensesProvider.select((s) => s.value?.currentExpenseAmount),
     );
     final role = ref.watch(userProvider.select((u) => u?.profile?.role));
+    final selected = ref.watch(selectedProvider(key));
 
     return RefreshIndicator(
       onRefresh: () => refresh(ref),
@@ -127,7 +140,12 @@ class _ExpensesTabState extends ConsumerState<ExpensesTab> {
                 style: TextStyle(fontWeight: .w500, fontSize: 16),
               ),
               expenseState.when(
-                data: (state) => ExpenseList(expenses: state.expenses),
+                data: (state) => ExpenseList(
+                  expenses: state.expenses,
+                  selected: selected,
+                  onSelect: onSelect,
+                  onSelectCancel: onSelectCancel,
+                ),
 
                 error: (e, _) => Text("Произошла ошибка при загрузке."),
                 loading: () => Center(child: CircularProgressIndicator()),

@@ -12,11 +12,17 @@ class CategoryBuyingList extends StatelessWidget {
     required this.category,
     required this.buyings,
     required this.onBuyingComplete,
+    this.onSelect,
+    this.onSelectCancel,
+    this.selected,
   });
 
   final BuyingCategory category;
   final List<Buying> buyings;
   final void Function(int) onBuyingComplete;
+  final Set<int>? selected;
+  final void Function(int)? onSelect;
+  final void Function(int)? onSelectCancel;
 
   @override
   Widget build(BuildContext context) {
@@ -46,7 +52,13 @@ class CategoryBuyingList extends StatelessWidget {
           danger: false,
           children: buyings
               .map(
-                (b) => BuyingListTile(buying: b, onComplete: onBuyingComplete),
+                (b) => BuyingListTile(
+                  buying: b,
+                  onComplete: onBuyingComplete,
+                  selectionMode: selected?.isNotEmpty,
+                  onSelect: onSelect,
+                  onSelectCancel: onSelectCancel,
+                ),
               )
               .toList(),
         ),

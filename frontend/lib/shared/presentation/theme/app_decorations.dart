@@ -3,7 +3,7 @@ import 'package:frontend/shared/presentation/theme/app_colors.dart';
 import 'package:frontend/shared/presentation/theme/app_shadows.dart';
 
 class AppDecorations {
-  static BoxDecoration choiceChipBox({
+  static BoxDecoration cardDecoration({
     required BuildContext context,
     required bool selected,
     double borderRadius = 10,
@@ -20,5 +20,14 @@ class AppDecorations {
             : Colors.black.withAlpha(37),
       ),
     ],
+  );
+
+  static BoxDecoration listTileDecoration({
+    required BuildContext context,
+    required bool selected,
+  }) => BoxDecoration(
+    color: selected
+        ? AppColors.blue.withAlpha(37)
+        : Theme.of(context).colorScheme.surfaceContainer,
   );
 }

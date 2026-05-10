@@ -7,8 +7,10 @@ import 'package:frontend/features/home/data/providers/page_provider.dart';
 import 'package:frontend/features/home/presentation/ui/widgets/tabs/home_tab.dart';
 import 'package:frontend/features/profile/presentation/ui/widgets/tabs/profile_tab.dart';
 import 'package:frontend/features/tasks/presentation/ui/widgets/tabs/tasks_tab.dart';
+import 'package:frontend/shared/data/providers/selected_provider.dart';
 import 'package:frontend/shared/data/providers/user_provider.dart';
 import 'package:frontend/shared/data/types/role.dart';
+import 'package:frontend/shared/presentation/theme/app_colors.dart';
 import 'package:frontend/shared/presentation/ui/widgets/buttons/custom_app_floating_action_button.dart';
 import 'package:go_router/go_router.dart';
 
@@ -27,18 +29,34 @@ class _HomePageState extends ConsumerState<HomePage> {
     Role? role,
     BuildContext context,
   ) {
+    final key = switch (currentIndex) {
+      1 => "tasks",
+      2 => "buyings",
+      3 => "expenses",
+      _ => "",
+    };
+
+    final isEmpty = ref.watch(selectedProvider(key)).isEmpty;
+
     return switch (currentIndex) {
       1 =>
         role != Role.inhabitant
             ? CustomAppFloatingActionButton(
-                onPressed: () => context.push("/tasks/create"),
+                iconData: isEmpty ? Icons.add : Icons.delete,
+                color: isEmpty ? AppColors.blue : AppColors.red,
+                onPressed: () =>
+                    isEmpty ? context.push("/tasks/create") : () {},
               )
             : null,
       2 => CustomAppFloatingActionButton(
-        onPressed: () => context.push("/buyings/create"),
+        iconData: isEmpty ? Icons.add : Icons.delete,
+        color: isEmpty ? AppColors.blue : AppColors.red,
+        onPressed: () => isEmpty ? context.push("/buyings/create") : () {},
       ),
       3 => CustomAppFloatingActionButton(
-        onPressed: () => context.push("/expenses/create"),
+        iconData: isEmpty ? Icons.add : Icons.delete,
+        color: isEmpty ? AppColors.blue : AppColors.red,
+        onPressed: () => isEmpty ? context.push("/expenses/create") : () {},
       ),
       _ => null,
     };

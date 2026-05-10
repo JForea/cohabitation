@@ -64,7 +64,6 @@ class _ApartmentNotifier extends AsyncNotifier<Apartment?> {
         return Apartment(
           address: address,
           budget: createApartmentResponse.budget,
-          currentExpenseSum: 0,
           id: createApartmentResponse.id,
           name: name,
         );
@@ -116,17 +115,5 @@ class _ApartmentNotifier extends AsyncNotifier<Apartment?> {
     apartment = apartment.copyWith(inviteCode: response.data["inviteCode"]);
 
     state = AsyncValue.data(apartment);
-  }
-
-  void addExpenseAmount(int amount) {
-    final current = state.value;
-
-    if (current == null) {
-      return;
-    }
-
-    state = AsyncData(
-      current.copyWith(currentExpenseSum: current.currentExpenseSum + amount),
-    );
   }
 }

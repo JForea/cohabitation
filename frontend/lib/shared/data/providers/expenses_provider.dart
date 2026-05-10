@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/shared/data/models/expense.dart';
+import 'package:frontend/shared/data/models/expenses_info.dart';
 import 'package:frontend/shared/data/models/profile/profile.dart';
 import 'package:frontend/shared/data/models/profile/profile_brief.dart';
 import 'package:frontend/shared/data/network/dio_client.dart';
@@ -10,13 +11,12 @@ import 'package:frontend/shared/data/types/expense_category.dart';
 import 'package:frontend/shared/utils/util_functions.dart';
 import 'package:image_picker/image_picker.dart';
 
-final expensesProvider =
-    AsyncNotifierProvider<_ExpensesNotifier, List<Expense>>(
-      _ExpensesNotifier.new,
-    );
+final expensesProvider = AsyncNotifierProvider<_ExpensesNotifier, ExpensesInfo>(
+  _ExpensesNotifier.new,
+);
 
-class _ExpensesNotifier extends AsyncNotifier<List<Expense>> {
-  late String baseUrl;
+class _ExpensesNotifier extends AsyncNotifier<ExpensesInfo> {
+  late String _baseUrl;
 
   static const _pageSize = 20;
 
@@ -25,22 +25,31 @@ class _ExpensesNotifier extends AsyncNotifier<List<Expense>> {
   bool _isLoading = false;
 
   @override
-  Future<List<Expense>> build() async {
+  Future<ExpensesInfo> build() async {
     final apartmentId = ref.watch(apartmentProvider.select((a) => a?.id));
 
     if (apartmentId == null) {
       throw Exception("Not in apartment.");
     }
 
-    baseUrl = "/apartments/$apartmentId/expenses";
+    _baseUrl = "/apartments/$apartmentId/expenses";
 
-    return _fetchPage();
+    return ExpensesInfo(
+      currentExpenseAmount: await _fetchExpenseAmount(),
+      expenses: await _fetchPage(),
+    );
+  }
+
+  Future<int> _fetchExpenseAmount() async {
+    final response = await AppDio.dio.get("$_baseUrl/amount");
+
+    return response.data;
   }
 
   Future<List<Expense>> _fetchPage() async {
     final query = {'page': '$_page', 'size': '$_pageSize'};
 
-    final response = await AppDio.dio.get(baseUrl, queryParameters: query);
+    final response = await AppDio.dio.get(_baseUrl, queryParameters: query);
 
     final data = response.data as List;
 
@@ -52,7 +61,8 @@ class _ExpensesNotifier extends AsyncNotifier<List<Expense>> {
 
     _isLoading = true;
 
-    final previousValue = state.value ?? [];
+    final previousValue =
+        state.value ?? ExpensesInfo(currentExpenseAmount: 0, expenses: []);
 
     try {
       _page++;
@@ -62,23 +72,17 @@ class _ExpensesNotifier extends AsyncNotifier<List<Expense>> {
         _hasMore = false;
       }
 
-      state = AsyncData([...previousValue, ...newExpenses]);
+      state = AsyncData(
+        previousValue.copyWith(
+          expenses: [...previousValue.expenses, ...newExpenses],
+        ),
+      );
     } catch (e, st) {
       _page--;
-      state = AsyncError<List<Expense>>(e, st);
+      state = AsyncError(e, st);
     } finally {
       _isLoading = false;
     }
-  }
-
-  Future<void> refresh() async {
-    _page = 0;
-    _hasMore = true;
-
-    state = const AsyncLoading();
-    state = await AsyncValue.guard(() async {
-      return _fetchPage();
-    });
   }
 
   Future<bool> create({
@@ -115,7 +119,7 @@ class _ExpensesNotifier extends AsyncNotifier<List<Expense>> {
           ),
       });
 
-      final response = await AppDio.dio.post(baseUrl, data: formData);
+      final response = await AppDio.dio.post(_baseUrl, data: formData);
 
       final expense = Expense(
         id: response.data["id"],
@@ -127,7 +131,12 @@ class _ExpensesNotifier extends AsyncNotifier<List<Expense>> {
         createdAt: DateTime.now(),
       );
 
-      state = AsyncData([expense, ...?state.value]);
+      final previousValue =
+          state.value ?? ExpensesInfo(currentExpenseAmount: 0, expenses: []);
+
+      state = AsyncData(
+        previousValue.copyWith(expenses: [expense, ...previousValue.expenses]),
+      );
 
       _isLoading = false;
 
@@ -137,5 +146,19 @@ class _ExpensesNotifier extends AsyncNotifier<List<Expense>> {
       _isLoading = false;
       return false;
     }
+  }
+
+  void addExpenseAmount(int amount) {
+    final current = state.value;
+
+    if (current == null) {
+      return;
+    }
+
+    state = AsyncData(
+      current.copyWith(
+        currentExpenseAmount: current.currentExpenseAmount + amount,
+      ),
+    );
   }
 }

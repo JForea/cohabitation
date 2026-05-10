@@ -5,8 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:frontend/features/expenses/presentation/ui/widgets/fields/image_uploader_field.dart';
-import 'package:frontend/shared/data/providers/apartment_provider.dart';
-import 'package:frontend/shared/data/providers/async_apartment_provider.dart';
 import 'package:frontend/shared/data/providers/expenses_provider.dart';
 import 'package:frontend/shared/data/providers/user_provider.dart';
 import 'package:frontend/shared/data/types/expense_category.dart';
@@ -71,7 +69,7 @@ class _CreateApartmentPageState extends ConsumerState<CreateExpensePage> {
 
     int price = UtilFunctions.parsePrice(sum);
 
-    ref.read(asyncApartmentProvider.notifier).addExpenseAmount(price);
+    ref.read(expensesProvider.notifier).addExpenseAmount(price);
     bool created = await ref
         .read(expensesProvider.notifier)
         .create(
@@ -82,7 +80,7 @@ class _CreateApartmentPageState extends ConsumerState<CreateExpensePage> {
           image: image,
         );
     if (!created) {
-      ref.read(asyncApartmentProvider.notifier).addExpenseAmount(-price);
+      ref.read(expensesProvider.notifier).addExpenseAmount(-price);
     }
 
     return created;

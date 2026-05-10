@@ -11,15 +11,15 @@ class ExpensesTab extends ConsumerWidget {
   const ExpensesTab({super.key});
 
   Future<void> _refresh(WidgetRef ref) async {
-    ref.read(expensesProvider.notifier).refresh();
+    ref.invalidate(expensesProvider);
   }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final expenseState = ref.watch(expensesProvider);
     final budget = ref.watch(apartmentProvider.select((a) => a?.budget));
-    final currentExpenses = ref.watch(
-      apartmentProvider.select((a) => a?.currentExpenseSum),
+    final currentExpenseAmount = ref.watch(
+      expensesProvider.select((s) => s.value?.currentExpenseAmount),
     );
 
     return RefreshIndicator(
@@ -50,10 +50,10 @@ class ExpensesTab extends ConsumerWidget {
               ),
             ],
           ),
-          if (budget != null && currentExpenses != null)
+          if (budget != null && currentExpenseAmount != null)
             MonthlyExpensesCard(
               budget: budget,
-              currentExpenses: currentExpenses,
+              currentExpenses: currentExpenseAmount,
             ),
           Column(
             crossAxisAlignment: .start,
@@ -64,7 +64,7 @@ class ExpensesTab extends ConsumerWidget {
                 style: TextStyle(fontWeight: .w500, fontSize: 16),
               ),
               expenseState.when(
-                data: (expenses) => ExpenseList(expenses: expenses),
+                data: (state) => ExpenseList(expenses: state.expenses),
 
                 error: (e, _) => Text("Произошла ошибка при загрузке."),
                 loading: () => Center(child: CircularProgressIndicator()),

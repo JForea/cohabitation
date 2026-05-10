@@ -172,7 +172,6 @@ public class ApartmentService {
     }
 
     @Transactional
-    @Modifying
     public InviteCodeResponse generateCode(Integer apartmentId) {
         int inviteCodeLength = 8;
         String charset = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -200,7 +199,6 @@ public class ApartmentService {
     }
 
     @Transactional
-    @Modifying
     public void setBudget(Integer apartmentId, Integer budget) {
         apartmentRepository.updateBudgetById(apartmentId, budget);
     }

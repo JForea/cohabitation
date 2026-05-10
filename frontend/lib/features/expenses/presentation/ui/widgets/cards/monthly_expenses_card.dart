@@ -10,10 +10,12 @@ class MonthlyExpensesCard extends StatelessWidget {
     super.key,
     required this.budget,
     required this.currentExpenses,
+    required this.onSettingsClick,
   });
 
   final int currentExpenses;
   final int budget;
+  final VoidCallback? onSettingsClick;
 
   @override
   Widget build(BuildContext context) {
@@ -91,16 +93,17 @@ class MonthlyExpensesCard extends StatelessWidget {
               ),
             ],
           ),
-          Align(
-            alignment: .topRight,
-            child: CustomIconButton(
-              color: Color(0xFFAAA3FF),
-              icon: Icons.settings_outlined,
-              size: 28,
-              onPressed: () {},
-              iconColor: Colors.white,
+          if (onSettingsClick != null)
+            Align(
+              alignment: .topRight,
+              child: CustomIconButton(
+                color: Color(0xFFAAA3FF),
+                icon: Icons.settings_outlined,
+                size: 28,
+                onPressed: onSettingsClick!,
+                iconColor: Colors.white,
+              ),
             ),
-          ),
         ],
       ),
     );

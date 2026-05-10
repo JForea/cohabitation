@@ -116,4 +116,18 @@ class _ApartmentNotifier extends AsyncNotifier<Apartment?> {
 
     state = AsyncValue.data(apartment);
   }
+
+  Future<void> setBudget(int budget) async {
+    final currentValue = state.value;
+
+    if (currentValue == null) return;
+
+    state = AsyncData(currentValue.copyWith(budget: budget));
+
+    try {
+      await AppDio.dio.patch("$baseUrl/$apartmentId/budget", data: budget);
+    } catch (_) {
+      state = AsyncData(currentValue);
+    }
+  }
 }

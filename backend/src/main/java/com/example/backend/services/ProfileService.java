@@ -45,9 +45,9 @@ public class ProfileService {
     public List<ProfileDto> getAll(User user, Integer apartmentId, Boolean excludeMe) {
         List<Profile> profiles;
         if (excludeMe == null || !excludeMe)
-            profiles = profileRepository.findAllByApartment_Id(apartmentId);
+            profiles = profileRepository.findAllByApartment_IdAndLeftAtNull(apartmentId);
         else
-            profiles = profileRepository.findAllByApartment_IdAndUserNot(apartmentId, user);
+            profiles = profileRepository.findAllByApartment_IdAndUserNotAndLeftAtNull(apartmentId, user);
 
         Calendar calendar = Calendar.getInstance();
 

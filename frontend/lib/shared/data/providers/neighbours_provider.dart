@@ -9,7 +9,7 @@ final neighboursProvider =
     );
 
 class _ApartmentNotifier extends AsyncNotifier<List<Profile>> {
-  late String baseUrl;
+  late String _baseUrl;
 
   @override
   Future<List<Profile>> build() async {
@@ -19,11 +19,11 @@ class _ApartmentNotifier extends AsyncNotifier<List<Profile>> {
       throw Exception("Not in apartment.");
     }
 
-    baseUrl = "/apartments/$apartmentId/profiles";
+    _baseUrl = "/apartments/$apartmentId/profiles";
 
     final query = {"excludeMe": 'true'};
 
-    final response = await AppDio.dio.get(baseUrl, queryParameters: query);
+    final response = await AppDio.dio.get(_baseUrl, queryParameters: query);
     List<Profile> profiles = (response.data as List)
         .map((json) => Profile.fromJson(json))
         .toList();
@@ -35,11 +35,26 @@ class _ApartmentNotifier extends AsyncNotifier<List<Profile>> {
     final query = {"excludeMe": 'true'};
 
     state = await AsyncValue.guard(() async {
-      final response = await AppDio.dio.get(baseUrl, queryParameters: query);
+      final response = await AppDio.dio.get(_baseUrl, queryParameters: query);
 
       return (response.data as List)
           .map((json) => Profile.fromJson(json))
           .toList();
     });
+  }
+
+  Future<bool> kick(int profileId) async {
+    final previousValue = state.value ?? [];
+
+    try {
+      final newValue = [...previousValue];
+      newValue.removeWhere((p) => p.id == profileId);
+      state = AsyncData(newValue);
+      await AppDio.dio.post("$_baseUrl/$profileId/kick");
+      return true;
+    } catch (e) {
+      state = AsyncData(previousValue);
+      return false;
+    }
   }
 }

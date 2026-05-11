@@ -5,6 +5,7 @@ import com.example.backend.dtos.out.apartment.ApartmentDto;
 import com.example.backend.dtos.out.apartment.CreateApartmentResponse;
 import com.example.backend.dtos.out.apartment.InviteCodeResponse;
 import com.example.backend.dtos.out.apartment.JoinApartmentResponse;
+import com.example.backend.dtos.out.user.UserDto;
 import com.example.backend.entities.User;
 import com.example.backend.security.CustomUserDetails;
 import com.example.backend.services.ApartmentService;
@@ -60,6 +61,19 @@ public class ApartmentController {
     }
 
     @PreAuthorize("@apartmentSecurity.hasAccess(#apartmentId, authentication)")
+    @PostMapping("/leave")
+    public ResponseEntity<Void> leave(
+        @AuthenticationPrincipal CustomUserDetails details,
+        HttpServletResponse servletResponse
+    ) {
+        User user = details.getUser();
+        apartmentService.leave(user);
+        String token = jwtService.generateToken(user);
+        servletResponse.addHeader(HttpHeaders.AUTHORIZATION, "Bearer " + token);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
+    @PreAuthorize("@apartmentSecurity.hasAccess(#apartmentId, authentication)")
     @GetMapping("/{apartmentId}")
     public ResponseEntity<ApartmentDto> get(
             @PathVariable Integer apartmentId,
@@ -86,6 +100,15 @@ public class ApartmentController {
         @RequestBody @Min(0) @Max(1000000) Integer budget
     ) {
         apartmentService.setBudget(apartmentId, budget);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
+    @PreAuthorize("@apartmentSecurity.hasAccess(#apartmentId, authentication)")
+    @DeleteMapping("/{apartmentId}")
+    public ResponseEntity<Void> deleteApartment(
+            @PathVariable Integer apartmentId
+    ) {
+        apartmentService.deleteApartment(apartmentId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 }

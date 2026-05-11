@@ -8,4 +8,11 @@ class AuthDataHolder {
   String password = '';
   String name = '';
   bool male = true;
+
+  void clear() {
+    email = "";
+    password = "";
+    name = "";
+    male = true;
+  }
 }

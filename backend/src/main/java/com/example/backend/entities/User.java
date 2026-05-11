@@ -36,7 +36,7 @@ public class User {
     @OneToMany(mappedBy = "user", orphanRemoval = true)
     private Set<DeviceToken> deviceTokens = new LinkedHashSet<>();
 
-    @OneToOne(fetch = FetchType.LAZY, orphanRemoval = true)
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "current_profile_id")
     private Profile currentProfile;
 

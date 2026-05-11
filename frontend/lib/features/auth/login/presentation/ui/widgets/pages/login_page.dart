@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/features/auth/data/auth_data_holder.dart';
@@ -23,19 +22,25 @@ class LoginPage extends ConsumerWidget {
   }
 
   Future<void> login(WidgetRef ref) async {
-    if (kIsWeb) {
-      await FcmHelper.requestPermission();
+    bool permissionGranted = await FcmHelper.requestPermission();
+
+    if (permissionGranted) {
+      await ref
+          .read(authProvider.notifier)
+          .login(
+            dataHolder.email,
+            dataHolder.password,
+            deviceId: await FcmHelper.getDeviceId(),
+            fcmToken: await FcmHelper.getToken(),
+            platform: FcmHelper.getPlatform(),
+          );
+    } else {
+      await ref
+          .read(authProvider.notifier)
+          .login(dataHolder.email, dataHolder.password);
     }
 
-    await ref
-        .read(authProvider.notifier)
-        .login(
-          dataHolder.email,
-          dataHolder.password,
-          await FcmHelper.getDeviceId(),
-          await FcmHelper.getToken(),
-          FcmHelper.getPlatform(),
-        );
+    dataHolder.clear();
   }
 
   @override

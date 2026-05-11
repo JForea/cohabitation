@@ -22,6 +22,7 @@ public class NotificationTextFactory implements INotificationTextFactory {
             case RULE_DELETED -> "Удалено правило";
             case USER_JOINED -> "Пользователь присоединился";
             case USER_REJOINED -> "Пользователь вернулся";
+            case USER_CREATOR -> "Пользователь стал новым владельцем";
             case USER_ADMIN -> "Пользователь стал администратором";
             case USER_INHABITANT -> "Администратор стал пользователем";
             case USER_LEFT -> "Пользователь вышел";
@@ -112,16 +113,34 @@ public class NotificationTextFactory implements INotificationTextFactory {
                             payload.get("userName"),
                             male ? "ся" : "ась"
                     );
-            case USER_ADMIN -> "%s назначен%s администратором."
+            case USER_CREATOR -> {
+                if (isPersonal)
+                    yield "Вам переданы права владельца квартиры.";
+                else
+                    yield "%s стал%s новым владельцем квартиры.".formatted(
+                            payload.get("userName"),
+                            suffix
+                    );
+            }
+            case USER_ADMIN -> {
+                if (isPersonal)
+                    yield "Вы назначены администратором.";
+                else
+                    yield "%s назначен%s администратором."
                     .formatted(
                             payload.get("userName"),
                             suffix
                     );
-            case USER_INHABITANT -> "%s снова стал%s жильцом."
-                    .formatted(
-                            payload.get("userName"),
-                            suffix
-                    );
+            }
+            case USER_INHABITANT -> {
+                if (isPersonal)
+                    yield "Вы больше не администратор.";
+                else
+                    yield "%s больше не администратор."
+                        .formatted(
+                                payload.get("userName")
+                        );
+            }
             case USER_LEFT -> "%s покинул%s квартиру."
                     .formatted(
                             payload.get("userName"),

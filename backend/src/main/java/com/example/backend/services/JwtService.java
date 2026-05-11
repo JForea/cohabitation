@@ -5,6 +5,7 @@ import com.example.backend.dtos.out.user.UserDto;
 import com.example.backend.entities.User;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import jakarta.validation.constraints.Null;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -31,6 +32,23 @@ public class JwtService {
         return Jwts.builder()
                 .claims(claims)
                 .subject(dto.id().toString())
+                .issuedAt(new Date())
+                .expiration(new Date(System.currentTimeMillis() + exp))
+                .signWith(Keys.hmacShaKeyFor(secret.getBytes()))
+                .compact();
+    }
+
+    public String generateToken(User user) {
+        Map<String, String> claims = new HashMap<>();
+        claims.put("id", "" + user.getId());
+        claims.put("name", user.getName());
+        claims.put("email", user.getEmail());
+        claims.put("profileId", "" + null);
+        claims.put("role", null);
+
+        return Jwts.builder()
+                .claims(claims)
+                .subject(user.getId().toString())
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + exp))
                 .signWith(Keys.hmacShaKeyFor(secret.getBytes()))

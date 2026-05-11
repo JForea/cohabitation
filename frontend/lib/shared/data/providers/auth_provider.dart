@@ -4,6 +4,7 @@ import 'package:frontend/shared/data/models/auth_state.dart';
 import 'package:frontend/shared/data/models/profile/profile.dart';
 import 'package:frontend/shared/data/models/user.dart';
 import 'package:frontend/shared/data/network/dio_client.dart';
+import 'package:frontend/shared/utils/fcm_helper.dart';
 
 final authProvider = AsyncNotifierProvider<_AuthNotifier, AuthState>(
   _AuthNotifier.new,
@@ -33,11 +34,11 @@ class _AuthNotifier extends AsyncNotifier<AuthState> {
     String email,
     String password,
     String name,
-    bool male,
+    bool male, {
     String? deviceId,
     String? fcmToken,
     String? platform,
-  ) async {
+  }) async {
     state = const AsyncValue.loading();
 
     state = await AsyncValue.guard(() async {
@@ -71,11 +72,11 @@ class _AuthNotifier extends AsyncNotifier<AuthState> {
 
   Future<void> login(
     String email,
-    String password,
+    String password, {
     String? deviceId,
     String? fcmToken,
     String? platform,
-  ) async {
+  }) async {
     state = const AsyncValue.loading();
 
     state = await AsyncValue.guard(() async {
@@ -110,11 +111,14 @@ class _AuthNotifier extends AsyncNotifier<AuthState> {
     return User.fromJson(response.data);
   }
 
-  void setProfile(Profile profile) {
+  void setProfile(Profile? profile) {
     final current = state.value;
     if (current == null || current.user == null) return;
 
-    final updatedUser = current.user!.copyWith(profile: profile);
+    final updatedUser = current.user!.copyWith(
+      clearProfile: profile == null,
+      profile: profile,
+    );
 
     state = AsyncValue.data(current.copyWith(user: updatedUser));
   }
@@ -137,6 +141,14 @@ class _AuthNotifier extends AsyncNotifier<AuthState> {
   }
 
   Future<void> logout() async {
+    final deviceId = await FcmHelper.getDeviceId();
+
+    try {
+      await AppDio.dio.post("/users/auth/logout", data: {"deviceId": deviceId});
+    } catch (e) {
+      print(e);
+    }
+
     await _storage.delete(key: "token");
     await AppDio.updateToken(null);
 

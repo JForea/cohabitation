@@ -12,6 +12,7 @@ public enum NotificationType {
     RULE_DELETED,
     USER_JOINED,
     USER_REJOINED,
+    USER_CREATOR,
     USER_ADMIN,
     USER_INHABITANT,
     USER_LEFT,

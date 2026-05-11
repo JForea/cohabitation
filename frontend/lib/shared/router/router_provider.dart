@@ -21,7 +21,7 @@ import 'package:go_router/go_router.dart';
 final routerProvider = Provider<GoRouter>((ref) {
   final notifier = ValueNotifier(0);
 
-  ref.listen(authFlagsProvider, (_, __) {
+  ref.listen(authFlagsProvider, (_, _) {
     notifier.value++;
   });
 
@@ -29,9 +29,11 @@ final routerProvider = Provider<GoRouter>((ref) {
     initialLocation: '/',
     refreshListenable: notifier,
     redirect: (context, state) {
+      print(state.uri.path);
+
       final flags = ref.read(authFlagsProvider);
 
-      if (flags.isLoading) return null;
+      if (flags.isLoading || flags.isApartmentLoading) return null;
 
       final path = state.uri.path;
 

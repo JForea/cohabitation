@@ -8,6 +8,7 @@ import com.example.backend.exceptions.ResourceNotFoundException;
 import com.example.backend.repositories.DeviceTokenRepository;
 import com.example.backend.repositories.UserRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
@@ -49,4 +50,8 @@ public class DeviceTokenService {
         }
     }
 
+    @Transactional
+    public void delete(User user, String deviceId) {
+        deviceTokenRepository.deleteByUser_IdAndDeviceId(user.getId(), deviceId);
+    }
 }

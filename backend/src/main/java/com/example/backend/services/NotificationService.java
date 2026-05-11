@@ -12,6 +12,7 @@ import com.example.backend.repositories.ProfileNotificationRepository;
 import com.example.backend.repositories.ProfileRepository;
 import com.example.backend.types.EntityType;
 import com.example.backend.types.NotificationType;
+import com.example.backend.types.Role;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -27,7 +28,8 @@ public class NotificationService implements
         ApartmentNotificationHandler,
         TaskNotificationHandler,
         ExpenseNotificationHandler,
-        RuleNotificationHandler {
+        RuleNotificationHandler,
+        ProfileNotificationHandler {
 
     private final ProfileNotificationRepository profileNotificationRepository;
 
@@ -289,6 +291,26 @@ public class NotificationService implements
                         "ruleText", rule.getText()
                 )
         ));
+
+        broadcast(profile, notification, null);
+    }
+
+    @Override
+    public void handleRoleChange(Profile profile, Role role) {
+        NotificationType type = switch (role) {
+            case Role.INHABITANT -> NotificationType.USER_INHABITANT;
+            case Role.ADMIN -> NotificationType.USER_ADMIN;
+            case Role.CREATOR -> NotificationType.USER_CREATOR;
+        };
+
+        Notification notification = notificationRepository.save(
+                new Notification(
+                        profile,
+                        type,
+                        EntityType.USER,
+                        Map.of("userName", profile.getName())
+                )
+        );
 
         broadcast(profile, notification, null);
     }

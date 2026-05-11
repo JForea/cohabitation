@@ -1,7 +1,4 @@
-import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/features/auth/data/auth_data_holder.dart';
 import 'package:frontend/shared/data/providers/auth_provider.dart';
@@ -37,34 +34,34 @@ class _RegistrationSecondPageState
   }
 
   Future<void> register() async {
-    if (kIsWeb) {
-      await FirebaseMessaging.instance.requestPermission(provisional: true);
-    }
+    bool permissionGranted = await FcmHelper.requestPermission();
 
     AuthDataHolder dataHolder = widget.dataHolder;
 
-    String? fcmToken;
-    if (kIsWeb) {
-      fcmToken = await FirebaseMessaging.instance.getToken(
-        vapidKey: dotenv.get("FIREBASE_WEB_PUBLIC_KEY"),
-      );
+    if (permissionGranted) {
+      await ref
+          .read(authProvider.notifier)
+          .register(
+            dataHolder.email,
+            dataHolder.password,
+            dataHolder.name,
+            dataHolder.male,
+            deviceId: await FcmHelper.getDeviceId(),
+            fcmToken: await FcmHelper.getToken(),
+            platform: FcmHelper.getPlatform(),
+          );
     } else {
-      fcmToken = await FirebaseMessaging.instance.getToken();
+      await ref
+          .read(authProvider.notifier)
+          .register(
+            dataHolder.email,
+            dataHolder.password,
+            dataHolder.name,
+            dataHolder.male,
+          );
     }
 
-    if (fcmToken == null) return;
-
-    await ref
-        .read(authProvider.notifier)
-        .register(
-          dataHolder.email,
-          dataHolder.password,
-          dataHolder.name,
-          dataHolder.male,
-          await FcmHelper.getDeviceId(),
-          await FcmHelper.getToken(),
-          FcmHelper.getPlatform(),
-        );
+    dataHolder.clear();
   }
 
   @override

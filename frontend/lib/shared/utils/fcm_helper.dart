@@ -18,8 +18,13 @@ class FcmHelper {
     fallback: null,
   );
 
-  static Future<void> requestPermission() async {
-    await FirebaseMessaging.instance.requestPermission(provisional: true);
+  static Future<bool> requestPermission() async {
+    final settings = await FirebaseMessaging.instance.requestPermission(
+      provisional: true,
+    );
+
+    return settings.authorizationStatus == AuthorizationStatus.authorized ||
+        settings.authorizationStatus == AuthorizationStatus.provisional;
   }
 
   static Future<String> getDeviceId() async {
@@ -34,14 +39,21 @@ class FcmHelper {
   }
 
   static Future<String?> getToken() async {
-    String? fcmToken;
-    if (kIsWeb) {
-      fcmToken = await FirebaseMessaging.instance.getToken(vapidKey: _vapidKey);
-    } else {
-      fcmToken = await FirebaseMessaging.instance.getToken();
-    }
+    try {
+      String? fcmToken;
+      if (kIsWeb) {
+        fcmToken = await FirebaseMessaging.instance.getToken(
+          vapidKey: _vapidKey,
+        );
+      } else {
+        fcmToken = await FirebaseMessaging.instance.getToken();
+      }
 
-    return fcmToken;
+      return fcmToken;
+    } catch (e) {
+      print(e);
+      return null;
+    }
   }
 
   static String? getPlatform() {

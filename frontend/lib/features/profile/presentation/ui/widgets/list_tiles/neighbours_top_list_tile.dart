@@ -4,6 +4,7 @@ import 'package:frontend/features/profile/presentation/ui/widgets/indicators/poi
 import 'package:frontend/shared/data/models/profile/profile.dart';
 import 'package:frontend/shared/presentation/theme/app_colors.dart';
 import 'package:frontend/shared/presentation/ui/widgets/avatars/avatar.dart';
+import 'package:frontend/shared/presentation/ui/widgets/dialogs/profile_dialog.dart';
 
 class NeighboursTopListTile extends StatelessWidget {
   const NeighboursTopListTile({
@@ -51,36 +52,48 @@ class NeighboursTopListTile extends StatelessWidget {
     };
   }
 
+  void _showProfileDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => ProfileDialog(profile: profile),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: .symmetric(vertical: 8, horizontal: 15),
-      width: .infinity,
-      decoration: BoxDecoration(
-        color: isActiveUser ? AppColors.blue.withAlpha(37) : Colors.transparent,
-      ),
-      child: Row(
-        children: [
-          _getPlaceIndicator(context),
-          SizedBox(width: 16),
-          Avatar(name: profile.name, size: 32, color: profile.color),
-          SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              "${profile.name}${isActiveUser ? " (вы)" : ""}",
-              maxLines: 1,
-              overflow: .ellipsis,
-              style: TextStyle(
-                color: isActiveUser
-                    ? AppColors.blue
-                    : Theme.of(context).colorScheme.onSurface,
-                fontSize: 14,
-                fontWeight: .w500,
+    return GestureDetector(
+      onTap: isActiveUser ? null : () => _showProfileDialog(context),
+      child: Container(
+        padding: .symmetric(vertical: 8, horizontal: 15),
+        width: .infinity,
+        decoration: BoxDecoration(
+          color: isActiveUser
+              ? AppColors.blue.withAlpha(37)
+              : Colors.transparent,
+        ),
+        child: Row(
+          children: [
+            _getPlaceIndicator(context),
+            SizedBox(width: 16),
+            Avatar(name: profile.name, size: 32, color: profile.color),
+            SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                "${profile.name}${isActiveUser ? " (вы)" : ""}",
+                maxLines: 1,
+                overflow: .ellipsis,
+                style: TextStyle(
+                  color: isActiveUser
+                      ? AppColors.blue
+                      : Theme.of(context).colorScheme.onSurface,
+                  fontSize: 14,
+                  fontWeight: .w500,
+                ),
               ),
             ),
-          ),
-          PointsIndicator(pointsCount: profile.points),
-        ],
+            PointsIndicator(pointsCount: profile.points),
+          ],
+        ),
       ),
     );
   }

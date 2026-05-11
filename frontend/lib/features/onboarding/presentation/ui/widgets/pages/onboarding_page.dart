@@ -14,7 +14,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
 
   void _incrementCurrentPage() {
     setState(() {
-      _currentScreen++;
+      if (_currentScreen < 2) _currentScreen++;
     });
   }
 

@@ -43,6 +43,10 @@ class _ExpensesNotifier extends AsyncNotifier<ExpensesInfo> {
   Future<int> _fetchExpenseAmount() async {
     final response = await AppDio.dio.get("$_baseUrl/amount");
 
+    if (response.data.toString().isEmpty) {
+      return 0;
+    }
+
     return response.data;
   }
 

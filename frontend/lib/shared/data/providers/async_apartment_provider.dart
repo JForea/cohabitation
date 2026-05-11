@@ -77,6 +77,8 @@ class _ApartmentNotifier extends AsyncNotifier<Apartment?> {
 
   Future<Profile?> join(String inviteCode) async {
     try {
+      state = const AsyncLoading();
+
       final query = {'code': inviteCode};
 
       final response = await AppDio.dio.post(
@@ -100,7 +102,25 @@ class _ApartmentNotifier extends AsyncNotifier<Apartment?> {
 
       return profile;
     } catch (e) {
+      state = AsyncData(null);
       return null;
+    }
+  }
+
+  Future<bool> leave() async {
+    final current = state;
+    state = AsyncLoading();
+
+    try {
+      await AppDio.dio.post("$baseUrl/leave");
+
+      state = AsyncData(null);
+
+      return true;
+    } catch (e) {
+      state = current;
+
+      return false;
     }
   }
 

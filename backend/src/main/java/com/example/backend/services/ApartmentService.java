@@ -13,9 +13,9 @@ import com.example.backend.intefaces.ApartmentNotificationHandler;
 import com.example.backend.repositories.*;
 import com.example.backend.types.Role;
 import jakarta.transaction.Transactional;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.time.Month;
 import java.time.Year;
 import java.util.Calendar;
@@ -201,5 +201,19 @@ public class ApartmentService {
     @Transactional
     public void setBudget(Integer apartmentId, Integer budget) {
         apartmentRepository.updateBudgetById(apartmentId, budget);
+    }
+
+    @Transactional
+    public void deleteApartment(Integer apartmentId) {
+        apartmentRepository.deleteById(apartmentId);
+    }
+
+    @Transactional
+    public void leave(User user) {
+        Profile profile = user.getCurrentProfile();
+        profileRepository.updateLeftAtById(profile.getId(), Instant.now());
+        userRepository.setCurrentProfileNullWhereId(user.getId());
+
+        apartmentNotificationHandler.handleLeaveNotification(profile);
     }
 }

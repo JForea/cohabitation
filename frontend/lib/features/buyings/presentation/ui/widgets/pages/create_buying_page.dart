@@ -178,13 +178,13 @@ class _CreateBuyingPageState extends ConsumerState<CreateBuyingPage> {
             CustomWidgetList(
               danger: false,
               children: [
-                ...buyings.map(
-                  (b) => RedactBuyingListTile(
-                    buying: b,
-                    onRemove: () => removeBuying(b),
-                    changeCategory: (c) => changeCategory(b, c),
+                for (int i = 0; i < buyings.length; i++)
+                  RedactBuyingListTile(
+                    key: ValueKey(i),
+                    buying: buyings[i],
+                    onRemove: () => removeBuying(buyings[i]),
+                    changeCategory: (c) => changeCategory(buyings[i], c),
                   ),
-                ),
                 AddListTile(onAdd: addBuying, text: "Добавить товар"),
               ],
             ),
@@ -195,7 +195,6 @@ class _CreateBuyingPageState extends ConsumerState<CreateBuyingPage> {
             selected: assignedTo?.id,
             select: changeAssigned,
           ),
-          Spacer(),
           CustomTextButton(
             onPressed: () async {
               final created = await create();

@@ -205,7 +205,6 @@ class _CreateTaskPageState extends ConsumerState<CreateTaskPage> {
               );
             }),
           ),
-          Spacer(),
           CustomTextButton(
             onPressed: () async {
               final success = await create();

@@ -6,9 +6,9 @@ class PageWrapper extends StatelessWidget {
     super.key,
     required this.backButton,
     required this.pageName,
-    required this.children,
     required this.bottomFloatingButtonExists,
     required this.pathIfCantPop,
+    required this.children,
   });
 
   final List<Widget> children;
@@ -21,40 +21,38 @@ class PageWrapper extends StatelessWidget {
   Widget build(BuildContext context) {
     return CustomScrollView(
       slivers: [
-        SliverFillRemaining(
-          hasScrollBody: false,
-          child: Container(
-            padding: .only(
-              top: 60,
-              left: 20,
-              right: 20,
-              bottom: bottomFloatingButtonExists ? 90 : 20,
-            ),
-            width: .infinity,
-            child: Column(
-              crossAxisAlignment: .start,
-              spacing: 20,
-              children: [
-                Row(
-                  spacing: 15,
-                  children: [
-                    CustomBackButton(
-                      mainColor: false,
-                      pathIfCantPop: pathIfCantPop,
+        SliverPadding(
+          padding: EdgeInsets.only(
+            top: 60,
+            left: 20,
+            right: 20,
+            bottom: bottomFloatingButtonExists ? 90 : 20,
+          ),
+          sliver: SliverList(
+            delegate: SliverChildListDelegate([
+              Row(
+                spacing: 15,
+                children: [
+                  CustomBackButton(
+                    mainColor: false,
+                    pathIfCantPop: pathIfCantPop,
+                  ),
+                  Text(
+                    pageName,
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w500,
+                      color: Theme.of(context).colorScheme.onSurface,
                     ),
-                    Text(
-                      pageName,
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: .w500,
-                        color: Theme.of(context).colorScheme.onSurface,
-                      ),
-                    ),
-                  ],
-                ),
-                ...children,
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+              for (Widget child in children) ...[
+                child,
+                const SizedBox(height: 20),
               ],
-            ),
+            ]),
           ),
         ),
       ],

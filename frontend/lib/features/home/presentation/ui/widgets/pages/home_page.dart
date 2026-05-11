@@ -7,7 +7,10 @@ import 'package:frontend/features/home/data/providers/page_provider.dart';
 import 'package:frontend/features/home/presentation/ui/widgets/tabs/home_tab.dart';
 import 'package:frontend/features/profile/presentation/ui/widgets/tabs/profile_tab.dart';
 import 'package:frontend/features/tasks/presentation/ui/widgets/tabs/tasks_tab.dart';
+import 'package:frontend/shared/data/providers/buyings_provider.dart';
+import 'package:frontend/shared/data/providers/expenses_provider.dart';
 import 'package:frontend/shared/data/providers/selected_provider.dart';
+import 'package:frontend/shared/data/providers/tasks_provider.dart';
 import 'package:frontend/shared/data/providers/user_provider.dart';
 import 'package:frontend/shared/data/types/role.dart';
 import 'package:frontend/shared/presentation/theme/app_colors.dart';
@@ -39,24 +42,41 @@ class _HomePageState extends ConsumerState<HomePage> {
     final isEmpty = ref.watch(selectedProvider(key)).isEmpty;
 
     return switch (currentIndex) {
-      1 =>
-        role != Role.inhabitant
-            ? CustomAppFloatingActionButton(
-                iconData: isEmpty ? Icons.add : Icons.delete,
-                color: isEmpty ? AppColors.blue : AppColors.red,
-                onPressed: () =>
-                    isEmpty ? context.push("/tasks/create") : () {},
-              )
-            : null,
+      1 => CustomAppFloatingActionButton(
+        iconData: isEmpty ? Icons.add : Icons.delete,
+        color: isEmpty ? AppColors.blue : AppColors.red,
+        onPressed: isEmpty
+            ? () => context.push("/tasks/create")
+            : () async {
+                await ref
+                    .read(tasksProvider.notifier)
+                    .deleteMany(ref.read(selectedProvider(key)).toList());
+                ref.invalidate(selectedProvider(key));
+              },
+      ),
       2 => CustomAppFloatingActionButton(
         iconData: isEmpty ? Icons.add : Icons.delete,
         color: isEmpty ? AppColors.blue : AppColors.red,
-        onPressed: () => isEmpty ? context.push("/buyings/create") : () {},
+        onPressed: isEmpty
+            ? () => context.push("/buyings/create")
+            : () async {
+                await ref
+                    .read(buyingsProvider.notifier)
+                    .deleteMany(ref.read(selectedProvider(key)).toList());
+                ref.invalidate(selectedProvider(key));
+              },
       ),
       3 => CustomAppFloatingActionButton(
         iconData: isEmpty ? Icons.add : Icons.delete,
         color: isEmpty ? AppColors.blue : AppColors.red,
-        onPressed: () => isEmpty ? context.push("/expenses/create") : () {},
+        onPressed: isEmpty
+            ? () => context.push("/expenses/create")
+            : () async {
+                await ref
+                    .read(expensesProvider.notifier)
+                    .deleteMany(ref.read(selectedProvider(key)).toList());
+                ref.invalidate(selectedProvider(key));
+              },
       ),
       _ => null,
     };

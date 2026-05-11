@@ -46,12 +46,9 @@ class _ControlledTextFieldState extends State<ControlledTextField> {
   void didUpdateWidget(ControlledTextField oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    if (oldWidget != widget) {
-      if (_textEditingController.text != widget.text) {
-        _textEditingController.value = _textEditingController.value.copyWith(
-          text: widget.text,
-        );
-      }
+    if (oldWidget.text != widget.text &&
+        _textEditingController.text != widget.text) {
+      _textEditingController.text = widget.text;
     }
   }
 

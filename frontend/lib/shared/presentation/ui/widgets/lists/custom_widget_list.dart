@@ -27,32 +27,32 @@ class CustomWidgetList extends StatelessWidget {
         border: danger ? Border.all(color: color) : null,
         boxShadow: [AppShadows.standard()],
       ),
-      child: ListView.separated(
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
-        itemCount: children.length + (title != null ? 1 : 0),
-        separatorBuilder: (_, _) => Divider(height: 1, color: color),
-        itemBuilder: (context, index) {
-          if (title != null && index == 0) {
-            return Container(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (title != null) ...[
+            Container(
+              width: double.infinity,
               margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
               child: Text(
                 title!.toUpperCase(),
                 style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w700,
                   color: danger
-                      ? color
+                      ? AppColors.red
                       : Theme.of(context).colorScheme.onSurfaceVariant,
+                  fontSize: 14,
+                  fontWeight: .w700,
                 ),
               ),
-            );
-          }
+            ),
+            Divider(height: 1, color: color),
+          ],
 
-          final childIndex = title != null ? index - 1 : index;
-
-          return children[childIndex];
-        },
+          for (int i = 0; i < children.length; i++) ...[
+            children[i],
+            if (i != children.length - 1) Divider(height: 1, color: color),
+          ],
+        ],
       ),
     );
   }

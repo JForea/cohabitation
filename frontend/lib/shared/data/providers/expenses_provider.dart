@@ -161,4 +161,15 @@ class _ExpensesNotifier extends AsyncNotifier<ExpensesInfo> {
       ),
     );
   }
+
+  Future<bool> deleteMany(List<int> ids) async {
+    try {
+      await AppDio.dio.delete(_baseUrl, data: ids);
+      ref.invalidateSelf();
+      return true;
+    } catch (e) {
+      print(e);
+      return false;
+    }
+  }
 }

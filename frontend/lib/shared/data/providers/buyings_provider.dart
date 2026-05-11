@@ -16,7 +16,7 @@ final buyingsProvider =
     );
 
 class _BuyingNotifier extends AsyncNotifier<Map<BuyingCategory, List<Buying>>> {
-  late String baseUrl;
+  late String _baseUrl;
 
   static const _pageSize = 30;
 
@@ -32,7 +32,7 @@ class _BuyingNotifier extends AsyncNotifier<Map<BuyingCategory, List<Buying>>> {
       throw Exception("Not in apartment.");
     }
 
-    baseUrl = "/apartments/$apartmentId/buyings";
+    _baseUrl = "/apartments/$apartmentId/buyings";
 
     final buyings = await _fetchPage();
 
@@ -46,7 +46,7 @@ class _BuyingNotifier extends AsyncNotifier<Map<BuyingCategory, List<Buying>>> {
   Future<List<Buying>> _fetchPage() async {
     final query = {'page': '$_page', 'size': '$_pageSize', 'isPublic': 'true'};
 
-    final response = await AppDio.dio.get(baseUrl, queryParameters: query);
+    final response = await AppDio.dio.get(_baseUrl, queryParameters: query);
 
     final data = response.data as List;
 
@@ -73,7 +73,7 @@ class _BuyingNotifier extends AsyncNotifier<Map<BuyingCategory, List<Buying>>> {
       _isLoading = true;
 
       final response = await AppDio.dio.post(
-        baseUrl,
+        _baseUrl,
         data: {
           "name": buyingRedacted.name,
           "quantity": buyingRedacted.quantity,
@@ -126,7 +126,7 @@ class _BuyingNotifier extends AsyncNotifier<Map<BuyingCategory, List<Buying>>> {
       _isLoading = true;
 
       final response = await AppDio.dio.post(
-        "$baseUrl/bulk",
+        "$_baseUrl/bulk",
         data: {
           "buyings": buyingsRedacted
               .map(
@@ -217,7 +217,7 @@ class _BuyingNotifier extends AsyncNotifier<Map<BuyingCategory, List<Buying>>> {
 
       _isLoading = true;
 
-      await AppDio.dio.patch("$baseUrl/$buyingId");
+      await AppDio.dio.patch("$_baseUrl/$buyingId");
     } catch (e) {
       state = AsyncData(previous);
     } finally {
@@ -265,5 +265,16 @@ class _BuyingNotifier extends AsyncNotifier<Map<BuyingCategory, List<Buying>>> {
 
       return map;
     });
+  }
+
+  Future<bool> deleteMany(List<int> ids) async {
+    try {
+      await AppDio.dio.delete(_baseUrl, data: ids);
+      ref.invalidateSelf();
+      return true;
+    } catch (e) {
+      print(e);
+      return false;
+    }
   }
 }

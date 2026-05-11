@@ -15,7 +15,7 @@ final tasksProvider = AsyncNotifierProvider<_TasksNotifier, List<Task>>(
 );
 
 class _TasksNotifier extends AsyncNotifier<List<Task>> {
-  late String baseUrl;
+  late String _baseUrl;
 
   static const _pageSize = 20;
 
@@ -33,7 +33,7 @@ class _TasksNotifier extends AsyncNotifier<List<Task>> {
       throw Exception("Not in apartment.");
     }
 
-    baseUrl = "/apartments/$apartmentId/tasks";
+    _baseUrl = "/apartments/$apartmentId/tasks";
 
     return _fetchPage();
   }
@@ -46,7 +46,7 @@ class _TasksNotifier extends AsyncNotifier<List<Task>> {
       if (_filter.done != null) 'done': '${_filter.done}',
     };
 
-    final response = await AppDio.dio.get(baseUrl, queryParameters: query);
+    final response = await AppDio.dio.get(_baseUrl, queryParameters: query);
 
     final data = response.data as List;
 
@@ -116,7 +116,7 @@ class _TasksNotifier extends AsyncNotifier<List<Task>> {
           ? null
           : DateTime.now().add(Duration(days: dueDateOffset));
       final response = await AppDio.dio.post(
-        baseUrl,
+        _baseUrl,
         data: {
           "name": name,
           "description": description == "" ? null : description,
@@ -189,7 +189,7 @@ class _TasksNotifier extends AsyncNotifier<List<Task>> {
 
       _isLoading = true;
 
-      await AppDio.dio.patch("$baseUrl/$taskId");
+      await AppDio.dio.patch("$_baseUrl/$taskId");
 
       _isLoading = false;
 
@@ -198,6 +198,17 @@ class _TasksNotifier extends AsyncNotifier<List<Task>> {
       state = AsyncData(previous);
       _isLoading = false;
 
+      return false;
+    }
+  }
+
+  Future<bool> deleteMany(List<int> ids) async {
+    try {
+      await AppDio.dio.delete(_baseUrl, data: ids);
+      ref.invalidateSelf();
+      return true;
+    } catch (e) {
+      print(e);
       return false;
     }
   }

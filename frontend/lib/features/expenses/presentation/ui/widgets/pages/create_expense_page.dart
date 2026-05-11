@@ -150,7 +150,6 @@ class _CreateApartmentPageState extends ConsumerState<CreateExpensePage> {
                         : Image.file(File(image!.path), fit: .cover)),
                   ),
                 ),
-          Spacer(),
           CustomTextButton(
             onPressed: () async {
               final created = await create();

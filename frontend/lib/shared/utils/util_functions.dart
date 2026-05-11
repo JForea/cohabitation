@@ -310,7 +310,7 @@ class UtilFunctions {
   }
 
   static int parsePrice(String price) {
-    return int.parse(price.replaceAll(RegExp(r'\D'), ''));
+    return int.tryParse(price.replaceAll(RegExp(r'\D'), '')) ?? -1;
   }
 
   static String timeAgo(DateTime date) {

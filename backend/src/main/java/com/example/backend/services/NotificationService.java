@@ -94,6 +94,34 @@ public class NotificationService implements
         broadcast(profile, notification, null);
     }
 
+    @Override
+    public void handleLeaveNotification(Profile profile) {
+        Notification notification = notificationRepository.save(
+                new Notification(
+                        profile,
+                        NotificationType.USER_LEFT,
+                        EntityType.USER,
+                        Map.of("userName", profile.getName())
+                )
+        );
+
+        broadcast(profile, notification, null);
+    }
+
+    @Override
+    public void handleKickNotification(Profile actor, Profile target) {
+        Notification notification = notificationRepository.save(
+                new Notification(
+                        actor,
+                        NotificationType.USER_KICK,
+                        EntityType.USER,
+                        Map.of("userName", actor.getName(), "targetUserName", target.getName())
+                )
+        );
+
+        broadcast(actor, notification, null);
+    }
+
     public void handleBuyingCreate(Profile createdBy, Profile assignedTo) {
         NotificationType type = NotificationType.BUYING_UPDATED;
 
@@ -123,7 +151,7 @@ public class NotificationService implements
         }
     }
 
-    public void handleEventNotification(User createdBy, Integer apartmentId, Event event, boolean creating) {
+    public void handleEventNotification(User createdBy, Event event, boolean creating) {
         NotificationType type = creating ? NotificationType.EVENT_CREATED : NotificationType.EVENT_DELETED;
         Profile profile = createdBy.getCurrentProfile();
 
@@ -151,7 +179,7 @@ public class NotificationService implements
                         "taskId", task.getId(),
                         "taskName", task.getName(),
                         "userName", creatorProfile.getName(),
-                        "point", task.getPoints()
+                        "points", task.getPoints()
                 )
         );
 
@@ -181,7 +209,7 @@ public class NotificationService implements
         }
     }
 
-    public void handleSwitchStatus(User actor, Task task) {
+    public void handleTaskSwitchStatus(User actor, Task task) {
         notificationRepository.save(
                 new Notification(
                         actor.getCurrentProfile(),
@@ -191,18 +219,36 @@ public class NotificationService implements
                                 "taskId", task.getId(),
                                 "taskName", task.getName(),
                                 "userName", actor.getName(),
-                                "point", task.getPoints()
+                                "points", task.getPoints()
                         )
                 )
         );
     }
 
     @Override
-    public void handleExpenseNotification(User createdBy, Expense expense, boolean creating) {
+    public void handleManyTasksDelete(User user, List<Task> tasks) {
+        Profile profile = user.getCurrentProfile();
+        for (Task task : tasks) {
+            new Notification(
+                    profile,
+                    NotificationType.TASK_DELETED,
+                    EntityType.TASK,
+                    Map.of(
+                            "taskId", task.getId(),
+                            "taskName", task.getName(),
+                            "userName", profile.getName(),
+                            "points", task.getPoints()
+                    )
+            );
+        }
+    }
+
+    @Override
+    public void handleExpenseCreate(User createdBy, Expense expense) {
         Profile profile = createdBy.getCurrentProfile();
         Notification notification = notificationRepository.save(new Notification(
                 profile,
-                creating ? NotificationType.EXPENSE_CREATED : NotificationType.EXPENSE_DELETED,
+                NotificationType.EXPENSE_CREATED,
                 EntityType.EXPENSE,
                 Map.of(
                         "userName", profile.getName(),
@@ -215,7 +261,24 @@ public class NotificationService implements
     }
 
     @Override
-    public void handleRuleNotification(User createdBy, Rule rule, boolean creating) {
+    public void handleManyExpensesDelete(User createdBy, List<Expense> expenses) {
+        Profile profile = createdBy.getCurrentProfile();
+        List<Notification> notifications = expenses.stream().map(expense -> new Notification(
+                profile,
+                NotificationType.EXPENSE_DELETED,
+                EntityType.EXPENSE,
+                Map.of(
+                        "userName", profile.getName(),
+                        "expenseName", expense.getName(),
+                        "expenseAmount", expense.getAmount()
+                )
+        )).toList();
+
+        notificationRepository.saveAll(notifications);
+    }
+
+    @Override
+    public void handleRuleUpdate(User createdBy, Rule rule, boolean creating) {
         Profile profile = createdBy.getCurrentProfile();
         Notification notification = notificationRepository.save(new Notification(
                 profile,

@@ -61,4 +61,15 @@ public class ExpenseController {
     ) {
         return ResponseEntity.ok(expenseService.getAmount(apartmentId));
     }
+
+    @DeleteMapping
+    public ResponseEntity<Void> deleteMany(
+            @PathVariable Integer apartmentId,
+            @RequestBody List<Long> ids,
+            @AuthenticationPrincipal CustomUserDetails details
+    ) {
+        User user = details.getUser();
+        expenseService.deleteMany(user, apartmentId, ids);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
 }

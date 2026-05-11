@@ -70,4 +70,15 @@ public class TaskController {
         taskService.deleteOne(apartmentId, user, taskId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
+
+    @DeleteMapping
+    public ResponseEntity<Void> deleteMany(
+            @PathVariable Integer apartmentId,
+            @RequestBody List<Long> ids,
+            @AuthenticationPrincipal CustomUserDetails details
+    ) {
+        User user = details.getUser();
+        taskService.deleteMany(user, apartmentId, ids);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
 }

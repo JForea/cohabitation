@@ -76,13 +76,24 @@ public class BuyingController {
     }
 
     @DeleteMapping("/{buyingId}")
-    public ResponseEntity<Void> delete(
+    public ResponseEntity<Void> deleteOne(
             @PathVariable Integer apartmentId,
             @PathVariable Long buyingId,
             @AuthenticationPrincipal CustomUserDetails details
     ) {
         User user = details.getUser();
         buyingService.deleteOne(apartmentId, user, buyingId);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
+    @DeleteMapping
+    public ResponseEntity<Void> deleteMany(
+            @PathVariable Integer apartmentId,
+            @RequestBody List<Long> ids,
+            @AuthenticationPrincipal CustomUserDetails details
+    ) {
+        User user = details.getUser();
+        buyingService.deleteMany(user, apartmentId, ids);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 }

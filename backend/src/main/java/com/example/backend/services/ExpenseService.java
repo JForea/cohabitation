@@ -4,22 +4,28 @@ import com.example.backend.dtos.in.expenses.CreateExpenseRequest;
 import com.example.backend.dtos.out.expenses.CreateExpenseResponse;
 import com.example.backend.dtos.out.expenses.ExpenseDto;
 import com.example.backend.entities.Expense;
+import com.example.backend.entities.Profile;
 import com.example.backend.entities.ProfileMonthlyExpense;
 import com.example.backend.entities.User;
+import com.example.backend.exceptions.AccessForbiddenException;
 import com.example.backend.intefaces.ExpenseNotificationHandler;
 import com.example.backend.intefaces.FileStorage;
 import com.example.backend.repositories.ExpenseRepository;
 import com.example.backend.repositories.ProfileMonthlyExpenseRepository;
+import com.example.backend.types.Role;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.time.Month;
 import java.time.Year;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 public class ExpenseService {
@@ -83,7 +89,7 @@ public class ExpenseService {
 
             profileMonthlyExpenseRepository.save(monthlyExpense);
 
-            expenseNotificationHandler.handleExpenseNotification(user, expense, true);
+            expenseNotificationHandler.handleExpenseCreate(user, expense);
 
             return new CreateExpenseResponse(
                     expense.getId(),
@@ -124,5 +130,34 @@ public class ExpenseService {
                 year.getValue(),
                 month
         );
+    }
+
+    @Transactional
+    public void deleteMany(User user, Integer apartmentId, List<Long> ids) {
+        List<Expense> expenses = expenseRepository.findAllByCreatedBy_Apartment_IdAndIdIn(apartmentId, ids);
+        Profile profile = user.getCurrentProfile();
+
+        if (profile.getRole() != Role.INHABITANT) {
+            expenseRepository.deleteAll(expenses);
+            expenseNotificationHandler.handleManyExpensesDelete(user, expenses);
+            return;
+        }
+
+        Instant now = Instant.now();
+
+        List<String> filenames = new ArrayList<>();
+        for (Expense expense : expenses) {
+            if ((!Objects.equals(expense.getCreatedBy().getId(), profile.getId()) ||
+                    now.getEpochSecond() - expense.getCreatedAt().getEpochSecond() > 3600) &&
+                    profile.getRole() == Role.INHABITANT) {
+                throw new AccessForbiddenException("Request contains expenses which you can't delete.");
+            }
+            if (expense.getCheckImageName() != null)
+                filenames.add(expense.getCheckImageName());
+        }
+
+        fileStorage.deleteMany(bucketName, filenames);
+
+        expenseRepository.deleteAll(expenses);
     }
 }

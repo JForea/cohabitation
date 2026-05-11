@@ -140,15 +140,43 @@ public class BuyingService {
         return new StatusResponse(buying.getCompletedAt() != null);
     }
 
+    private void checkDeleteAuthority(Profile profile, Buying buying) {
+        if (!Objects.equals(buying.getCreatedBy().getId(), profile.getId()))
+            throw new AccessForbiddenException("You can't delete others buyings.");
+    }
+
     public void deleteOne(Integer apartmentId, User user, Long buyingId) {
         Buying buying = buyingRepository.findByCreatedBy_Apartment_IdAndId(apartmentId, buyingId).orElseThrow(
                 () -> new ResourceNotFoundException("Buying not found.")
         );
 
         Profile profile = user.getCurrentProfile();
-        if (!Objects.equals(buying.getCreatedBy().getId(), profile.getId()) && profile.getRole() == Role.INHABITANT)
-            throw new AccessForbiddenException("You can't delete others buyings.");
+
+        if (profile.getRole() != Role.INHABITANT) {
+            buyingRepository.delete(buying);
+            return;
+        }
+
+        checkDeleteAuthority(profile, buying);
 
         buyingRepository.delete(buying);
+    }
+
+    @Transactional
+    public void deleteMany(User user, Integer apartmentId, List<Long> buyingIds) {
+        List<Buying> buyings = buyingRepository.findAllByCreatedBy_Apartment_IdAndIdIn(apartmentId, buyingIds);
+
+        Profile profile = user.getCurrentProfile();
+
+        if (profile.getRole() != Role.INHABITANT) {
+            buyingRepository.deleteAll(buyings);
+            return;
+        }
+
+        for (Buying buying : buyings) {
+            checkDeleteAuthority(profile, buying);
+        }
+
+        buyingRepository.deleteAll(buyings);
     }
 }

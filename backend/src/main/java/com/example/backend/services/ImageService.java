@@ -5,6 +5,8 @@ import com.example.backend.exceptions.ResourceNotFoundException;
 import com.example.backend.intefaces.FileStorage;
 import io.minio.*;
 import io.minio.http.Method;
+import io.minio.messages.DeleteError;
+import io.minio.messages.DeleteObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -14,6 +16,7 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -122,6 +125,25 @@ public class ImageService implements FileStorage {
         } catch (Exception e) {
             log.error("Delete image error: ", e);
             throw new RuntimeException("Delete image error.", e);
+        }
+    }
+
+    public void deleteMany(String bucket, List<String> filenames) {
+        try {
+            List<DeleteObject> objects = filenames.stream()
+                    .map(DeleteObject::new)
+                    .toList();
+
+            Iterable<Result<DeleteError>> results =
+                    minioClient.removeObjects(RemoveObjectsArgs.builder().bucket(bucket).objects(objects).build());
+
+            for (Result<DeleteError> result : results) {
+                DeleteError error = result.get();
+                log.error("Cannot delete object {}: {}", error.objectName(), error.message());
+            }
+
+        } catch (Exception e) {
+            log.error("Delete many images error: ", e);
         }
     }
 }

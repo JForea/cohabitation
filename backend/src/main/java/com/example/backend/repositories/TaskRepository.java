@@ -6,12 +6,12 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.ListCrudRepository;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
 public interface TaskRepository extends ListCrudRepository<Task, Long>, JpaSpecificationExecutor<Task> {
     Optional<Task> findByCreatedBy_Apartment_IdAndId(Integer apartmentId, Long id);
+    List<Task> findAllByCreatedBy_Apartment_IdAndIdIn(Integer apartmentId, List<Long> taskIds);
     @EntityGraph(attributePaths = {
             "assignedTo",
             "assignedTo.user"

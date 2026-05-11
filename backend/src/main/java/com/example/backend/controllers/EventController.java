@@ -53,4 +53,14 @@ public class EventController {
             ) {
         return ResponseEntity.ok(eventService.getEventsByDay(apartmentId, date));
     }
+
+    @DeleteMapping("/{eventId}")
+    public ResponseEntity<Void> deleteEvent(
+            @PathVariable Long eventId,
+            @AuthenticationPrincipal CustomUserDetails details
+    ) {
+        User user = details.getUser();
+        eventService.deleteOne(user, eventId);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
 }

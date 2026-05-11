@@ -32,15 +32,6 @@ public class PushNotificationService implements IPushNotificationService {
                 || code == MessagingErrorCode.INVALID_ARGUMENT;
     }
 
-    private FirebaseMessaging getMessaging() {
-
-        if (FirebaseApp.getApps().isEmpty()) {
-            throw new IllegalStateException("Firebase is not initialized");
-        }
-
-        return FirebaseMessaging.getInstance();
-    }
-
     @Async("pushExecutor")
     public void send(
             List<TokenDto> tokenDtos,

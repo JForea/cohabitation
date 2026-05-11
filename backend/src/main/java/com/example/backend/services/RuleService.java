@@ -43,7 +43,7 @@ public class RuleService {
 
         rule = ruleRepository.save(rule);
 
-        ruleNotificationHandler.handleRuleNotification(user, rule, true);
+        ruleNotificationHandler.handleRuleUpdate(user, rule, true);
 
         return new IdResponse<>(rule.getId());
     }
@@ -59,6 +59,6 @@ public class RuleService {
 
         ruleRepository.deleteById(ruleId);
 
-        ruleNotificationHandler.handleRuleNotification(user, rule, false);
+        ruleNotificationHandler.handleRuleUpdate(user, rule, false);
     }
 }

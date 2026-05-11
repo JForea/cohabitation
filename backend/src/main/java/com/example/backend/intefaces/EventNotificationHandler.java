@@ -4,5 +4,5 @@ import com.example.backend.entities.Event;
 import com.example.backend.entities.User;
 
 public interface EventNotificationHandler {
-    void handleEventNotification(User createdBy, Integer apartmentId, Event event, boolean creating);
+    void handleEventNotification(User createdBy, Event event, boolean creating);
 }

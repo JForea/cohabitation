@@ -15,12 +15,8 @@ public class ApartmentSecurity {
     public boolean hasAccess(Integer apartmentId, Authentication auth) {
         User user = (User) auth.getPrincipal();
 
-        log.info("I'm working");
-
-        if (user == null) {
-            log.info("User is null.");
+        if (user == null)
             return false;
-        }
         if (Objects.equals(user.getCurrentProfile().getApartment().getId(), apartmentId))
             return true;
         else {

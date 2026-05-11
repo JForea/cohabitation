@@ -45,6 +45,22 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     }
   }
 
+  void _deleteApartment(BuildContext context, WidgetRef ref) async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    bool deleted = await ref.read(asyncApartmentProvider.notifier).delete();
+    if (deleted && context.mounted) {
+      ref.read(authProvider.notifier).setProfile(null);
+      context.go("/enter");
+    } else {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
   Future<bool> _createRule(WidgetRef ref, String text) async {
     bool created = await ref.read(rulesProvider.notifier).create(text);
 
@@ -135,7 +151,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                     if (role == Role.creator)
                       DangerListTile(
                         iconData: Icons.delete_outline,
-                        onTap: () {},
+                        onTap: () => _deleteApartment(context, ref),
                         text: "Удалить квартиру",
                       ),
                   ],

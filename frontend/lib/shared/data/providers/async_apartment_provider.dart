@@ -150,4 +150,21 @@ class _ApartmentNotifier extends AsyncNotifier<Apartment?> {
       state = AsyncData(currentValue);
     }
   }
+
+  Future<bool> delete() async {
+    final current = state;
+    state = AsyncLoading();
+
+    try {
+      await AppDio.dio.delete("$baseUrl/$apartmentId");
+
+      state = AsyncData(null);
+
+      return true;
+    } catch (e) {
+      state = current;
+
+      return false;
+    }
+  }
 }

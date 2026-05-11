@@ -67,7 +67,10 @@ public class Profile {
     private Set<Task> completedTasks = new LinkedHashSet<>();
 
     @OneToMany(mappedBy = "key.profile", orphanRemoval = true)
-    private Set<ProfileNotification> notifications = new LinkedHashSet<>();
+    private Set<ProfileNotification> profileNotifications = new LinkedHashSet<>();
+
+    @OneToMany(mappedBy = "actor", orphanRemoval = true)
+    private Set<Notification> notifications = new LinkedHashSet<>();
 
     @Enumerated
     @Column(name = "role", nullable = false)
@@ -211,11 +214,15 @@ public class Profile {
         this.name = name;
     }
 
-    public Set<ProfileNotification> getNotifications() {
-        return notifications;
+    public Set<ProfileNotification> getProfileNotifications() {
+        return profileNotifications;
     }
 
     public Set<ProfileMonthlyExpense> getProfileMonthlyExpenses() {
         return profileMonthlyExpenses;
+    }
+
+    public Set<Notification> getNotifications() {
+        return notifications;
     }
 }

@@ -4,6 +4,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:frontend/shared/data/models/profile/profile.dart';
 import 'package:frontend/shared/data/providers/auth_provider.dart';
 import 'package:frontend/shared/data/providers/neighbours_provider.dart';
+import 'package:frontend/shared/data/types/role.dart';
 import 'package:frontend/shared/presentation/theme/app_colors.dart';
 import 'package:frontend/shared/presentation/ui/widgets/avatars/avatar.dart';
 import 'package:frontend/shared/presentation/ui/widgets/badges/role_badge.dart';
@@ -22,10 +23,19 @@ class ProfileDialog extends ConsumerWidget {
     return await ref.read(neighboursProvider.notifier).kick(profileId);
   }
 
+  Future<bool> _setRole(WidgetRef ref, int profileId, Role role) async {
+    return await ref.read(neighboursProvider.notifier).setRole(profileId, role);
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final userRole = ref.read(
       authProvider.select((s) => s.value?.user?.profile?.role),
+    );
+    final targetRole = ref.watch(
+      neighboursProvider.select(
+        (s) => s.value?.firstWhere((p) => p.id == profile.id).role,
+      ),
     );
 
     return Dialog(
@@ -46,7 +56,7 @@ class ProfileDialog extends ConsumerWidget {
                 fontWeight: .w500,
               ),
             ),
-            RoleBadge(role: profile.role),
+            RoleBadge(role: targetRole ?? profile.role),
             Row(
               mainAxisSize: .min,
               spacing: 5,
@@ -67,7 +77,7 @@ class ProfileDialog extends ConsumerWidget {
               mainAxisSize: .min,
               children: [
                 if (userRole == .creator ||
-                    userRole == .admin && profile.role == .inhabitant)
+                    userRole == .admin && targetRole == .inhabitant)
                   CustomIconButton(
                     color: AppColors.red,
                     icon: Icons.person_remove,
@@ -76,19 +86,20 @@ class ProfileDialog extends ConsumerWidget {
                     iconColor: Colors.white,
                   ),
                 if (userRole == .creator)
-                  profile.role == .admin
+                  targetRole == .admin
                       ? CustomIconButton(
                           color: AppColors.greyBlue,
                           icon: Icons.gpp_bad,
                           size: 36,
-                          onPressed: () {},
+                          onPressed: () =>
+                              _setRole(ref, profile.id, .inhabitant),
                           iconColor: Colors.white,
                         )
                       : CustomIconButton(
                           color: AppColors.blue,
                           icon: Icons.star,
                           size: 36,
-                          onPressed: () {},
+                          onPressed: () => _setRole(ref, profile.id, .admin),
                           iconColor: Colors.white,
                         ),
               ],

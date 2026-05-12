@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/shared/data/models/profile/profile.dart';
 import 'package:frontend/shared/data/network/dio_client.dart';
 import 'package:frontend/shared/data/providers/apartment_provider.dart';
+import 'package:frontend/shared/data/types/role.dart';
 
 final neighboursProvider =
     AsyncNotifierProvider<_ApartmentNotifier, List<Profile>>(
@@ -51,6 +52,28 @@ class _ApartmentNotifier extends AsyncNotifier<List<Profile>> {
       newValue.removeWhere((p) => p.id == profileId);
       state = AsyncData(newValue);
       await AppDio.dio.post("$_baseUrl/$profileId/kick");
+      return true;
+    } catch (e) {
+      state = AsyncData(previousValue);
+      return false;
+    }
+  }
+
+  Future<bool> setRole(int profileId, Role role) async {
+    final previousValue = state.value ?? [];
+
+    try {
+      final newValue = [...previousValue];
+      for (int i = 0; i < newValue.length; i++) {
+        if (newValue[i].id == profileId) {
+          newValue[i] = newValue[i].copyWith(role: role);
+        }
+      }
+      state = AsyncData(newValue);
+      await AppDio.dio.patch(
+        "$_baseUrl/$profileId",
+        queryParameters: {"role": role.name.toUpperCase()},
+      );
       return true;
     } catch (e) {
       state = AsyncData(previousValue);

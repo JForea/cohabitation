@@ -312,7 +312,7 @@ public class NotificationService implements
                 )
         );
 
-        broadcast(profile, notification, null);
+        profileNotificationRepository.save(new ProfileNotification(profile, notification));
     }
 
     public Integer getUnreadCount(User user) {

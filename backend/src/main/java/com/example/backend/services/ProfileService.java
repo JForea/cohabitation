@@ -54,16 +54,19 @@ public class ProfileService {
         Year year = Year.of(calendar.get(Calendar.YEAR));
         Month month = Month.of(calendar.get(Calendar.MONTH));
 
-        Integer monthlyExpense = profileMonthlyExpenseRepository.
-                getSumByProfileAndYearAndMonth(
-                        user.getCurrentProfile(),
-                        year.getValue(),
-                        month
-                );
+        return profiles.stream().map((Profile p) -> {
+            Integer monthlyExpense = profileMonthlyExpenseRepository.
+                    getSumByProfileAndYearAndMonth(
+                            p,
+                            year.getValue(),
+                            month
+                    );
 
-        return profiles.stream().map(p -> new ProfileDto(
-                p, monthlyExpense != null ? monthlyExpense : 0
-        )).toList();
+            return new ProfileDto(
+                    p, monthlyExpense != null ? monthlyExpense : 0
+            );
+        }
+        ).toList();
     }
 
     @Transactional

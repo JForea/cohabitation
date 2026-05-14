@@ -91,9 +91,7 @@ class ExpenseCard extends ConsumerWidget {
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                         fontSize: 14,
-                        fontWeight: isSelected
-                            ? FontWeight.w600
-                            : FontWeight.w500,
+                        fontWeight: .w500,
                         color: isSelected
                             ? AppColors.blue
                             : Theme.of(context).colorScheme.onSurface,
@@ -107,8 +105,10 @@ class ExpenseCard extends ConsumerWidget {
                       "${DateFormat("d MMMM", "ru_RU").format(expense.createdAt)}",
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        color: Color(0xFFA3A3A3),
+                      style: TextStyle(
+                        color: isSelected
+                            ? Theme.of(context).colorScheme.onSurfaceVariant
+                            : Color(0xFFA3A3A3),
                         fontSize: 13,
                         fontWeight: FontWeight.w500,
                       ),
@@ -139,7 +139,9 @@ class ExpenseCard extends ConsumerWidget {
                   Text(
                     "${NumberFormat("#,###", "ru_RU").format(expense.sum)} ₽",
                     style: TextStyle(
-                      color: Theme.of(context).colorScheme.onSurface,
+                      color: isSelected
+                          ? AppColors.blue
+                          : Theme.of(context).colorScheme.onSurface,
                       fontSize: 13,
                       fontWeight: FontWeight.w500,
                     ),

@@ -83,6 +83,19 @@ class AsyncUserNotifier extends AsyncNotifier<User?> {
     );
   }
 
+  void addExpenseAmount(int expenseAmount) {
+    final previous = state.value;
+
+    state = AsyncData(
+      previous?.copyWith(
+        profile: previous.profile?.copyWith(
+          monthlyExpensesAmount:
+              previous.profile!.monthlyExpensesAmount + expenseAmount,
+        ),
+      ),
+    );
+  }
+
   Future<void> logout(String deviceId) async {
     if (state.value == null) {
       throw UnauthorizedFailure();

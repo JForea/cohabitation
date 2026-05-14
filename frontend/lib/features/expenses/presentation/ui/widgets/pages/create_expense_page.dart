@@ -7,6 +7,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:frontend/features/expenses/presentation/ui/widgets/fields/image_uploader_field.dart';
 import 'package:frontend/features/expenses/utils/expense_validators.dart';
 import 'package:frontend/shared/data/failures/failures.dart';
+import 'package:frontend/shared/data/providers/async_user_provider.dart';
 import 'package:frontend/shared/data/providers/expenses_provider.dart';
 import 'package:frontend/shared/data/providers/user_provider.dart';
 import 'package:frontend/shared/data/types/expense_category.dart';
@@ -81,6 +82,7 @@ class _CreateApartmentPageState extends ConsumerState<CreateExpensePage> {
     if (!ok) return;
 
     ref.read(expensesProvider.notifier).addExpenseAmount(price!);
+    ref.read(asyncUserProvider.notifier).addExpenseAmount(price!);
 
     try {
       await ref
@@ -101,6 +103,7 @@ class _CreateApartmentPageState extends ConsumerState<CreateExpensePage> {
         showErrorDialog(context, e.message);
       }
       ref.read(expensesProvider.notifier).addExpenseAmount(-price!);
+      ref.read(asyncUserProvider.notifier).addExpenseAmount(-price!);
     }
   }
 

@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/features/expenses/presentation/ui/widgets/cards/monthly_expenses_card.dart';
 import 'package:frontend/features/expenses/presentation/ui/widgets/lists/expense_list.dart';
+import 'package:frontend/features/expenses/presentation/ui/widgets/lists/inhabitants_expenses_amount_list.dart';
 import 'package:frontend/shared/data/providers/apartment_provider.dart';
 import 'package:frontend/shared/data/providers/async_apartment_provider.dart';
 import 'package:frontend/shared/data/providers/expenses_provider.dart';
+import 'package:frontend/shared/data/providers/neighbours_provider.dart';
 import 'package:frontend/shared/data/providers/selected_provider.dart';
 import 'package:frontend/shared/data/providers/user_provider.dart';
 import 'package:frontend/shared/presentation/ui/widgets/buttons/custom_text_button.dart';
@@ -30,6 +32,7 @@ class _ExpensesTabState extends ConsumerState<ExpensesTab> {
     ref.invalidate(asyncApartmentProvider);
     ref.invalidate(expensesProvider);
     ref.invalidate(selectedProvider(key));
+    ref.read(neighboursProvider.notifier).refresh();
   }
 
   void setBudget(String s) {
@@ -95,6 +98,8 @@ class _ExpensesTabState extends ConsumerState<ExpensesTab> {
     );
     final role = ref.watch(userProvider.select((u) => u?.profile?.role));
     final selected = ref.watch(selectedProvider(key));
+    final profile = ref.watch(userProvider.select((u) => u?.profile));
+    final neighboursState = ref.watch(neighboursProvider);
 
     return RefreshIndicator(
       onRefresh: () => refresh(ref),
@@ -132,6 +137,16 @@ class _ExpensesTabState extends ConsumerState<ExpensesTab> {
                   ? () => onSettingsClick(context)
                   : null,
             ),
+
+          Text("Статистика", style: TextStyle(fontWeight: .w500, fontSize: 16)),
+          neighboursState.when(
+            data: (neighbours) => InhabitantsExpensesAmountList(
+              inhabitants: [?profile, ...neighbours],
+              onTap: () {},
+            ),
+            error: (_, _) => Text("Не удалось загрузить статистику"),
+            loading: () => Center(child: CircularProgressIndicator()),
+          ),
           Column(
             crossAxisAlignment: .start,
             spacing: 8,

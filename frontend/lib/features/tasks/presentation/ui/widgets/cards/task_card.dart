@@ -92,7 +92,9 @@ class TaskCard extends ConsumerWidget {
                     maxLines: 1,
                     overflow: .ellipsis,
                     style: TextStyle(
-                      color: Theme.of(context).colorScheme.onSurface,
+                      color: isSelected
+                          ? AppColors.blue
+                          : Theme.of(context).colorScheme.onSurface,
                       fontSize: 15,
                       fontWeight: .w500,
                     ),
@@ -105,7 +107,9 @@ class TaskCard extends ConsumerWidget {
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: .w500,
-                      color: Color(0xFFA3A3A3),
+                      color: isSelected
+                          ? AppColors.greyBlue
+                          : Color(0xFFA3A3A3),
                     ),
                   ),
                   Spacer(),

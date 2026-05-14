@@ -74,7 +74,9 @@ class BuyingListTile extends ConsumerWidget {
                     maxLines: 1,
                     overflow: .ellipsis,
                     style: TextStyle(
-                      color: Theme.of(context).colorScheme.onSurface,
+                      color: isSelected
+                          ? AppColors.blue
+                          : Theme.of(context).colorScheme.onSurface,
                       fontSize: 14,
                       fontWeight: .w500,
                     ),

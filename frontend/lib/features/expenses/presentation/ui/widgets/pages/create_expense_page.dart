@@ -5,12 +5,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:frontend/features/expenses/presentation/ui/widgets/fields/image_uploader_field.dart';
+import 'package:frontend/features/expenses/utils/expense_validators.dart';
+import 'package:frontend/shared/data/failures/failures.dart';
 import 'package:frontend/shared/data/providers/expenses_provider.dart';
 import 'package:frontend/shared/data/providers/user_provider.dart';
 import 'package:frontend/shared/data/types/expense_category.dart';
 import 'package:frontend/shared/presentation/theme/app_colors.dart';
 import 'package:frontend/shared/presentation/ui/widgets/buttons/custom_text_button.dart';
 import 'package:frontend/shared/presentation/ui/widgets/chips/custom_choice_chip.dart';
+import 'package:frontend/shared/presentation/ui/widgets/dialogs/error_dialog.dart';
 import 'package:frontend/shared/presentation/ui/widgets/inputs/controlled_named_text_field.dart';
 import 'package:frontend/shared/presentation/ui/widgets/wrappers/choice_wrapper.dart';
 import 'package:frontend/shared/presentation/ui/widgets/wrappers/page_wrapper.dart';
@@ -32,13 +35,8 @@ class _CreateApartmentPageState extends ConsumerState<CreateExpensePage> {
   late ExpenseCategory category;
   XFile? image;
 
-  @override
-  void initState() {
-    name = "";
-    sum = "";
-    category = ExpenseCategory.products;
-    super.initState();
-  }
+  late String nameErrorMessage;
+  late String sumErrorMessage;
 
   void setName(String s) {
     name = s;
@@ -60,30 +58,61 @@ class _CreateApartmentPageState extends ConsumerState<CreateExpensePage> {
     });
   }
 
-  Future<bool> create() async {
+  Future<void> create(BuildContext context) async {
     final profile = ref.read(userProvider.select((u) => u?.profile));
 
-    if (profile == null) {
-      return false;
+    if (profile == null) return;
+
+    int? price;
+    bool ok = true;
+    setState(() {
+      final nameError = ExpenseValidators.validateName(name);
+      if (nameError != null) {
+        nameErrorMessage = nameError;
+        ok = false;
+      }
+      price = ExpenseValidators.parsePrice(sum);
+      if (price == null) {
+        sumErrorMessage = "Неверное значение";
+        ok = false;
+      }
+    });
+
+    if (!ok) return;
+
+    ref.read(expensesProvider.notifier).addExpenseAmount(price!);
+
+    try {
+      await ref
+          .read(expensesProvider.notifier)
+          .create(
+            name: name,
+            amount: price!,
+            category: category,
+            createdBy: profile,
+            image: image,
+          );
+
+      if (context.mounted) {
+        context.go("/");
+      }
+    } on Failure catch (e) {
+      if (context.mounted) {
+        showErrorDialog(context, e.message);
+      }
+      ref.read(expensesProvider.notifier).addExpenseAmount(-price!);
     }
+  }
 
-    int price = UtilFunctions.parsePrice(sum);
+  @override
+  void initState() {
+    name = "";
+    sum = "";
+    category = ExpenseCategory.products;
 
-    ref.read(expensesProvider.notifier).addExpenseAmount(price);
-    bool created = await ref
-        .read(expensesProvider.notifier)
-        .create(
-          name: name,
-          amount: price,
-          category: category,
-          createdBy: profile,
-          image: image,
-        );
-    if (!created) {
-      ref.read(expensesProvider.notifier).addExpenseAmount(-price);
-    }
-
-    return created;
+    nameErrorMessage = "";
+    sumErrorMessage = "";
+    super.initState();
   }
 
   @override
@@ -103,6 +132,7 @@ class _CreateApartmentPageState extends ConsumerState<CreateExpensePage> {
             secondaryColor: false,
             type: .text,
             require: true,
+            errorMessage: nameErrorMessage,
           ),
           ControlledNamedTextField(
             text: sum,
@@ -112,6 +142,7 @@ class _CreateApartmentPageState extends ConsumerState<CreateExpensePage> {
             secondaryColor: false,
             type: .price,
             require: true,
+            errorMessage: sumErrorMessage,
           ),
           ChoiceWrapper(
             name: "Категория",
@@ -151,15 +182,7 @@ class _CreateApartmentPageState extends ConsumerState<CreateExpensePage> {
                   ),
                 ),
           CustomTextButton(
-            onPressed: () async {
-              final created = await create();
-
-              if (created && context.mounted) {
-                context.go("/");
-              } else if (!created) {
-                print("Couldn't create expense.");
-              }
-            },
+            onPressed: () async => await create(context),
             text: "Добавить",
           ),
         ],

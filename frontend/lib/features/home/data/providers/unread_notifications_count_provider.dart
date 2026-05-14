@@ -1,8 +1,9 @@
 import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:frontend/shared/data/network/dio_client.dart';
+import 'package:frontend/shared/data/failures/failures.dart';
 import 'package:frontend/shared/data/providers/apartment_provider.dart';
+import 'package:frontend/shared/data/repositories/notification_repository.dart';
 
 final unreadNotificationsCountProvider =
     AsyncNotifierProvider<_UnreadNotificationsCountNotifier, int>(
@@ -10,31 +11,32 @@ final unreadNotificationsCountProvider =
     );
 
 class _UnreadNotificationsCountNotifier extends AsyncNotifier<int> {
-  late String _url;
+  late NotificationRepository _notificationRepository;
+
+  late int? _apartmentId;
 
   @override
   FutureOr<int> build() async {
-    final apartmentId = ref.watch(apartmentProvider.select((a) => a?.id));
+    _notificationRepository = ref.read(notificationRepositoryProvider);
+    _apartmentId = ref.watch(apartmentProvider.select((a) => a?.id));
 
-    if (apartmentId == null) {
-      throw Exception("Not in apartment.");
-    }
+    if (_apartmentId == null) throw NotInApartmentFailure();
 
-    _url = "/apartments/$apartmentId/notifications/unread-count";
-
-    final response = await AppDio.dio.get(_url);
-
-    return response.data as int;
+    return _notificationRepository.getUnreadCount(_apartmentId!);
   }
 
   Future<void> refresh() async {
-    state = const AsyncLoading();
+    if (_apartmentId == null) throw NotInApartmentFailure();
 
-    state = await AsyncValue.guard(() async {
-      final response = await AppDio.dio.get(_url);
+    final previous = state.value ?? 0;
 
-      return response.data as int;
-    });
+    try {
+      state = AsyncData(
+        await _notificationRepository.getUnreadCount(_apartmentId!),
+      );
+    } catch (e) {
+      state = AsyncData(previous);
+    }
   }
 
   void decrement() {

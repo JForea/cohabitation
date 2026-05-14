@@ -125,11 +125,16 @@ public class ExpenseService {
         Month month = Month.of(calendar.get(Calendar.MONTH));
         Year year = Year.of(calendar.get(Calendar.YEAR));
 
-        return profileMonthlyExpenseRepository.getSumByApartmentIdAndYearAndMonth(
+        Integer amount = profileMonthlyExpenseRepository.getSumByApartmentIdAndYearAndMonth(
                 apartmentId,
                 year.getValue(),
                 month
         );
+
+        if (amount == null)
+            amount = 0;
+
+        return amount;
     }
 
     @Transactional

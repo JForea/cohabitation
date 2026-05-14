@@ -1,52 +1,62 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:frontend/shared/data/network/dio_client.dart';
+import 'package:frontend/shared/data/failures/failures.dart';
 import 'package:frontend/shared/data/providers/apartment_provider.dart';
-import 'package:intl/intl.dart';
+import 'package:frontend/shared/data/repositories/event_repository.dart';
 
-final calendarProvider =
-    AsyncNotifierProvider<_CalendarNotifier, Set<DateTime>>(
-      _CalendarNotifier.new,
-    );
+final calendarProvider = AsyncNotifierProvider<CalendarNotifier, Set<DateTime>>(
+  CalendarNotifier.new,
+);
 
-class _CalendarNotifier extends AsyncNotifier<Set<DateTime>> {
-  late String url;
-  late DateTime currentMonth;
+class CalendarNotifier extends AsyncNotifier<Set<DateTime>> {
+  late EventRepository _eventRepository;
+
+  late DateTime _currentMonth;
+
+  late int? _apartmentId;
 
   @override
   Future<Set<DateTime>> build() async {
-    final apartmentId = ref.watch(apartmentProvider.select((a) => a?.id));
+    _eventRepository = ref.read(eventRepositoryProvider);
+    _apartmentId = ref.watch(apartmentProvider.select((a) => a?.id));
 
-    if (apartmentId == null) {
-      throw Exception("Not in apartment.");
-    }
+    if (_apartmentId == null) throw NotInApartmentFailure();
 
-    url = "/apartments/$apartmentId/events/calendar";
+    _currentMonth = DateTime.now();
 
-    currentMonth = DateTime.now();
-
-    return loadMonth(DateTime.now());
-  }
-
-  Future<Set<DateTime>> loadMonth(DateTime month) async {
-    final query = {
-      "year": month.year,
-      "month": DateFormat.MMMM("en_US").format(month).toUpperCase(),
-    };
-
-    final response = await AppDio.dio.get(url, queryParameters: query);
-
-    return (response.data as List).map((date) => DateTime.parse(date)).toSet();
+    return _eventRepository.loadMonth(_apartmentId!, _currentMonth);
   }
 
   Future<void> changeMonth(DateTime month) async {
-    currentMonth = month;
+    if (_apartmentId == null) throw NotInApartmentFailure();
 
-    state = await AsyncValue.guard(() => loadMonth(month));
+    final previousMonth = _currentMonth;
+    final previous = state;
+
+    try {
+      _currentMonth = month;
+
+      Set<DateTime> dates = await _eventRepository.loadMonth(
+        _apartmentId!,
+        _currentMonth,
+      );
+
+      state = AsyncData(dates);
+    } catch (e) {
+      _currentMonth = previousMonth;
+      state = previous;
+
+      rethrow;
+    }
   }
 
   Future<void> refresh() async {
-    state = const AsyncLoading();
+    if (_apartmentId == null) throw NotInApartmentFailure();
 
-    state = await AsyncValue.guard(() => loadMonth(currentMonth));
+    Set<DateTime> dates = await _eventRepository.loadMonth(
+      _apartmentId!,
+      _currentMonth,
+    );
+
+    state = AsyncData(dates);
   }
 }

@@ -1,65 +1,64 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:frontend/shared/data/failures/failures.dart';
 import 'package:frontend/shared/data/models/profile/profile.dart';
-import 'package:frontend/shared/data/network/dio_client.dart';
 import 'package:frontend/shared/data/providers/apartment_provider.dart';
+import 'package:frontend/shared/data/repositories/profile_repository.dart';
 import 'package:frontend/shared/data/types/role.dart';
 
 final neighboursProvider =
-    AsyncNotifierProvider<_ApartmentNotifier, List<Profile>>(
-      _ApartmentNotifier.new,
+    AsyncNotifierProvider<NeighboursNotifier, List<Profile>>(
+      NeighboursNotifier.new,
     );
 
-class _ApartmentNotifier extends AsyncNotifier<List<Profile>> {
-  late String _baseUrl;
+class NeighboursNotifier extends AsyncNotifier<List<Profile>> {
+  late ProfileRepository _profileRepository;
+
+  late int? _apartmentId;
 
   @override
   Future<List<Profile>> build() async {
-    final apartmentId = ref.watch(apartmentProvider.select((a) => a?.id));
+    _profileRepository = ref.read(profileRepositoryProvider);
+    _apartmentId = ref.watch(apartmentProvider.select((a) => a?.id));
 
-    if (apartmentId == null) {
-      throw Exception("Not in apartment.");
-    }
+    if (_apartmentId == null) throw NotInApartmentFailure();
 
-    _baseUrl = "/apartments/$apartmentId/profiles";
-
-    final query = {"excludeMe": 'true'};
-
-    final response = await AppDio.dio.get(_baseUrl, queryParameters: query);
-    List<Profile> profiles = (response.data as List)
-        .map((json) => Profile.fromJson(json))
-        .toList();
-
-    return profiles;
+    return _profileRepository.getAll(
+      apartmentId: _apartmentId!,
+      excludeMe: true,
+    );
   }
 
   Future<void> refresh() async {
-    final query = {"excludeMe": 'true'};
+    if (_apartmentId == null) throw NotInApartmentFailure();
 
-    state = await AsyncValue.guard(() async {
-      final response = await AppDio.dio.get(_baseUrl, queryParameters: query);
+    final neigbours = await _profileRepository.getAll(
+      apartmentId: _apartmentId!,
+      excludeMe: true,
+    );
 
-      return (response.data as List)
-          .map((json) => Profile.fromJson(json))
-          .toList();
-    });
+    state = AsyncData(neigbours);
   }
 
-  Future<bool> kick(int profileId) async {
+  Future<void> kick(int profileId) async {
+    if (_apartmentId == null) throw NotInApartmentFailure();
+
     final previousValue = state.value ?? [];
 
     try {
       final newValue = [...previousValue];
       newValue.removeWhere((p) => p.id == profileId);
       state = AsyncData(newValue);
-      await AppDio.dio.post("$_baseUrl/$profileId/kick");
-      return true;
+      await _profileRepository.kick(_apartmentId!, profileId);
     } catch (e) {
       state = AsyncData(previousValue);
-      return false;
+
+      rethrow;
     }
   }
 
-  Future<bool> setRole(int profileId, Role role) async {
+  Future<void> setRole(int profileId, Role role) async {
+    if (_apartmentId == null) throw NotInApartmentFailure();
+
     final previousValue = state.value ?? [];
 
     try {
@@ -70,14 +69,9 @@ class _ApartmentNotifier extends AsyncNotifier<List<Profile>> {
         }
       }
       state = AsyncData(newValue);
-      await AppDio.dio.patch(
-        "$_baseUrl/$profileId",
-        queryParameters: {"role": role.name.toUpperCase()},
-      );
-      return true;
+      await _profileRepository.setRole(_apartmentId!, profileId, role);
     } catch (e) {
       state = AsyncData(previousValue);
-      return false;
     }
   }
 }

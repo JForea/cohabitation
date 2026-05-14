@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/features/tasks/presentation/ui/widgets/chips/task_priority_choice_chip.dart';
+import 'package:frontend/shared/data/failures/failures.dart';
 import 'package:frontend/shared/data/models/profile/profile.dart';
-import 'package:frontend/shared/data/providers/auth_provider.dart';
+import 'package:frontend/shared/data/providers/async_user_provider.dart';
 import 'package:frontend/shared/data/providers/neighbours_provider.dart';
 import 'package:frontend/shared/data/providers/tasks_provider.dart';
 import 'package:frontend/shared/data/types/room.dart';
 import 'package:frontend/shared/data/types/task_priority.dart';
 import 'package:frontend/shared/presentation/ui/widgets/buttons/custom_text_button.dart';
 import 'package:frontend/shared/presentation/ui/widgets/chips/custom_choice_chip.dart';
+import 'package:frontend/shared/presentation/ui/widgets/dialogs/error_dialog.dart';
 import 'package:frontend/shared/presentation/ui/widgets/inputs/controlled_named_text_field.dart';
 import 'package:frontend/shared/presentation/ui/widgets/wrappers/choice_wrapper.dart';
 import 'package:frontend/shared/presentation/ui/widgets/wrappers/page_wrapper.dart';
@@ -86,29 +88,35 @@ class _CreateTaskPageState extends ConsumerState<CreateTaskPage> {
     });
   }
 
-  Future<bool> create() async {
-    final userProfile = ref.read(authProvider).value!.user!.profile!;
+  Future<void> create(BuildContext context) async {
+    final userProfile = ref.read(asyncUserProvider).value!.profile!;
 
-    final created = ref
-        .read(tasksProvider.notifier)
-        .create(
-          userProfile: userProfile,
-          name: name,
-          description: description,
-          assignedTo: assignedTo,
-          room: room,
-          priority: priority,
-          dueDateOffset: dueDateOffset,
-          points: points,
-        );
+    try {
+      await ref
+          .read(tasksProvider.notifier)
+          .create(
+            userProfile: userProfile,
+            name: name,
+            description: description,
+            assignedTo: assignedTo,
+            room: room,
+            priority: priority,
+            dueDateOffset: dueDateOffset,
+            points: points,
+          );
 
-    return created;
+      if (context.mounted) {
+        context.go("/");
+      }
+    } on Failure catch (e) {
+      showErrorDialog(context, e.message);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final profiles = [
-      ref.read(authProvider).value!.user!.profile!,
+      ref.read(asyncUserProvider).value!.profile!,
       ...ref.read(neighboursProvider).value!,
     ];
 
@@ -206,15 +214,7 @@ class _CreateTaskPageState extends ConsumerState<CreateTaskPage> {
             }),
           ),
           CustomTextButton(
-            onPressed: () async {
-              final success = await create();
-
-              if (success && context.mounted) {
-                context.go("/");
-              } else {
-                print("Couldn't create task.");
-              }
-            },
+            onPressed: () async => await create(context),
             text: "Создать",
           ),
         ],

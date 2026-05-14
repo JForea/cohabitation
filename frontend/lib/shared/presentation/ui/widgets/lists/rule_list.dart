@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/shared/data/failures/failures.dart';
 import 'package:frontend/shared/data/models/rule.dart';
 import 'package:frontend/shared/presentation/ui/widgets/buttons/custom_text_button.dart';
+import 'package:frontend/shared/presentation/ui/widgets/dialogs/error_dialog.dart';
 import 'package:frontend/shared/presentation/ui/widgets/inputs/controlled_text_field.dart';
 import 'package:frontend/shared/presentation/ui/widgets/list_tiles/add_list_tile.dart';
 import 'package:frontend/shared/presentation/ui/widgets/list_tiles/rule_list_tile.dart';
@@ -16,7 +18,7 @@ class RuleList extends StatefulWidget {
   });
 
   final List<Rule> rules;
-  final Future<bool> Function(String)? onRuleAdd;
+  final Future<void> Function(String)? onRuleAdd;
   final Future<void> Function(int)? onRuleRemove;
   final bool titleNeeded;
 
@@ -76,11 +78,16 @@ class _RuleListState extends State<RuleList> {
                     setState(() {
                       addingNow = false;
                     });
-                    final added = await widget.onRuleAdd!(text);
-                    if (added) {
+                    try {
+                      await widget.onRuleAdd!(text);
+
                       setState(() {
                         text = "";
                       });
+                    } on Failure catch (e) {
+                      if (context.mounted) {
+                        showErrorDialog(context, e.message);
+                      }
                     }
                   },
                   text: "Добавить",

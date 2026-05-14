@@ -3,11 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/features/apartment_enter/presentation/ui/widgets/cards/invite_hint_card.dart';
 import 'package:frontend/features/apartment_enter/presentation/ui/widgets/inputs/invite_code_input.dart';
 import 'package:frontend/shared/data/providers/async_apartment_provider.dart';
-import 'package:frontend/shared/data/providers/auth_provider.dart';
+import 'package:frontend/shared/data/providers/async_user_provider.dart';
 import 'package:frontend/shared/presentation/ui/widgets/buttons/custom_back_button.dart';
 import 'package:frontend/shared/presentation/ui/widgets/buttons/custom_text_button.dart';
+import 'package:frontend/shared/presentation/ui/widgets/snack_bars/message_snack_bar.dart';
 import 'package:frontend/shared/presentation/ui/widgets/wrappers/auth_page_wrapper.dart';
-import 'package:frontend/shared/utils/fcm_helper.dart';
 
 class JoinApartmentPage extends ConsumerStatefulWidget {
   const JoinApartmentPage({super.key});
@@ -29,7 +29,7 @@ class _JoinApartmentPageState extends ConsumerState<JoinApartmentPage> {
     super.initState();
   }
 
-  Future<void> onJoin() async {
+  Future<void> onJoin(BuildContext context) async {
     final profile = await ref
         .read(asyncApartmentProvider.notifier)
         .join(inviteCode);
@@ -38,8 +38,15 @@ class _JoinApartmentPageState extends ConsumerState<JoinApartmentPage> {
       return;
     }
 
-    ref.read(authProvider.notifier).setProfile(profile);
-    await FcmHelper.requestPermission();
+    try {
+      ref.read(asyncUserProvider.notifier).setProfile(profile);
+    } catch (_) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(MessageSnackBar(message: "Неверный код", error: true));
+      }
+    }
   }
 
   @override
@@ -74,7 +81,7 @@ class _JoinApartmentPageState extends ConsumerState<JoinApartmentPage> {
           ),
           InviteHintCard(),
           Spacer(),
-          CustomTextButton(onPressed: onJoin, text: "Войти"),
+          CustomTextButton(onPressed: () => onJoin(context), text: "Войти"),
         ],
       ),
     );

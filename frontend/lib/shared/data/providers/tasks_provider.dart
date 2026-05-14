@@ -1,21 +1,22 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:frontend/shared/data/failures/failures.dart';
 import 'package:frontend/shared/data/models/profile/profile.dart';
 import 'package:frontend/shared/data/models/profile/profile_brief.dart';
 import 'package:frontend/shared/data/models/task.dart';
-import 'package:frontend/shared/data/network/dio_client.dart';
 import 'package:frontend/shared/data/providers/apartment_provider.dart';
-import 'package:frontend/shared/data/types/role.dart';
+import 'package:frontend/shared/data/repositories/task_repository.dart';
 import 'package:frontend/shared/data/types/room.dart';
 import 'package:frontend/shared/data/types/task_filter.dart';
 import 'package:frontend/shared/data/types/task_priority.dart';
-import 'package:frontend/shared/utils/util_functions.dart';
 
 final tasksProvider = AsyncNotifierProvider<_TasksNotifier, List<Task>>(
   _TasksNotifier.new,
 );
 
 class _TasksNotifier extends AsyncNotifier<List<Task>> {
-  late String _baseUrl;
+  late TaskRepository _taskRepository;
+
+  late int? _apartmentId;
 
   static const _pageSize = 20;
 
@@ -27,64 +28,69 @@ class _TasksNotifier extends AsyncNotifier<List<Task>> {
 
   @override
   Future<List<Task>> build() async {
-    final apartmentId = ref.watch(apartmentProvider.select((a) => a?.id));
+    _apartmentId = ref.watch(apartmentProvider.select((a) => a?.id));
+    _taskRepository = ref.read(taskRepositoryProvider);
 
-    if (apartmentId == null) {
-      throw Exception("Not in apartment.");
-    }
+    if (_apartmentId == null) NotInApartmentFailure();
 
-    _baseUrl = "/apartments/$apartmentId/tasks";
-
-    return _fetchPage();
-  }
-
-  Future<List<Task>> _fetchPage() async {
-    final query = {
-      'page': '$_page',
-      'size': '$_pageSize',
-      if (_filter.assignedTo != null) 'assignedTo': '${_filter.assignedTo}',
-      if (_filter.done != null) 'done': '${_filter.done}',
-    };
-
-    final response = await AppDio.dio.get(_baseUrl, queryParameters: query);
-
-    final data = response.data as List;
-
-    return data.map((taskJson) => Task.fromJson(taskJson)).toList();
+    return _taskRepository.getPage(
+      apartmentId: _apartmentId!,
+      page: _page,
+      pageSize: _pageSize,
+      assignedTo: _filter.assignedTo,
+      done: _filter.done,
+    );
   }
 
   Future<void> loadMore() async {
-    if (_isLoading || !_hasMore || state.isLoading) return;
+    if (_apartmentId == null) NotInApartmentFailure();
+
+    if (_isLoading || !_hasMore) return;
 
     _isLoading = true;
 
     final previousValue = state.value ?? [];
 
     try {
+      final newTasks = await _taskRepository.getPage(
+        apartmentId: _apartmentId!,
+        page: _page + 1,
+        pageSize: _pageSize,
+      );
+
       _page++;
-      final newTasks = await _fetchPage();
 
       if (newTasks.length < _pageSize) {
         _hasMore = false;
       }
 
       state = AsyncData([...previousValue, ...newTasks]);
-    } catch (e, st) {
-      _page--;
-      state = AsyncError<List<Task>>(e, st);
     } finally {
       _isLoading = false;
     }
   }
 
   Future<void> refresh() async {
-    _page = 0;
-    _hasMore = true;
+    if (_apartmentId == null) throw NotInApartmentFailure();
 
-    state = const AsyncLoading();
-    state = await AsyncValue.guard(() async {
-      return _fetchPage();
-    });
+    if (_isLoading) return;
+
+    _isLoading = true;
+
+    try {
+      final tasks = await _taskRepository.getPage(
+        apartmentId: _apartmentId!,
+        page: 0,
+        pageSize: _pageSize,
+      );
+
+      _page = 0;
+      _hasMore = tasks.length >= _pageSize;
+
+      state = AsyncData(tasks);
+    } finally {
+      _isLoading = false;
+    }
   }
 
   Future<void> switchFilter({int? assignedTo, bool? done}) async {
@@ -93,7 +99,7 @@ class _TasksNotifier extends AsyncNotifier<List<Task>> {
     await refresh();
   }
 
-  Future<bool> create({
+  Future<void> create({
     required Profile userProfile,
     required String name,
     String? description,
@@ -103,113 +109,77 @@ class _TasksNotifier extends AsyncNotifier<List<Task>> {
     int? dueDateOffset,
     required int points,
   }) async {
-    print(dueDateOffset);
-
-    if (_isLoading) {
-      return false;
-    }
+    if (_apartmentId == null) throw NotInApartmentFailure();
 
     try {
       _isLoading = true;
 
-      final date = dueDateOffset == null
-          ? null
-          : DateTime.now().add(Duration(days: dueDateOffset));
-      final response = await AppDio.dio.post(
-        _baseUrl,
-        data: {
-          "name": name,
-          "description": description == "" ? null : description,
-          "assignedTo": assignedTo?.id,
-          "room": UtilFunctions.tValueToStringRequest(room),
-          "priority": UtilFunctions.tValueToStringRequest(priority),
-          "dueDate": date == null
-              ? null
-              : UtilFunctions.dateToStringRequest(date),
-          "points": points,
-        },
-      );
-
-      final task = Task(
-        id: response.data["id"] as int,
-        createdBy: ProfileBrief.fromFullProfile(userProfile),
+      final task = await _taskRepository.create(
+        apartmentId: _apartmentId!,
+        craeatedBy: userProfile,
         name: name,
         description: description,
-        assignedTo: assignedTo != null
-            ? ProfileBrief.fromFullProfile(assignedTo)
-            : null,
+        assignedTo: assignedTo,
         room: room,
         priority: priority,
-        dueDate: date,
+        dueDateOffset: dueDateOffset,
         points: points,
       );
 
       state = AsyncData([task, ...?state.value]);
-
+    } finally {
       _isLoading = false;
-
-      return true;
-    } catch (e) {
-      print(e);
-      _isLoading = false;
-      return false;
     }
   }
 
-  Future<bool> switchTaskStatus(int taskId, Profile userProfile) async {
+  Future<void> switchTaskStatus(int taskId, Profile userProfile) async {
+    if (_apartmentId == null) throw NotInApartmentFailure();
+
     final previous = state.value ?? [];
 
+    final index = previous.indexWhere((t) => t.id == taskId);
+
+    if (index == -1) return;
+
+    final task = previous[index];
+
+    final updatedTask = task.completedBy == null
+        ? task.copyWith(completedBy: ProfileBrief.fromFullProfile(userProfile))
+        : task.copyWith(clearCompletedBy: true);
+
+    final updated = [...previous]..[index] = updatedTask;
+
+    state = AsyncData(updated);
+
     try {
-      bool ok = true;
-
-      final updated = previous.map((t) {
-        if (t.id == taskId) {
-          if (t.completedBy != null) {
-            if (t.completedBy!.id == userProfile.id ||
-                userProfile.role != Role.inhabitant) {
-              return t.copyWith(clearCompletedBy: true);
-            } else {
-              ok = false;
-            }
-          } else if (t.completedBy == null) {
-            return t.copyWith(
-              completedBy: ProfileBrief.fromFullProfile(userProfile),
-            );
-          }
-        }
-
-        return t;
-      }).toList();
-
-      if (!ok) {
-        return false;
-      }
-
-      state = AsyncData(updated);
-
-      _isLoading = true;
-
-      await AppDio.dio.patch("$_baseUrl/$taskId");
-
-      _isLoading = false;
-
-      return true;
+      await _taskRepository.switchTaskStatus(
+        _apartmentId!,
+        taskId,
+        userProfile,
+      );
     } catch (e) {
       state = AsyncData(previous);
-      _isLoading = false;
-
-      return false;
+      rethrow;
     }
   }
 
-  Future<bool> deleteMany(List<int> ids) async {
+  Future<void> deleteMany(List<int> ids) async {
+    if (_apartmentId == null) throw NotInApartmentFailure();
+
+    final previous = state.value;
+
+    if (previous == null) return;
+
+    final current = previous.where((e) => !ids.contains(e.id)).toList();
+
+    state = AsyncData(current);
+
     try {
-      await AppDio.dio.delete(_baseUrl, data: ids);
-      ref.invalidateSelf();
-      return true;
+      await _taskRepository.deleteMany(_apartmentId!, ids);
     } catch (e) {
-      print(e);
-      return false;
+      state = AsyncData(previous);
+
+      rethrow;
     }
   }
 }

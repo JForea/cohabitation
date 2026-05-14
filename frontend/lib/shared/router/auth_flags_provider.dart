@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:frontend/shared/data/network/auth_session_provider.dart';
 import 'package:frontend/shared/data/providers/async_apartment_provider.dart';
-import 'package:frontend/shared/data/providers/auth_provider.dart';
+import 'package:frontend/shared/data/providers/async_user_provider.dart';
 
 class _AuthFlags {
   const _AuthFlags({
@@ -17,18 +18,18 @@ class _AuthFlags {
 }
 
 final authFlagsProvider = Provider<_AuthFlags>((ref) {
-  final isAuthLoading = ref.watch(authProvider.select((s) => s.isLoading));
+  final isAuthLoading = ref.watch(asyncUserProvider.select((s) => s.isLoading));
 
   final isApartmentLoading = ref.watch(
     asyncApartmentProvider.select((s) => s.isLoading),
   );
 
   final isLoggedIn = ref.watch(
-    authProvider.select((s) => s.value?.token != null),
+    authSessionProvider.select((s) => s.token != null),
   );
 
   final isInApartment = ref.watch(
-    authProvider.select((s) => s.value?.user?.profile != null),
+    asyncUserProvider.select((s) => s.value?.profile != null),
   );
 
   return _AuthFlags(

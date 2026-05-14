@@ -1,75 +1,63 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:frontend/shared/data/failures/failures.dart';
 import 'package:frontend/shared/data/models/rule.dart';
-import 'package:frontend/shared/data/network/dio_client.dart';
 import 'package:frontend/shared/data/providers/apartment_provider.dart';
+import 'package:frontend/shared/data/repositories/rule_repository.dart';
 
 final rulesProvider = AsyncNotifierProvider<_RulesNotifier, List<Rule>>(
   _RulesNotifier.new,
 );
 
 class _RulesNotifier extends AsyncNotifier<List<Rule>> {
-  late String baseUrl;
+  late RuleRepository _ruleRepository;
+
+  late int? _apartmentId;
 
   @override
   Future<List<Rule>> build() async {
-    final apartmentId = ref.watch(apartmentProvider.select((a) => a?.id));
+    _ruleRepository = ref.read(ruleRepositoryProvider);
+    _apartmentId = ref.watch(apartmentProvider.select((a) => a?.id));
 
-    if (apartmentId == null) {
-      throw Exception("Not in apartment.");
-    }
+    if (_apartmentId == null) throw NotInApartmentFailure();
 
-    baseUrl = "/apartments/$apartmentId/rules";
-
-    final response = await AppDio.dio.get(baseUrl);
-    List<Rule> rules = (response.data as List)
-        .map((json) => Rule.fromJson(json))
-        .toList();
-
-    return rules;
+    return _ruleRepository.getAll(_apartmentId!);
   }
 
   Future<void> refresh() async {
-    state = await AsyncValue.guard(() async {
-      final response = await AppDio.dio.get(baseUrl);
+    if (_apartmentId == null) throw NotInApartmentFailure();
 
-      return (response.data as List)
-          .map((json) => Rule.fromJson(json))
-          .toList();
-    });
+    state = AsyncData(await _ruleRepository.getAll(_apartmentId!));
   }
 
-  Future<bool> create(String text) async {
+  Future<void> create(String text) async {
+    if (_apartmentId == null) throw NotInApartmentFailure();
+
+    final previousValue = state.value ?? [];
+
     try {
-      final previousValue = state.value;
+      final rule = await _ruleRepository.create(_apartmentId!, text);
 
-      final response = await AppDio.dio.post(baseUrl, data: {"text": text});
-
-      final rule = Rule(id: response.data["id"] as int, text: text);
-
-      state = AsyncValue.data([rule, ...?previousValue]);
-
-      return true;
+      state = AsyncValue.data([rule, ...previousValue]);
     } catch (e) {
-      print(e);
-      return false;
+      state = AsyncData(previousValue);
+      rethrow;
     }
   }
 
-  Future<bool> delete(int id) async {
+  Future<void> delete(int id) async {
+    if (_apartmentId == null) throw NotInApartmentFailure();
+
     final previous = state.value ?? [];
 
     try {
-      final newList = previous.where((rule) => rule.id != id).toList();
+      final current = previous.where((rule) => rule.id != id).toList();
 
-      state = AsyncData(newList);
+      state = AsyncData(current);
 
-      await AppDio.dio.delete("$baseUrl/$id");
-
-      return true;
+      await _ruleRepository.delete(_apartmentId!, id);
     } catch (e) {
-      print(e);
       state = AsyncData(previous);
-      return false;
+      rethrow;
     }
   }
 }

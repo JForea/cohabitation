@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/features/home/data/providers/unread_notifications_count_provider.dart';
-import 'package:frontend/features/notifications/data/providers/notifications_provider.dart';
+import 'package:frontend/shared/data/providers/notifications_provider.dart';
 import 'package:frontend/features/notifications/ui/presentation/widgets/lists/notification_list.dart';
 import 'package:frontend/shared/presentation/ui/widgets/buttons/custom_app_floating_action_button.dart';
+import 'package:frontend/shared/presentation/ui/widgets/snack_bars/message_snack_bar.dart';
 import 'package:frontend/shared/presentation/ui/widgets/wrappers/page_wrapper.dart';
 
 class NotificationsPage extends ConsumerWidget {
@@ -14,23 +15,31 @@ class NotificationsPage extends ConsumerWidget {
     await ref.read(unreadNotificationsCountProvider.notifier).refresh();
   }
 
-  void _markAsRead(WidgetRef ref, int notificationId) async {
+  void _markAsRead(
+    BuildContext context,
+    WidgetRef ref,
+    int notificationId,
+  ) async {
     final countNotifier = ref.read(unreadNotificationsCountProvider.notifier);
-
     final notificationsNotifier = ref.read(notificationsProvider.notifier);
 
     final unreadCount = ref.read(unreadNotificationsCountProvider).value ?? 0;
 
     countNotifier.decrement();
 
-    final cleared = await notificationsNotifier.markAsRead(notificationId);
-
-    if (!cleared) {
+    try {
+      await notificationsNotifier.markAsRead(notificationId);
+    } catch (e) {
       countNotifier.set(unreadCount);
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          MessageSnackBar(message: "Произошла ошибка", error: true),
+        );
+      }
     }
   }
 
-  void _markAsReadAll(WidgetRef ref) async {
+  void _markAsReadAll(BuildContext context, WidgetRef ref) async {
     final countNotifier = ref.read(unreadNotificationsCountProvider.notifier);
 
     final notificationsNotifier = ref.read(notificationsProvider.notifier);
@@ -39,10 +48,15 @@ class NotificationsPage extends ConsumerWidget {
 
     countNotifier.clear();
 
-    final cleared = await notificationsNotifier.markAsReadAll();
-
-    if (!cleared) {
+    try {
+      await notificationsNotifier.markAsReadAll();
+    } catch (e) {
       countNotifier.set(unreadCount);
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          MessageSnackBar(message: "Произошла ошибка", error: true),
+        );
+      }
     }
   }
 
@@ -54,7 +68,7 @@ class NotificationsPage extends ConsumerWidget {
       onRefresh: () => _refresh(ref),
       child: Scaffold(
         floatingActionButton: CustomAppFloatingActionButton(
-          onPressed: () => _markAsReadAll(ref),
+          onPressed: () => _markAsReadAll(context, ref),
           iconData: Icons.visibility,
         ),
         body: PageWrapper(
@@ -66,7 +80,7 @@ class NotificationsPage extends ConsumerWidget {
             notifications.when(
               data: (notifications) => NotificationList(
                 notifications: notifications,
-                onNotificationTap: (id) => _markAsRead(ref, id),
+                onNotificationTap: (id) => _markAsRead(context, ref, id),
               ),
               error: (_, _) => Text("Произошла ошибка при загрузке"),
               loading: () => Center(child: CircularProgressIndicator()),

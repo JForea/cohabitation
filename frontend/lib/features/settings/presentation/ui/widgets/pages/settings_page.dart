@@ -3,16 +3,19 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/features/settings/presentation/ui/widgets/list_tiles/danger_list_tile.dart';
 import 'package:frontend/features/settings/presentation/ui/widgets/list_tiles/generate_invite_code_tile.dart';
+import 'package:frontend/shared/data/failures/failures.dart';
 import 'package:frontend/shared/data/providers/apartment_provider.dart';
 import 'package:frontend/shared/data/providers/async_apartment_provider.dart';
-import 'package:frontend/shared/data/providers/auth_provider.dart';
+import 'package:frontend/shared/data/providers/async_user_provider.dart';
 import 'package:frontend/shared/data/providers/rules_provider.dart';
 import 'package:frontend/shared/data/providers/user_provider.dart';
 import 'package:frontend/shared/data/types/role.dart';
+import 'package:frontend/shared/presentation/ui/widgets/dialogs/error_dialog.dart';
 import 'package:frontend/shared/presentation/ui/widgets/lists/custom_widget_list.dart';
 import 'package:frontend/shared/presentation/ui/widgets/lists/rule_list.dart';
 import 'package:frontend/shared/presentation/ui/widgets/snack_bars/message_snack_bar.dart';
 import 'package:frontend/shared/presentation/ui/widgets/wrappers/page_wrapper.dart';
+import 'package:frontend/shared/utils/fcm_helper.dart';
 import 'package:go_router/go_router.dart';
 
 class SettingsPage extends ConsumerStatefulWidget {
@@ -26,7 +29,9 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
   late bool _isLoading;
 
   void _logout(WidgetRef ref) async {
-    await ref.read(authProvider.notifier).logout();
+    String deviceId = await FcmHelper.getDeviceId();
+
+    await ref.read(asyncUserProvider.notifier).logout(deviceId);
   }
 
   void _leave(BuildContext context, WidgetRef ref) async {
@@ -34,14 +39,21 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       _isLoading = true;
     });
 
-    bool left = await ref.read(asyncApartmentProvider.notifier).leave();
-    if (left && context.mounted) {
-      ref.read(authProvider.notifier).setProfile(null);
-      context.go("/enter");
-    } else {
+    try {
+      await ref.read(asyncApartmentProvider.notifier).leave();
+      if (context.mounted) {
+        ref.read(asyncUserProvider.notifier).setProfile(null);
+        context.go("/enter");
+      }
+    } catch (e) {
       setState(() {
         _isLoading = false;
       });
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          MessageSnackBar(message: "Произошла ошибка", error: true),
+        );
+      }
     }
   }
 
@@ -50,21 +62,36 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       _isLoading = true;
     });
 
-    bool deleted = await ref.read(asyncApartmentProvider.notifier).delete();
-    if (deleted && context.mounted) {
-      ref.read(authProvider.notifier).setProfile(null);
-      context.go("/enter");
-    } else {
+    try {
+      await ref.read(asyncApartmentProvider.notifier).delete();
+      if (context.mounted) {
+        ref.read(asyncUserProvider.notifier).setProfile(null);
+        context.go("/enter");
+      }
+    } catch (e) {
       setState(() {
         _isLoading = false;
       });
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          MessageSnackBar(message: "Произошла ошибка", error: true),
+        );
+      }
     }
   }
 
-  Future<bool> _createRule(WidgetRef ref, String text) async {
-    bool created = await ref.read(rulesProvider.notifier).create(text);
-
-    return created;
+  Future<void> _createRule(
+    BuildContext context,
+    WidgetRef ref,
+    String text,
+  ) async {
+    try {
+      await ref.read(rulesProvider.notifier).create(text);
+    } on Failure catch (e) {
+      if (context.mounted) {
+        showErrorDialog(context, e.message);
+      }
+    }
   }
 
   Future<void> _deleteRule(WidgetRef ref, int ruleId) async {
@@ -78,7 +105,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       if (context.mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(MessageSnackBar(message: "Скопировано"));
+        ).showSnackBar(MessageSnackBar(message: "Скопировано", error: false));
       }
     }
   }
@@ -128,7 +155,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                     data: (rules) => RuleList(
                       titleNeeded: true,
                       rules: rules,
-                      onRuleAdd: (text) async => await _createRule(ref, text),
+                      onRuleAdd: (text) async =>
+                          await _createRule(context, ref, text),
                       onRuleRemove: (id) async => await _deleteRule(ref, id),
                     ),
                     error: (e, _) => Text("Произошла ошибка при загрузке."),

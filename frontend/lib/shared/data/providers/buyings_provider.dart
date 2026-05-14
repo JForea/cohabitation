@@ -2,11 +2,12 @@ import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/features/buyings/data/models/buying_redacted.dart';
+import 'package:frontend/shared/data/failures/failures.dart';
 import 'package:frontend/shared/data/models/buying.dart';
 import 'package:frontend/shared/data/models/profile/profile.dart';
 import 'package:frontend/shared/data/models/profile/profile_brief.dart';
-import 'package:frontend/shared/data/network/dio_client.dart';
 import 'package:frontend/shared/data/providers/apartment_provider.dart';
+import 'package:frontend/shared/data/repositories/buying_repository.dart';
 import 'package:frontend/shared/data/types/buying_category.dart';
 import 'package:frontend/shared/data/types/role.dart';
 
@@ -16,25 +17,34 @@ final buyingsProvider =
     );
 
 class _BuyingNotifier extends AsyncNotifier<Map<BuyingCategory, List<Buying>>> {
-  late String _baseUrl;
+  late BuyingRepository _buyingsRepository;
 
   static const _pageSize = 30;
+  late int _page;
+  late bool _hasMore;
+  late bool _isLoading;
 
-  int _page = 0;
-  bool _hasMore = true;
-  bool _isLoading = false;
+  late int? _apartmentId;
 
   @override
   Future<Map<BuyingCategory, List<Buying>>> build() async {
-    final apartmentId = ref.watch(apartmentProvider.select((a) => a?.id));
+    _buyingsRepository = ref.read(buyingRepositoryProvider);
+    _apartmentId = ref.watch(apartmentProvider.select((a) => a?.id));
 
-    if (apartmentId == null) {
-      throw Exception("Not in apartment.");
+    if (_apartmentId == null) {
+      throw NotInApartmentFailure();
     }
 
-    _baseUrl = "/apartments/$apartmentId/buyings";
+    _page = 0;
+    _hasMore = true;
+    _isLoading = false;
 
-    final buyings = await _fetchPage();
+    final buyings = await _buyingsRepository.getPage(
+      apartmentId: _apartmentId!,
+      page: _page,
+      pageSize: _pageSize,
+      isPublic: true,
+    );
 
     final map = <BuyingCategory, List<Buying>>{};
 
@@ -43,137 +53,79 @@ class _BuyingNotifier extends AsyncNotifier<Map<BuyingCategory, List<Buying>>> {
     return map;
   }
 
-  Future<List<Buying>> _fetchPage() async {
-    final query = {'page': '$_page', 'size': '$_pageSize', 'isPublic': 'true'};
-
-    final response = await AppDio.dio.get(_baseUrl, queryParameters: query);
-
-    final data = response.data as List;
-
-    return data.map((buyingJson) => Buying.fromJson(buyingJson)).toList();
-  }
-
   void _addToMap(Map<BuyingCategory, List<Buying>> map, List<Buying> buyings) {
     for (var b in buyings) {
       (map[b.category] ??= []).add(b);
     }
   }
 
-  Future<bool> create({
+  Future<void> create({
     required Profile userProfile,
     required BuyingRedacted buyingRedacted,
     Profile? assignedTo,
     required bool isPublic,
   }) async {
-    if (_isLoading) {
-      return false;
-    }
+    if (_isLoading) return;
+
+    if (_apartmentId == null) throw NotInApartmentFailure();
 
     try {
       _isLoading = true;
 
-      final response = await AppDio.dio.post(
-        _baseUrl,
-        data: {
-          "name": buyingRedacted.name,
-          "quantity": buyingRedacted.quantity,
-          "assignedTo": assignedTo?.id,
-          "category": buyingRedacted.category.name.toUpperCase(),
-          "isPublic": isPublic,
-        },
+      final buying = await _buyingsRepository.create(
+        apartmentId: _apartmentId!,
+        createdBy: userProfile,
+        assignedTo: assignedTo,
+        buyingRedacted: buyingRedacted,
+        isPublic: isPublic,
       );
 
-      final Buying buying = Buying(
-        id: response.data["id"] as int,
-        createdBy: ProfileBrief.fromFullProfile(userProfile),
-        name: buyingRedacted.name,
-        quantity: buyingRedacted.quantity,
-        assignedTo: assignedTo != null
-            ? ProfileBrief.fromFullProfile(assignedTo)
-            : null,
-        category: buyingRedacted.category,
-      );
+      final current = {...?state.value};
 
-      final mapValue = state.value ?? <BuyingCategory, List<Buying>>{};
+      _addToMap(current, [buying]);
 
-      final newMap = {...mapValue};
+      state = AsyncData(current);
 
-      _addToMap(newMap, [buying]);
-
+      return;
+    } finally {
       _isLoading = false;
-
-      state = AsyncData(newMap);
-
-      return true;
-    } catch (e) {
-      print(e);
-      _isLoading = false;
-      return false;
     }
   }
 
-  Future<bool> createMany({
+  Future<void> createMany({
     required Profile userProfile,
     required List<BuyingRedacted> buyingsRedacted,
     Profile? assignedTo,
     required bool isPublic,
   }) async {
-    if (_isLoading) {
-      return false;
-    }
+    if (_isLoading) return;
+
+    if (_apartmentId == null) throw NotInApartmentFailure();
 
     try {
       _isLoading = true;
 
-      final response = await AppDio.dio.post(
-        "$_baseUrl/bulk",
-        data: {
-          "buyings": buyingsRedacted
-              .map(
-                (b) => {
-                  "name": b.name,
-                  "quantity": b.quantity,
-                  "category": b.category.name.toUpperCase(),
-                },
-              )
-              .toList(),
-          "assignedTo": assignedTo?.id,
-          "isPublic": isPublic,
-        },
+      List<Buying> buyings = await _buyingsRepository.createMany(
+        apartmentId: _apartmentId!,
+        createdBy: userProfile,
+        assignedTo: assignedTo,
+        buyingsRedacted: buyingsRedacted,
+        isPublic: isPublic,
       );
-      final List<Buying> buyings = [];
 
-      for (int i = 0; i < buyingsRedacted.length; i++) {
-        buyings.add(
-          Buying(
-            id: response.data[i]["id"] as int,
-            createdBy: ProfileBrief.fromFullProfile(userProfile),
-            name: buyingsRedacted[i].name,
-            quantity: buyingsRedacted[i].quantity,
-            category: buyingsRedacted[i].category,
-          ),
-        );
-      }
+      final current = {...?state.value};
 
-      final mapValue = state.value ?? <BuyingCategory, List<Buying>>{};
+      _addToMap(current, buyings);
 
-      final newMap = {...mapValue};
-
-      _addToMap(newMap, buyings);
-
+      state = AsyncData(current);
+    } finally {
       _isLoading = false;
-
-      state = AsyncData(newMap);
-
-      return true;
-    } catch (e) {
-      print(e);
-      _isLoading = false;
-      return false;
     }
   }
 
   Future<void> switchBuyingStatus(int buyingId, Profile userProfile) async {
+    if (_apartmentId == null) throw NotInApartmentFailure();
+
     final previous = state.value ?? {};
 
     try {
@@ -217,64 +169,111 @@ class _BuyingNotifier extends AsyncNotifier<Map<BuyingCategory, List<Buying>>> {
 
       _isLoading = true;
 
-      await AppDio.dio.patch("$_baseUrl/$buyingId");
+      await _buyingsRepository.switchBuyingStatus(
+        apartmentId: _apartmentId!,
+        buyingId: buyingId,
+        userProfile: userProfile,
+      );
     } catch (e) {
       state = AsyncData(previous);
+      rethrow;
     } finally {
       _isLoading = false;
     }
   }
 
   Future<void> loadMore() async {
-    if (_isLoading || !_hasMore || state.isLoading) return;
+    if (_apartmentId == null) throw NotInApartmentFailure();
 
-    _isLoading = true;
+    if (_isLoading || !_hasMore) return;
 
     try {
-      _page++;
-      final newBuyings = await _fetchPage();
+      _isLoading = true;
 
-      if (newBuyings.length < _pageSize) {
+      final buyings = await _buyingsRepository.getPage(
+        apartmentId: _apartmentId!,
+        page: _page + 1,
+        pageSize: _pageSize,
+        isPublic: true,
+      );
+
+      _page++;
+
+      if (buyings.length < _pageSize) {
         _hasMore = false;
       }
 
-      final mapValue = state.value ?? <BuyingCategory, List<Buying>>{};
+      final current = {...?state.value};
 
-      _addToMap(mapValue, newBuyings);
+      _addToMap(current, buyings);
 
-      state = AsyncData(mapValue);
-    } catch (e, st) {
-      _page--;
-      state = AsyncError<Map<BuyingCategory, List<Buying>>>(e, st);
+      state = AsyncData(current);
     } finally {
       _isLoading = false;
     }
   }
 
   Future<void> refresh() async {
-    _page = 0;
-    _hasMore = true;
+    if (_apartmentId == null) throw NotInApartmentFailure();
 
-    state = const AsyncLoading();
-    state = await AsyncValue.guard(() async {
-      final map = <BuyingCategory, List<Buying>>{};
+    final previous = state;
 
-      final buyings = await _fetchPage();
+    final previousPage = _page;
+    final previousHasMore = _hasMore;
 
-      _addToMap(map, buyings);
+    try {
+      state = AsyncLoading();
 
-      return map;
-    });
+      final current = <BuyingCategory, List<Buying>>{};
+
+      final buyings = await _buyingsRepository.getPage(
+        apartmentId: _apartmentId!,
+        page: 0,
+        pageSize: _pageSize,
+        isPublic: true,
+      );
+
+      _page = 0;
+      _hasMore = buyings.length >= _pageSize;
+
+      _addToMap(current, buyings);
+
+      state = AsyncData(current);
+    } catch (e) {
+      _page = previousPage;
+      _hasMore = previousHasMore;
+
+      state = previous;
+
+      rethrow;
+    }
   }
 
-  Future<bool> deleteMany(List<int> ids) async {
+  Future<void> deleteMany(List<int> ids) async {
+    if (_apartmentId == null) {
+      throw NotInApartmentFailure();
+    }
+
+    final previous = state.value;
+
+    if (previous == null) return;
+
+    final current = <BuyingCategory, List<Buying>>{};
+
+    for (final entry in previous.entries) {
+      current[entry.key] = entry.value
+          .where((b) => !ids.contains(b.id))
+          .toList();
+    }
+
+    state = AsyncData(current);
+
     try {
-      await AppDio.dio.delete(_baseUrl, data: ids);
-      ref.invalidateSelf();
-      return true;
+      await _buyingsRepository.deleteMany(_apartmentId!, ids);
     } catch (e) {
-      print(e);
-      return false;
+      state = AsyncData(previous);
+
+      rethrow;
     }
   }
 }

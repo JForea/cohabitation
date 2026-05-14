@@ -2,84 +2,60 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:frontend/shared/data/failures/failures.dart';
 import 'package:frontend/shared/data/models/event.dart';
 import 'package:frontend/shared/data/models/profile/profile.dart';
-import 'package:frontend/shared/data/models/profile/profile_brief.dart';
-import 'package:frontend/shared/data/network/dio_client.dart';
 import 'package:frontend/shared/data/providers/apartment_provider.dart';
-import 'package:frontend/shared/utils/util_functions.dart';
+import 'package:frontend/shared/data/repositories/event_repository.dart';
 
 final eventsProvider =
-    AsyncNotifierProvider.family<_EventsNotifier, List<Event>, DateTime>(
-      _EventsNotifier.new,
+    AsyncNotifierProvider.family<EventsNotifier, List<Event>, DateTime>(
+      EventsNotifier.new,
     );
 
-class _EventsNotifier extends AsyncNotifier<List<Event>> {
-  _EventsNotifier(this.day);
-  final DateTime day;
-  late String baseUrl;
+class EventsNotifier extends AsyncNotifier<List<Event>> {
+  EventsNotifier(DateTime day) : _day = day;
+  final DateTime _day;
+
+  late EventRepository _eventRepository;
+
+  late int? _apartmentId;
 
   @override
   FutureOr<List<Event>> build() async {
-    final apartmentId = ref.watch(apartmentProvider.select((a) => a?.id));
+    _eventRepository = ref.read(eventRepositoryProvider);
+    _apartmentId = ref.watch(apartmentProvider.select((a) => a?.id));
 
-    if (apartmentId == null) {
-      throw Exception("Not in apartment.");
-    }
+    if (_apartmentId == null) throw NotInApartmentFailure();
 
-    baseUrl = "/apartments/$apartmentId/events";
-
-    return _fetchData(day);
+    return _eventRepository.getEventsByDay(_apartmentId!, _day);
   }
 
-  Future<List<Event>> _fetchData(DateTime date) async {
-    final response = await AppDio.dio.get(
-      "$baseUrl/day/${UtilFunctions.dateToStringRequest(date)}",
-    );
-
-    return (response.data as List).map((e) => Event.fromJson(e)).toList();
-  }
-
-  Future<void> refresh() async {
-    state = await AsyncValue.guard(() => _fetchData(day));
-  }
-
-  Future<bool> create({
+  Future<void> create({
     required String name,
     required Profile createdBy,
     String? description,
     TimeOfDay? time,
   }) async {
-    try {
-      String twoDigits(int n) => n.toString().padLeft(2, '0');
+    if (_apartmentId == null) throw NotInApartmentFailure();
 
-      final response = await AppDio.dio.post(
-        baseUrl,
-        data: {
-          "name": name,
-          "description": description,
-          "time": time != null
-              ? "${twoDigits(time.hour)}:${twoDigits(time.minute)}"
-              : null,
-          "date": UtilFunctions.dateToStringRequest(day),
-        },
-      );
+    final event = await _eventRepository.create(
+      apartmentId: _apartmentId!,
+      name: name,
+      description: description,
+      createdBy: createdBy,
+      day: _day,
+      time: time,
+    );
 
-      final event = Event(
-        id: response.data["id"],
-        createdBy: ProfileBrief.fromFullProfile(createdBy),
-        name: name,
-        description: description,
-        time: time,
-      );
+    state = AsyncData([event, ...?state.value]);
+  }
 
-      final previousValue = state.value;
+  Future<void> refresh() async {
+    if (_apartmentId == null) throw NotInApartmentFailure();
 
-      state = AsyncValue.data([event, ...?previousValue]);
-
-      return true;
-    } catch (e) {
-      return false;
-    }
+    state = AsyncData(
+      await _eventRepository.getEventsByDay(_apartmentId!, _day),
+    );
   }
 }

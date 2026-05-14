@@ -2,15 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:frontend/features/buyings/data/models/buying_redacted.dart';
+import 'package:frontend/shared/data/failures/failures.dart';
 import 'package:frontend/shared/data/providers/buyings_provider.dart';
 import 'package:frontend/features/buyings/presentation/ui/widgets/list_tiles/redact_buying_list_tile.dart';
 import 'package:frontend/shared/data/models/profile/profile.dart';
-import 'package:frontend/shared/data/providers/auth_provider.dart';
+import 'package:frontend/shared/data/providers/async_user_provider.dart';
 import 'package:frontend/shared/data/providers/neighbours_provider.dart';
 import 'package:frontend/shared/data/types/buying_category.dart';
 import 'package:frontend/shared/presentation/theme/app_styles.dart';
 import 'package:frontend/shared/presentation/ui/widgets/buttons/custom_text_button.dart';
 import 'package:frontend/shared/presentation/ui/widgets/chips/custom_choice_chip.dart';
+import 'package:frontend/shared/presentation/ui/widgets/dialogs/error_dialog.dart';
 import 'package:frontend/shared/presentation/ui/widgets/inputs/controlled_named_text_field.dart';
 import 'package:frontend/shared/presentation/ui/widgets/list_tiles/add_list_tile.dart';
 import 'package:frontend/shared/presentation/ui/widgets/lists/custom_widget_list.dart';
@@ -86,37 +88,82 @@ class _CreateBuyingPageState extends ConsumerState<CreateBuyingPage> {
     });
   }
 
-  Future<bool> create() {
-    final userProfile = ref.read(authProvider).value!.user!.profile!;
+  bool validateName(String name) {
+    return name.isNotEmpty && name.length <= 64;
+  }
 
-    Future<bool> created;
-    if (multipleCreate) {
-      created = ref
-          .read(buyingsProvider.notifier)
-          .createMany(
-            userProfile: userProfile,
-            buyingsRedacted: buyings,
-            assignedTo: assignedTo,
-            isPublic: true,
-          );
-    } else {
-      created = ref
-          .read(buyingsProvider.notifier)
-          .create(
-            userProfile: userProfile,
-            buyingRedacted: buyings[0],
-            assignedTo: assignedTo,
-            isPublic: true,
-          );
+  bool validateQuantity(String quantity) {
+    return quantity.isNotEmpty && quantity.length <= 16;
+  }
+
+  Future<void> create(BuildContext context) async {
+    final userProfile = ref.read(asyncUserProvider).value!.profile!;
+
+    try {
+      if (multipleCreate) {
+        bool ok = true;
+        setState(() {
+          for (int i = 0; i < buyings.length; i++) {
+            if (!validateName(buyings[i].name)) {
+              ok = false;
+              buyings[i].isNameError = false;
+            }
+            if (!validateQuantity(buyings[i].quantity)) {
+              ok = false;
+              buyings[i].isQuantityError = false;
+            }
+          }
+        });
+
+        if (!ok) return;
+
+        await ref
+            .read(buyingsProvider.notifier)
+            .createMany(
+              userProfile: userProfile,
+              buyingsRedacted: buyings,
+              assignedTo: assignedTo,
+              isPublic: true,
+            );
+      } else {
+        bool ok = true;
+        setState(() {
+          if (!validateName(buyings[0].name)) {
+            ok = false;
+            buyings[0].isNameError = true;
+          }
+          if (!validateQuantity(buyings[0].quantity)) {
+            ok = false;
+            buyings[0].isQuantityError = true;
+          }
+        });
+
+        if (!ok) return;
+
+        await ref
+            .read(buyingsProvider.notifier)
+            .create(
+              userProfile: userProfile,
+              buyingRedacted: buyings[0],
+              assignedTo: assignedTo,
+              isPublic: true,
+            );
+      }
+
+      if (context.mounted) {
+        context.go("/");
+      }
+    } on Failure catch (e) {
+      if (context.mounted) {
+        showErrorDialog(context, e.message);
+      }
     }
-
-    return created;
   }
 
   @override
   Widget build(BuildContext context) {
     final profiles = [
-      ref.read(authProvider).value!.user!.profile!,
+      ref.read(asyncUserProvider).value!.profile!,
       ...ref.read(neighboursProvider).value!,
     ];
 
@@ -147,6 +194,7 @@ class _CreateBuyingPageState extends ConsumerState<CreateBuyingPage> {
               secondaryColor: false,
               type: .text,
               require: true,
+              highlightError: buyings[0].isNameError,
             ),
             ControlledNamedTextField(
               text: buyings[0].quantity,
@@ -156,6 +204,7 @@ class _CreateBuyingPageState extends ConsumerState<CreateBuyingPage> {
               secondaryColor: false,
               type: .text,
               require: true,
+              highlightError: buyings[0].isQuantityError,
             ),
             ChoiceWrapper(
               name: "Категория",
@@ -196,15 +245,7 @@ class _CreateBuyingPageState extends ConsumerState<CreateBuyingPage> {
             select: changeAssigned,
           ),
           CustomTextButton(
-            onPressed: () async {
-              final created = await create();
-
-              if (created && context.mounted) {
-                context.go("/");
-              } else {
-                print("Couldn't create buying.");
-              }
-            },
+            onPressed: () async => await create(context),
             text: "Создать",
           ),
         ],

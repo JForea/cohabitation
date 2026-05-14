@@ -68,9 +68,6 @@ public class ApartmentService {
 
     @Transactional
     public CreateApartmentResponse create(User user, CreateApartmentDto dto) {
-        if (user.getCurrentProfile() != null)
-            throw new StateConflictException("You already have an apartment");
-
         Apartment apartment = apartmentRepository.save(new Apartment(
                 dto.name(),
                 dto.address(),

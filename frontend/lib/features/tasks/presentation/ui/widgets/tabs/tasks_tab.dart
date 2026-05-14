@@ -3,9 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/features/tasks/presentation/ui/widgets/lists/task_list.dart';
 import 'package:frontend/shared/data/models/task.dart';
 import 'package:frontend/shared/data/providers/apartment_provider.dart';
-import 'package:frontend/shared/data/providers/auth_provider.dart';
+import 'package:frontend/shared/data/providers/async_user_provider.dart';
 import 'package:frontend/shared/data/providers/selected_provider.dart';
 import 'package:frontend/shared/data/providers/tasks_provider.dart';
+import 'package:frontend/shared/presentation/ui/widgets/snack_bars/message_snack_bar.dart';
 import 'package:frontend/shared/presentation/ui/widgets/wrappers/tab_wrapper.dart';
 
 class TasksTab extends ConsumerWidget {
@@ -18,20 +19,31 @@ class TasksTab extends ConsumerWidget {
     ref.invalidate(selectedProvider(selectedKey));
   }
 
-  Future<void> switchStatus(WidgetRef ref, int apartmentId, Task task) async {
+  Future<void> switchStatus(
+    BuildContext context,
+    WidgetRef ref,
+    int apartmentId,
+    Task task,
+  ) async {
     final currentTaskDone = task.completedBy != null;
 
-    final switched = await ref
-        .read(tasksProvider.notifier)
-        .switchTaskStatus(
-          task.id,
-          ref.read(authProvider).value!.user!.profile!,
-        );
+    try {
+      await ref
+          .read(tasksProvider.notifier)
+          .switchTaskStatus(
+            task.id,
+            ref.read(asyncUserProvider).value!.profile!,
+          );
 
-    if (switched) {
       ref
-          .read(authProvider.notifier)
+          .read(asyncUserProvider.notifier)
           .updatePoints(currentTaskDone ? -task.points : task.points);
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          MessageSnackBar(message: "Произошла ошибка", error: true),
+        );
+      }
     }
   }
 
@@ -63,7 +75,7 @@ class TasksTab extends ConsumerWidget {
             data: (tasks) => TaskList(
               tasks: tasks,
               selected: selectedTasks,
-              onSwitchStatus: (t) => switchStatus(ref, apartmentId, t),
+              onSwitchStatus: (t) => switchStatus(context, ref, apartmentId, t),
               onSelect: (id) => onSelect(ref, id),
               onSelectCancel: (id) => onSelectCancel(ref, id),
             ),

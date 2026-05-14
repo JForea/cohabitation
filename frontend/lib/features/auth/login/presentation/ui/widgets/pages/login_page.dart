@@ -1,50 +1,124 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/features/auth/data/auth_data_holder.dart';
-import 'package:frontend/shared/data/providers/auth_provider.dart';
+import 'package:frontend/shared/data/failures/failures.dart';
+import 'package:frontend/shared/data/providers/async_user_provider.dart';
 import 'package:frontend/shared/presentation/ui/widgets/buttons/custom_back_button.dart';
 import 'package:frontend/shared/presentation/ui/widgets/buttons/custom_text_button.dart';
 import 'package:frontend/shared/presentation/ui/widgets/inputs/controlled_named_text_field.dart';
+import 'package:frontend/shared/presentation/ui/widgets/snack_bars/message_snack_bar.dart';
 import 'package:frontend/shared/presentation/ui/widgets/wrappers/auth_page_wrapper.dart';
 import 'package:frontend/shared/utils/fcm_helper.dart';
+import 'package:go_router/go_router.dart';
 
 class LoginPage extends ConsumerWidget {
-  LoginPage({super.key});
+  const LoginPage({super.key, required this.register});
 
-  final dataHolder = AuthDataHolder.instance;
+  final bool register;
 
-  void setEmail(String s) {
-    dataHolder.email = s;
+  void setEmail(WidgetRef ref, String s) {
+    ref.read(authDataHolderProvider.notifier).setEmail(s);
   }
 
-  void setPassword(String s) {
-    dataHolder.password = s;
+  void setPassword(WidgetRef ref, String s) {
+    ref.read(authDataHolderProvider.notifier).setPassword(s);
   }
 
-  Future<void> login(WidgetRef ref) async {
+  bool validateEmail(String email) {
+    final emailRegex = RegExp(
+      r'^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$',
+    );
+
+    return emailRegex.hasMatch(email);
+  }
+
+  bool validatePassword(String password) {
+    return password.length >= 8 && password.length <= 32;
+  }
+
+  Future<void> login(BuildContext context, WidgetRef ref) async {
+    final authHolderNotifier = ref.read(authDataHolderProvider.notifier);
+
+    final asyncUserNotifier = ref.read(asyncUserProvider.notifier);
+
     bool permissionGranted = await FcmHelper.requestPermission();
 
-    if (permissionGranted) {
-      await ref
-          .read(authProvider.notifier)
-          .login(
-            dataHolder.email,
-            dataHolder.password,
-            deviceId: await FcmHelper.getDeviceId(),
-            fcmToken: await FcmHelper.getToken(),
-            platform: FcmHelper.getPlatform(),
-          );
-    } else {
-      await ref
-          .read(authProvider.notifier)
-          .login(dataHolder.email, dataHolder.password);
+    String email = ref.read(authDataHolderProvider).email;
+    String password = ref.read(authDataHolderProvider).password;
+
+    bool ok = true;
+
+    if (!validateEmail(email)) {
+      ok = false;
+      authHolderNotifier.setEmailError("Неверный формат");
     }
 
-    dataHolder.clear();
+    if (!validatePassword(password)) {
+      ok = false;
+      authHolderNotifier.setPasswordError("Длина пароля - от 8 до 32 символов");
+    }
+
+    if (!ok) return;
+
+    try {
+      if (permissionGranted) {
+        await asyncUserNotifier.authorize(
+          false,
+          email,
+          password,
+          deviceId: await FcmHelper.getDeviceId(),
+          fcmToken: await FcmHelper.getToken(),
+          platform: FcmHelper.getPlatform(),
+        );
+      } else {
+        await asyncUserNotifier.authorize(false, email, password);
+      }
+
+      authHolderNotifier.clear();
+    } on Failure catch (e) {
+      if (e is NotFoundFailure) {
+        authHolderNotifier.setEmailError("Неверный email или пароль");
+      } else if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          MessageSnackBar(message: "Произошла ошибка", error: true),
+        );
+      }
+    }
+  }
+
+  void goNextRegistrationPage(BuildContext context, WidgetRef ref) {
+    bool ok = true;
+    if (!validateEmail(ref.read(authDataHolderProvider).email)) {
+      ok = false;
+      ref
+          .read(authDataHolderProvider.notifier)
+          .setEmailError("Неверный формат");
+    }
+    if (!validatePassword(ref.read(authDataHolderProvider).password)) {
+      ok = false;
+      ref
+          .read(authDataHolderProvider.notifier)
+          .setPasswordError("Длина пароля - от 8 до 32 символов");
+    }
+
+    if (ok) {
+      context.push("/auth/register/2");
+    }
   }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final email = ref.read(authDataHolderProvider.select((dh) => dh.email));
+    final password = ref.read(
+      authDataHolderProvider.select((dh) => dh.password),
+    );
+    final emailError = ref.watch(
+      authDataHolderProvider.select((dh) => dh.emailError),
+    );
+    final passwordError = ref.watch(
+      authDataHolderProvider.select((dh) => dh.passwordError),
+    );
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: AuthPageWrapper(
@@ -55,25 +129,32 @@ class LoginPage extends ConsumerWidget {
             style: TextStyle(fontSize: 20, fontWeight: .w500),
           ),
           ControlledNamedTextField(
-            text: dataHolder.email,
+            text: email,
             title: "Email",
             hintText: "example@mail.ru",
-            onChange: setEmail,
+            onChange: (s) => setEmail(ref, s),
             secondaryColor: true,
             type: .text,
             require: true,
+            errorMessage: emailError,
           ),
           ControlledNamedTextField(
-            text: dataHolder.password,
+            text: password,
             title: "Пароль",
             hintText: "********",
-            onChange: setPassword,
+            onChange: (s) => setPassword(ref, s),
             secondaryColor: true,
             type: .password,
             require: true,
+            errorMessage: passwordError,
           ),
           Spacer(),
-          CustomTextButton(onPressed: () => login(ref), text: "Войти"),
+          CustomTextButton(
+            onPressed: register
+                ? () => goNextRegistrationPage(context, ref)
+                : () => login(context, ref),
+            text: register ? "Продолжить" : "Войти",
+          ),
         ],
       ),
     );

@@ -1,77 +1,54 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:frontend/shared/data/models/apartment/apartment.dart';
-import 'package:frontend/shared/data/models/apartment/create_apartment_response.dart';
+import 'package:frontend/shared/data/failures/failures.dart';
+import 'package:frontend/shared/data/models/apartment.dart';
 import 'package:frontend/shared/data/models/profile/profile.dart';
-import 'package:frontend/shared/data/network/dio_client.dart';
-import 'package:frontend/shared/data/providers/user_provider.dart';
+import 'package:frontend/shared/data/providers/async_user_provider.dart';
+import 'package:frontend/shared/data/repositories/apartment_repository.dart';
 
 final asyncApartmentProvider =
-    AsyncNotifierProvider<_ApartmentNotifier, Apartment?>(
-      _ApartmentNotifier.new,
-    );
+    AsyncNotifierProvider<ApartmentNotifier, Apartment?>(ApartmentNotifier.new);
 
-class _ApartmentNotifier extends AsyncNotifier<Apartment?> {
-  late String baseUrl;
+class ApartmentNotifier extends AsyncNotifier<Apartment?> {
+  late ApartmentRepository _apartmentRepository;
 
-  late int? apartmentId;
+  late int? _apartmentId;
 
   @override
   Future<Apartment?> build() async {
-    baseUrl = "/apartments";
-
-    apartmentId = ref.watch(
-      userProvider.select((s) => s?.profile?.apartmentId),
+    _apartmentRepository = ref.read(apartmentRepositoryProvider);
+    _apartmentId = ref.watch(
+      asyncUserProvider.select((s) => s.value?.profile?.apartmentId),
     );
 
-    if (apartmentId == null) {
+    if (_apartmentId == null) {
       return null;
     }
 
-    final response = await AppDio.dio.get("$baseUrl/$apartmentId");
-    Apartment apartment = Apartment.fromJson(response.data);
-
-    return apartment;
+    return _apartmentRepository.get(_apartmentId!);
   }
 
   Future<Profile?> create({required String name, String? address}) async {
     try {
       state = const AsyncLoading();
 
-      final minutesOffset = DateTime.now().timeZoneOffset.inMinutes;
-
-      final response = await AppDio.dio.post(
-        baseUrl,
-        data: {
-          "name": name,
-          "address": address?.isEmpty == true ? null : address,
-          "minutesOffset": minutesOffset,
-        },
+      final createApartmentResponse = await _apartmentRepository.create(
+        name: name,
+        address: address,
       );
 
-      final token = response.headers['Authorization'];
-
-      if (token == null) {
-        return null;
-      }
-
-      await AppDio.updateToken(token.first);
-
-      final createApartmentResponse = CreateApartmentResponse.fromJson(
-        response.data,
-      );
-
-      state = await AsyncValue.guard(() async {
-        return Apartment(
+      state = AsyncData(
+        Apartment(
           address: address,
           budget: createApartmentResponse.budget,
           id: createApartmentResponse.id,
           name: name,
-        );
-      });
+        ),
+      );
 
       return createApartmentResponse.profile;
-    } catch (e) {
-      return null;
+    } catch (e, st) {
+      state = AsyncError(e, st);
+      rethrow;
     }
   }
 
@@ -79,92 +56,72 @@ class _ApartmentNotifier extends AsyncNotifier<Apartment?> {
     try {
       state = const AsyncLoading();
 
-      final query = {'code': inviteCode};
+      final joinApartmentResponse = await _apartmentRepository.join(inviteCode);
 
-      final response = await AppDio.dio.post(
-        "$baseUrl/join",
-        queryParameters: query,
-      );
+      state = AsyncData(joinApartmentResponse.apartment);
 
-      final token = response.headers['Authorization'];
-
-      if (token == null) {
-        return null;
-      }
-
-      await AppDio.updateToken(token.first);
-
-      state = await AsyncValue.guard(() async {
-        return Apartment.fromJson(response.data);
-      });
-
-      final profile = Profile.fromJson(response.data["profile"]);
-
-      return profile;
-    } catch (e) {
-      state = AsyncData(null);
-      return null;
+      return joinApartmentResponse.profile;
+    } catch (e, st) {
+      state = AsyncError(e, st);
+      rethrow;
     }
   }
 
-  Future<bool> leave() async {
-    final current = state;
+  Future<void> leave() async {
+    final previous = state;
+
     state = AsyncLoading();
 
     try {
-      await AppDio.dio.post("$baseUrl/leave");
+      await _apartmentRepository.leave();
 
       state = AsyncData(null);
-
-      return true;
     } catch (e) {
-      state = current;
-
-      return false;
+      state = previous;
+      rethrow;
     }
   }
 
   Future<void> generateCode() async {
-    final response = await AppDio.dio.patch("$baseUrl/$apartmentId/code");
-    Apartment? apartment = state.value;
+    final previousValue = state.value;
 
-    if (apartment == null) {
-      return;
+    if (previousValue == null || _apartmentId == null) {
+      throw NotInApartmentFailure();
     }
 
-    apartment = apartment.copyWith(inviteCode: response.data["inviteCode"]);
+    final inviteCode = await _apartmentRepository.generateCode(_apartmentId!);
 
-    state = AsyncValue.data(apartment);
+    state = AsyncData(previousValue.copyWith(inviteCode: inviteCode));
   }
 
   Future<void> setBudget(int budget) async {
-    final currentValue = state.value;
+    final previousValue = state.value;
 
-    if (currentValue == null) return;
-
-    state = AsyncData(currentValue.copyWith(budget: budget));
-
-    try {
-      await AppDio.dio.patch("$baseUrl/$apartmentId/budget", data: budget);
-    } catch (_) {
-      state = AsyncData(currentValue);
+    if (previousValue == null || _apartmentId == null) {
+      throw NotInApartmentFailure();
     }
+
+    await _apartmentRepository.setBudget(_apartmentId!, budget);
+
+    state = AsyncData(previousValue.copyWith(budget: budget));
   }
 
-  Future<bool> delete() async {
-    final current = state;
+  Future<void> delete() async {
+    final previous = state;
+
+    if (previous.value == null || _apartmentId == null) {
+      throw NotInApartmentFailure();
+    }
+
     state = AsyncLoading();
 
     try {
-      await AppDio.dio.delete("$baseUrl/$apartmentId");
+      await _apartmentRepository.delete(_apartmentId!);
 
       state = AsyncData(null);
-
-      return true;
     } catch (e) {
-      state = current;
-
-      return false;
+      state = previous;
+      rethrow;
     }
   }
 }

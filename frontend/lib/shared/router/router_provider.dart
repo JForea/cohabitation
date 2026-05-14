@@ -9,7 +9,6 @@ import 'package:frontend/features/notifications/ui/presentation/widgets/pages/no
 import 'package:frontend/features/settings/presentation/ui/widgets/pages/settings_page.dart';
 import 'package:frontend/features/tasks/presentation/ui/widgets/pages/create_task_page.dart';
 import 'package:frontend/features/onboarding/presentation/ui/widgets/pages/onboarding_page.dart';
-import 'package:frontend/features/auth/register/presentation/ui/widgets/pages/registration_first_page.dart';
 import 'package:frontend/features/auth/register/presentation/ui/widgets/pages/registration_second_page.dart';
 import 'package:frontend/features/auth/presentation/ui/widgets/pages/welcome_page.dart';
 import 'package:frontend/features/home/presentation/ui/widgets/pages/home_page.dart';
@@ -29,8 +28,6 @@ final routerProvider = Provider<GoRouter>((ref) {
     initialLocation: '/',
     refreshListenable: notifier,
     redirect: (context, state) {
-      print(state.uri.path);
-
       final flags = ref.read(authFlagsProvider);
 
       if (flags.isLoading || flags.isApartmentLoading) return null;
@@ -67,14 +64,17 @@ final routerProvider = Provider<GoRouter>((ref) {
     routes: [
       GoRoute(path: '/', builder: (context, state) => HomePage()),
       GoRoute(path: '/auth', builder: (context, state) => WelcomePage()),
-      GoRoute(path: '/auth/login', builder: (context, state) => LoginPage()),
+      GoRoute(
+        path: '/auth/login',
+        builder: (context, state) => LoginPage(register: false),
+      ),
       GoRoute(
         path: '/auth/onboarding',
         builder: (context, state) => OnboardingPage(),
       ),
       GoRoute(
         path: '/auth/register/1',
-        builder: (context, state) => RegistrationFirstPage(),
+        builder: (context, state) => LoginPage(register: true),
       ),
       GoRoute(
         path: '/auth/register/2',

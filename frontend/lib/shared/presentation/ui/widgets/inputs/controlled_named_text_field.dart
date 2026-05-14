@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:frontend/shared/formatters/price_input_formatter.dart';
 import 'package:frontend/shared/formatters/time_input_formatter.dart';
+import 'package:frontend/shared/presentation/theme/app_colors.dart';
 import 'package:frontend/shared/presentation/theme/app_shadows.dart';
 import 'package:frontend/shared/presentation/ui/widgets/texts/field_name.dart';
 
@@ -18,6 +19,8 @@ class ControlledNamedTextField extends StatefulWidget {
     required this.type,
     required this.require,
     this.maxLines,
+    this.highlightError,
+    this.errorMessage,
   });
 
   final String text;
@@ -28,6 +31,8 @@ class ControlledNamedTextField extends StatefulWidget {
   final InputType type;
   final bool require;
   final int? maxLines;
+  final bool? highlightError;
+  final String? errorMessage;
 
   @override
   State<StatefulWidget> createState() => _ControlledNamedTextFieldState();
@@ -73,6 +78,7 @@ class _ControlledNamedTextFieldState extends State<ControlledNamedTextField> {
   @override
   Widget build(BuildContext context) {
     return Column(
+      crossAxisAlignment: .start,
       spacing: 8,
       children: [
         FieldName(title: widget.title, require: widget.require),
@@ -83,6 +89,11 @@ class _ControlledNamedTextFieldState extends State<ControlledNamedTextField> {
                 ? Theme.of(context).colorScheme.surface
                 : Colors.white,
             borderRadius: .all(.circular(16)),
+            border: .all(
+              color: widget.highlightError != null && widget.highlightError!
+                  ? AppColors.red
+                  : Colors.transparent,
+            ),
             boxShadow: [AppShadows.standard()],
           ),
           child: Row(
@@ -127,6 +138,20 @@ class _ControlledNamedTextFieldState extends State<ControlledNamedTextField> {
             ],
           ),
         ),
+        if (widget.errorMessage != null)
+          SizedBox(
+            height: 14,
+            child: Text(
+              widget.errorMessage!,
+              maxLines: 1,
+              overflow: .ellipsis,
+              style: TextStyle(
+                color: AppColors.red,
+                fontSize: 11,
+                fontWeight: .w500,
+              ),
+            ),
+          ),
       ],
     );
   }

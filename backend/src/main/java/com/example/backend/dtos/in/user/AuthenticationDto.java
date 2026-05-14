@@ -11,8 +11,7 @@ public record AuthenticationDto(
     @NotBlank(message = "Email must be provided.")
     String email,
     @NotBlank(message = "Password must be provided.")
-    @Length(min = 8, max = 32, message =
-            "Password length must be 8-32 characters length.")
+    @Length(min = 8, max = 32, message = "Password length must be 8-32 characters length.")
     String password,
     DeviceTokenDto deviceToken
 ) {}

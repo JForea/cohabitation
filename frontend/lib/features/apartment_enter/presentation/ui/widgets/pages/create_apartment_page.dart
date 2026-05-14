@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:frontend/features/apartment_enter/utils/apartment_validators.dart';
 import 'package:frontend/shared/data/providers/async_apartment_provider.dart';
-import 'package:frontend/shared/data/providers/auth_provider.dart';
+import 'package:frontend/shared/data/providers/async_user_provider.dart';
 import 'package:frontend/shared/presentation/ui/widgets/buttons/custom_back_button.dart';
 import 'package:frontend/shared/presentation/ui/widgets/buttons/custom_text_button.dart';
 import 'package:frontend/shared/presentation/ui/widgets/inputs/controlled_named_text_field.dart';
+import 'package:frontend/shared/presentation/ui/widgets/snack_bars/message_snack_bar.dart';
 import 'package:frontend/shared/presentation/ui/widgets/wrappers/auth_page_wrapper.dart';
-import 'package:frontend/shared/utils/fcm_helper.dart';
 import 'package:go_router/go_router.dart';
 
 class CreateApartmentPage extends ConsumerStatefulWidget {
@@ -21,6 +22,9 @@ class _CreateApartmentPageState extends ConsumerState<CreateApartmentPage> {
   late String _name;
   late String _address;
 
+  late String _nameErrorMessage;
+  late String _addressErrorMessage;
+
   void setName(String s) {
     _name = s;
   }
@@ -34,18 +38,44 @@ class _CreateApartmentPageState extends ConsumerState<CreateApartmentPage> {
     super.initState();
     _name = "";
     _address = "";
+
+    _nameErrorMessage = "";
+    _addressErrorMessage = "";
   }
 
-  Future<bool> create() async {
-    final profile = await ref
-        .read(asyncApartmentProvider.notifier)
-        .create(name: _name, address: _address);
-    if (profile == null) {
-      return false;
+  Future<void> create(BuildContext context) async {
+    bool ok = true;
+    setState(() {
+      final nameError = ApartmentValidators.validateName(_name);
+      if (nameError != null) {
+        _nameErrorMessage = nameError;
+        ok = false;
+      }
+      final addressError = ApartmentValidators.validateAddress(_address);
+      if (addressError != null) {
+        _addressErrorMessage = addressError;
+        ok = false;
+      }
+    });
+
+    if (!ok) return;
+
+    try {
+      final profile = await ref
+          .read(asyncApartmentProvider.notifier)
+          .create(name: _name, address: _address);
+      ref.read(asyncUserProvider.notifier).setProfile(profile);
+
+      if (context.mounted) {
+        context.go("/");
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          MessageSnackBar(message: "Произошла ошибка", error: true),
+        );
+      }
     }
-    ref.read(authProvider.notifier).setProfile(profile);
-    await FcmHelper.requestPermission();
-    return true;
   }
 
   @override
@@ -75,6 +105,7 @@ class _CreateApartmentPageState extends ConsumerState<CreateApartmentPage> {
             secondaryColor: true,
             type: .text,
             require: true,
+            errorMessage: _nameErrorMessage,
           ),
           ControlledNamedTextField(
             text: _address,
@@ -84,16 +115,11 @@ class _CreateApartmentPageState extends ConsumerState<CreateApartmentPage> {
             secondaryColor: true,
             type: .text,
             require: false,
+            errorMessage: _addressErrorMessage,
           ),
           Spacer(),
           CustomTextButton(
-            onPressed: () async {
-              final created = await create();
-
-              if (created && context.mounted) {
-                context.go('/');
-              }
-            },
+            onPressed: () async => await create(context),
             text: "Создать",
           ),
         ],

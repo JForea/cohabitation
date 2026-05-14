@@ -2,35 +2,57 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:frontend/shared/data/models/profile/profile.dart';
-import 'package:frontend/shared/data/providers/auth_provider.dart';
+import 'package:frontend/shared/data/providers/async_user_provider.dart';
 import 'package:frontend/shared/data/providers/neighbours_provider.dart';
 import 'package:frontend/shared/data/types/role.dart';
 import 'package:frontend/shared/presentation/theme/app_colors.dart';
 import 'package:frontend/shared/presentation/ui/widgets/avatars/avatar.dart';
 import 'package:frontend/shared/presentation/ui/widgets/badges/role_badge.dart';
 import 'package:frontend/shared/presentation/ui/widgets/buttons/custom_icon_button.dart';
+import 'package:frontend/shared/presentation/ui/widgets/snack_bars/message_snack_bar.dart';
 
 class ProfileDialog extends ConsumerWidget {
   const ProfileDialog({super.key, required this.profile});
 
   final Profile profile;
 
-  Future<bool> _kick(BuildContext context, WidgetRef ref, int profileId) async {
+  Future<void> _kick(BuildContext context, WidgetRef ref, int profileId) async {
     if (context.mounted) {
       Navigator.pop(context);
     }
 
-    return await ref.read(neighboursProvider.notifier).kick(profileId);
+    try {
+      await ref.read(neighboursProvider.notifier).kick(profileId);
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          MessageSnackBar(message: "Произошла ошибка", error: true),
+        );
+      }
+    }
   }
 
-  Future<bool> _setRole(WidgetRef ref, int profileId, Role role) async {
-    return await ref.read(neighboursProvider.notifier).setRole(profileId, role);
+  Future<void> _setRole(
+    BuildContext context,
+    WidgetRef ref,
+    int profileId,
+    Role role,
+  ) async {
+    try {
+      await ref.read(neighboursProvider.notifier).setRole(profileId, role);
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          MessageSnackBar(message: "Произошла ошибка", error: true),
+        );
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final userRole = ref.read(
-      authProvider.select((s) => s.value?.user?.profile?.role),
+      asyncUserProvider.select((s) => s.value?.profile?.role),
     );
     final targetRole = ref.watch(
       neighboursProvider.select(
@@ -92,14 +114,15 @@ class ProfileDialog extends ConsumerWidget {
                           icon: Icons.gpp_bad,
                           size: 36,
                           onPressed: () =>
-                              _setRole(ref, profile.id, .inhabitant),
+                              _setRole(context, ref, profile.id, .inhabitant),
                           iconColor: Colors.white,
                         )
                       : CustomIconButton(
                           color: AppColors.blue,
                           icon: Icons.star,
                           size: 36,
-                          onPressed: () => _setRole(ref, profile.id, .admin),
+                          onPressed: () =>
+                              _setRole(context, ref, profile.id, .admin),
                           iconColor: Colors.white,
                         ),
               ],

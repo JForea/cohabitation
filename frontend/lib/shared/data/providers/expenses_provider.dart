@@ -1,22 +1,20 @@
-import 'package:dio/dio.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:frontend/shared/data/models/expense.dart';
+import 'package:frontend/shared/data/failures/failures.dart';
 import 'package:frontend/shared/data/models/expenses_info.dart';
 import 'package:frontend/shared/data/models/profile/profile.dart';
-import 'package:frontend/shared/data/models/profile/profile_brief.dart';
-import 'package:frontend/shared/data/network/dio_client.dart';
 import 'package:frontend/shared/data/providers/apartment_provider.dart';
+import 'package:frontend/shared/data/repositories/expense_repository.dart';
 import 'package:frontend/shared/data/types/expense_category.dart';
-import 'package:frontend/shared/utils/util_functions.dart';
 import 'package:image_picker/image_picker.dart';
 
-final expensesProvider = AsyncNotifierProvider<_ExpensesNotifier, ExpensesInfo>(
-  _ExpensesNotifier.new,
+final expensesProvider = AsyncNotifierProvider<ExpensesNotifier, ExpensesInfo>(
+  ExpensesNotifier.new,
 );
 
-class _ExpensesNotifier extends AsyncNotifier<ExpensesInfo> {
-  late String _baseUrl;
+class ExpensesNotifier extends AsyncNotifier<ExpensesInfo> {
+  late ExpenseRepository _expenseRepository;
+
+  late int? _apartmentId;
 
   static const _pageSize = 20;
 
@@ -26,113 +24,73 @@ class _ExpensesNotifier extends AsyncNotifier<ExpensesInfo> {
 
   @override
   Future<ExpensesInfo> build() async {
-    final apartmentId = ref.watch(apartmentProvider.select((a) => a?.id));
+    _expenseRepository = ref.read(expenseRepositoryProvider);
+    _apartmentId = ref.watch(apartmentProvider.select((a) => a?.id));
 
-    if (apartmentId == null) {
-      throw Exception("Not in apartment.");
-    }
-
-    _baseUrl = "/apartments/$apartmentId/expenses";
+    if (_apartmentId == null) throw NotInApartmentFailure();
 
     return ExpensesInfo(
-      currentExpenseAmount: await _fetchExpenseAmount(),
-      expenses: await _fetchPage(),
+      currentExpenseAmount: await _expenseRepository.getExpenseAmount(
+        _apartmentId!,
+      ),
+      expenses: await _expenseRepository.getPage(
+        apartmentId: _apartmentId!,
+        page: _page,
+        pageSize: _pageSize,
+      ),
     );
   }
 
-  Future<int> _fetchExpenseAmount() async {
-    final response = await AppDio.dio.get("$_baseUrl/amount");
-
-    if (response.data.toString().isEmpty) {
-      return 0;
-    }
-
-    return response.data;
-  }
-
-  Future<List<Expense>> _fetchPage() async {
-    final query = {'page': '$_page', 'size': '$_pageSize'};
-
-    final response = await AppDio.dio.get(_baseUrl, queryParameters: query);
-
-    final data = response.data as List;
-
-    return data.map((json) => Expense.fromJson(json)).toList();
-  }
-
   Future<void> loadMore() async {
-    if (_isLoading || !_hasMore || state.isLoading) return;
+    if (_isLoading || !_hasMore) return;
+
+    if (_apartmentId == null) throw NotInApartmentFailure();
 
     _isLoading = true;
 
-    final previousValue =
-        state.value ?? ExpensesInfo(currentExpenseAmount: 0, expenses: []);
+    final previous = state.value;
+    if (previous == null) return;
 
     try {
-      _page++;
-      final newExpenses = await _fetchPage();
+      final expenses = await _expenseRepository.getPage(
+        apartmentId: _apartmentId!,
+        page: _page + 1,
+        pageSize: _pageSize,
+      );
 
-      if (newExpenses.length < _pageSize) {
+      _page++;
+
+      if (expenses.length < _pageSize) {
         _hasMore = false;
       }
 
       state = AsyncData(
-        previousValue.copyWith(
-          expenses: [...previousValue.expenses, ...newExpenses],
-        ),
+        previous.copyWith(expenses: [...previous.expenses, ...expenses]),
       );
-    } catch (e, st) {
-      _page--;
-      state = AsyncError(e, st);
     } finally {
       _isLoading = false;
     }
   }
 
-  Future<bool> create({
+  Future<void> create({
     required String name,
     required int amount,
     required ExpenseCategory category,
     required Profile createdBy,
     XFile? image,
   }) async {
-    if (_isLoading) {
-      return false;
-    }
+    if (_apartmentId == null) throw NotInApartmentFailure();
 
     try {
       _isLoading = true;
 
-      final formData = FormData.fromMap({
-        "data": MultipartFile.fromString('''
-          {
-            "name": "$name",
-            "amount": $amount,
-            "category": "${UtilFunctions.tValueToStringRequest(category)}"
-          }
-          ''', contentType: .parse('application/json')),
-        if (image != null && kIsWeb)
-          "image": MultipartFile.fromBytes(
-            await image.readAsBytes(),
-            filename: image.name,
-          )
-        else if (image != null)
-          "image": await MultipartFile.fromFile(
-            image.path,
-            filename: image.name,
-          ),
-      });
-
-      final response = await AppDio.dio.post(_baseUrl, data: formData);
-
-      final expense = Expense(
-        id: response.data["id"],
-        category: category,
-        checkImageUrl: response.data["checkImageUrl"],
+      final expense = await _expenseRepository.create(
+        apartmentId: _apartmentId!,
         name: name,
-        createdBy: ProfileBrief.fromFullProfile(createdBy),
-        sum: amount,
-        createdAt: DateTime.now(),
+        amount: amount,
+        category: category,
+        createdBy: createdBy,
+        image: image,
       );
 
       final previousValue =
@@ -141,14 +99,8 @@ class _ExpensesNotifier extends AsyncNotifier<ExpensesInfo> {
       state = AsyncData(
         previousValue.copyWith(expenses: [expense, ...previousValue.expenses]),
       );
-
+    } finally {
       _isLoading = false;
-
-      return true;
-    } catch (e) {
-      print(e);
-      _isLoading = false;
-      return false;
     }
   }
 
@@ -166,14 +118,54 @@ class _ExpensesNotifier extends AsyncNotifier<ExpensesInfo> {
     );
   }
 
-  Future<bool> deleteMany(List<int> ids) async {
+  Future<void> deleteMany(List<int> ids) async {
+    if (_apartmentId == null) throw NotInApartmentFailure();
+
+    final previous = state.value;
+
+    final previousExpenses = previous?.expenses;
+
+    if (previous == null) return;
+
+    final current = previous.expenses
+        .where((e) => !ids.contains(e.id))
+        .toList();
+
+    state = AsyncData(previous.copyWith(expenses: current));
+
     try {
-      await AppDio.dio.delete(_baseUrl, data: ids);
-      ref.invalidateSelf();
-      return true;
+      await _expenseRepository.deleteMany(_apartmentId!, ids);
     } catch (e) {
-      print(e);
-      return false;
+      state = AsyncData(previous.copyWith(expenses: previousExpenses));
+
+      rethrow;
+    }
+  }
+
+  Future<void> refresh() async {
+    if (_apartmentId == null) {
+      throw NotInApartmentFailure();
+    }
+
+    _isLoading = true;
+
+    try {
+      final expenses = await _expenseRepository.getPage(
+        apartmentId: _apartmentId!,
+        page: 0,
+        pageSize: _pageSize,
+      );
+
+      final amount = await _expenseRepository.getExpenseAmount(_apartmentId!);
+
+      _page = 0;
+      _hasMore = expenses.length >= _pageSize;
+
+      state = AsyncData(
+        ExpensesInfo(currentExpenseAmount: amount, expenses: expenses),
+      );
+    } finally {
+      _isLoading = false;
     }
   }
 }

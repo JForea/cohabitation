@@ -6,6 +6,7 @@ import 'package:frontend/shared/data/providers/neighbours_provider.dart';
 import 'package:frontend/shared/data/providers/rules_provider.dart';
 import 'package:frontend/shared/data/providers/user_provider.dart';
 import 'package:frontend/shared/presentation/ui/widgets/lists/rule_list.dart';
+import 'package:frontend/shared/presentation/ui/widgets/other/empty_message_widget.dart';
 import 'package:frontend/shared/presentation/ui/widgets/wrappers/tab_wrapper.dart';
 
 class ProfileTab extends ConsumerWidget {
@@ -52,7 +53,16 @@ class ProfileTab extends ConsumerWidget {
                     ),
                   ),
                   rulesState.when(
-                    data: (rules) => RuleList(titleNeeded: false, rules: rules),
+                    data: (rules) => rules.isEmpty
+                        ? Center(
+                            child: EmptyMessageWidget(
+                              iconSize: 60,
+                              fontSize: 14,
+                              assetPath: "assets/icons/pin.svg",
+                              message: "Правил пока что нет",
+                            ),
+                          )
+                        : RuleList(titleNeeded: false, rules: rules),
                     error: (e, _) => Text("Произошла ошибка при загрузке."),
                     loading: () => Center(child: CircularProgressIndicator()),
                   ),

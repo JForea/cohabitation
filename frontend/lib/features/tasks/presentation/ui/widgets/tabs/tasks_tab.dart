@@ -6,6 +6,7 @@ import 'package:frontend/shared/data/providers/apartment_provider.dart';
 import 'package:frontend/shared/data/providers/async_user_provider.dart';
 import 'package:frontend/shared/data/providers/selected_provider.dart';
 import 'package:frontend/shared/data/providers/tasks_provider.dart';
+import 'package:frontend/shared/presentation/ui/widgets/other/empty_message_widget.dart';
 import 'package:frontend/shared/presentation/ui/widgets/snack_bars/message_snack_bar.dart';
 import 'package:frontend/shared/presentation/ui/widgets/wrappers/tab_wrapper.dart';
 
@@ -72,13 +73,23 @@ class TasksTab extends ConsumerWidget {
             style: TextStyle(fontSize: 20, fontWeight: .w500),
           ),
           tasksState.when(
-            data: (tasks) => TaskList(
-              tasks: tasks,
-              selected: selectedTasks,
-              onSwitchStatus: (t) => switchStatus(context, ref, apartmentId, t),
-              onSelect: (id) => onSelect(ref, id),
-              onSelectCancel: (id) => onSelectCancel(ref, id),
-            ),
+            data: (tasks) => tasks.isEmpty
+                ? Center(
+                    child: EmptyMessageWidget(
+                      iconSize: 70,
+                      fontSize: 16,
+                      assetPath: "assets/icons/task_list.svg",
+                      message: "Нет активных задач",
+                    ),
+                  )
+                : TaskList(
+                    tasks: tasks,
+                    selected: selectedTasks,
+                    onSwitchStatus: (t) =>
+                        switchStatus(context, ref, apartmentId, t),
+                    onSelect: (id) => onSelect(ref, id),
+                    onSelectCancel: (id) => onSelectCancel(ref, id),
+                  ),
             error: (e, _) => Text("При загрузке произошла ошибка"),
             loading: () =>
                 Center(child: Center(child: CircularProgressIndicator())),

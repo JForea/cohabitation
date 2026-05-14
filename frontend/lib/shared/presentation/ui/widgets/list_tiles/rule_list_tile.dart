@@ -19,7 +19,11 @@ class RuleListTile extends StatelessWidget {
         spacing: 16,
         crossAxisAlignment: .start,
         children: [
-          SvgPicture.asset("assets/icons/pin.svg", width: 20, height: 20),
+          SvgPicture.asset(
+            "assets/icons/pin_colored.svg",
+            width: 20,
+            height: 20,
+          ),
           Expanded(
             child: Text(
               rule.text,

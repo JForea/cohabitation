@@ -10,6 +10,7 @@ import 'package:frontend/shared/data/providers/user_provider.dart';
 import 'package:frontend/shared/presentation/ui/widgets/buttons/custom_text_button.dart';
 import 'package:frontend/shared/presentation/ui/widgets/inputs/controlled_named_text_field.dart';
 import 'package:frontend/shared/presentation/ui/widgets/modals/app_modal.dart';
+import 'package:frontend/shared/presentation/ui/widgets/other/empty_message_widget.dart';
 import 'package:frontend/shared/presentation/ui/widgets/wrappers/tab_wrapper.dart';
 import 'package:frontend/shared/utils/util_functions.dart';
 
@@ -140,12 +141,21 @@ class _ExpensesTabState extends ConsumerState<ExpensesTab> {
                 style: TextStyle(fontWeight: .w500, fontSize: 16),
               ),
               expenseState.when(
-                data: (state) => ExpenseList(
-                  expenses: state.expenses,
-                  selected: selected,
-                  onSelect: onSelect,
-                  onSelectCancel: onSelectCancel,
-                ),
+                data: (state) => state.expenses.isEmpty
+                    ? Center(
+                        child: EmptyMessageWidget(
+                          iconSize: 60,
+                          fontSize: 14,
+                          assetPath: "assets/icons/wallet.svg",
+                          message: "Пока нет записей о расходах",
+                        ),
+                      )
+                    : ExpenseList(
+                        expenses: state.expenses,
+                        selected: selected,
+                        onSelect: onSelect,
+                        onSelectCancel: onSelectCancel,
+                      ),
 
                 error: (e, _) => Text("Произошла ошибка при загрузке."),
                 loading: () => Center(child: CircularProgressIndicator()),

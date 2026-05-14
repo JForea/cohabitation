@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:frontend/features/events/utils/event_validators.dart';
 import 'package:frontend/shared/data/failures/failures.dart';
 import 'package:frontend/shared/data/providers/events_provider.dart';
@@ -12,6 +11,7 @@ import 'package:frontend/shared/presentation/ui/widgets/buttons/custom_text_butt
 import 'package:frontend/shared/presentation/ui/widgets/dialogs/error_dialog.dart';
 import 'package:frontend/shared/presentation/ui/widgets/inputs/controlled_named_text_field.dart';
 import 'package:frontend/shared/presentation/ui/widgets/modals/app_modal.dart';
+import 'package:frontend/shared/presentation/ui/widgets/other/empty_message_widget.dart';
 import 'package:frontend/shared/presentation/ui/widgets/wrappers/page_wrapper.dart';
 import 'package:intl/intl.dart';
 
@@ -203,35 +203,9 @@ class _EventsPageState extends ConsumerState<EventsPage> {
             eventsState.when(
               data: (events) => events.isEmpty
                   ? Center(
-                      child: Column(
-                        children: [
-                          SvgPicture.asset(
-                            "assets/icons/calendar.svg",
-                            colorFilter: ColorFilter.mode(
-                              AppColors.greyBlue,
-                              .srcIn,
-                            ),
-                            width: 90,
-                            height: 90,
-                          ),
-                          SizedBox(height: 20),
-                          Text(
-                            "Пока нет",
-                            style: TextStyle(
-                              color: AppColors.greyBlue,
-                              fontSize: 18,
-                              fontWeight: .w700,
-                            ),
-                          ),
-                          Text(
-                            "запланированных событий",
-                            style: TextStyle(
-                              color: AppColors.greyBlue,
-                              fontSize: 18,
-                              fontWeight: .w700,
-                            ),
-                          ),
-                        ],
+                      child: EmptyMessageWidget(
+                        assetPath: "assets/icons/calendar.svg",
+                        message: "Пока нет запланированных событий",
                       ),
                     )
                   : Column(

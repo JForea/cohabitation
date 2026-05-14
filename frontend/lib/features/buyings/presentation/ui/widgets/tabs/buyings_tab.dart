@@ -4,6 +4,7 @@ import 'package:frontend/shared/data/providers/buyings_provider.dart';
 import 'package:frontend/features/buyings/presentation/ui/widgets/lists/category_buying_list.dart';
 import 'package:frontend/shared/data/providers/selected_provider.dart';
 import 'package:frontend/shared/data/providers/user_provider.dart';
+import 'package:frontend/shared/presentation/ui/widgets/other/empty_message_widget.dart';
 import 'package:frontend/shared/presentation/ui/widgets/wrappers/tab_wrapper.dart';
 
 class BuyingsTab extends ConsumerWidget {
@@ -46,23 +47,32 @@ class BuyingsTab extends ConsumerWidget {
             ),
           ),
           buyingsState.when(
-            data: (categoryToBuyings) => Column(
-              spacing: 20,
-              children: [
-                ...categoryToBuyings.keys.map(
-                  (c) => CategoryBuyingList(
-                    category: c,
-                    buyings: categoryToBuyings[c]!,
-                    onBuyingComplete: (id) => ref
-                        .read(buyingsProvider.notifier)
-                        .switchBuyingStatus(id, profile),
-                    selected: buyingsSelected,
-                    onSelect: (id) => onSelect(ref, id),
-                    onSelectCancel: (id) => onSelectCancel(ref, id),
+            data: (categoryToBuyings) => categoryToBuyings.isEmpty
+                ? Center(
+                    child: EmptyMessageWidget(
+                      iconSize: 70,
+                      fontSize: 16,
+                      assetPath: "assets/icons/shopping_cart.svg",
+                      message: "Список покупок пуст",
+                    ),
+                  )
+                : Column(
+                    spacing: 20,
+                    children: [
+                      ...categoryToBuyings.keys.map(
+                        (c) => CategoryBuyingList(
+                          category: c,
+                          buyings: categoryToBuyings[c]!,
+                          onBuyingComplete: (id) => ref
+                              .read(buyingsProvider.notifier)
+                              .switchBuyingStatus(id, profile),
+                          selected: buyingsSelected,
+                          onSelect: (id) => onSelect(ref, id),
+                          onSelectCancel: (id) => onSelectCancel(ref, id),
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-              ],
-            ),
             error: (e, _) => Text("При загрузке данных произошла ошибка."),
             loading: () => Center(child: CircularProgressIndicator()),
           ),

@@ -8,6 +8,7 @@ import 'package:frontend/shared/data/providers/apartment_provider.dart';
 import 'package:frontend/shared/data/providers/calendar_provider.dart';
 import 'package:frontend/shared/data/providers/neighbours_provider.dart';
 import 'package:frontend/shared/data/providers/user_provider.dart';
+import 'package:frontend/shared/presentation/ui/widgets/other/empty_message_widget.dart';
 import 'package:frontend/shared/presentation/ui/widgets/wrappers/tab_wrapper.dart';
 import 'package:go_router/go_router.dart';
 
@@ -78,8 +79,18 @@ class _HomeTabState extends ConsumerState<HomeTab> {
                 onPageChanged: (month) => updateMonth(ref, month),
               ),
               neighboursState.when(
-                data: (neighbours) =>
-                    NeighboursPreview(neighbours: neighbours.take(3).toList()),
+                data: (neighbours) => neighbours.isEmpty
+                    ? Center(
+                        child: EmptyMessageWidget(
+                          iconSize: 70,
+                          fontSize: 16,
+                          assetPath: "assets/icons/user.svg",
+                          message: "У вас пока нет соседей",
+                        ),
+                      )
+                    : NeighboursPreview(
+                        neighbours: neighbours.take(3).toList(),
+                      ),
                 error: (e, _) => Text("Произошла ошибка при загрузке."),
                 loading: () => Center(child: CircularProgressIndicator()),
               ),

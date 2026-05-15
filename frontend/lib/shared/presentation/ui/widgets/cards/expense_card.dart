@@ -137,7 +137,7 @@ class ExpenseCard extends ConsumerWidget {
                     const SizedBox(height: 20),
 
                   Text(
-                    "${NumberFormat("#,###", "ru_RU").format(expense.sum)} ₽",
+                    "${NumberFormat("#,###", "ru_RU").format(expense.amount)} ₽",
                     style: TextStyle(
                       color: isSelected
                           ? AppColors.blue

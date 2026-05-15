@@ -20,8 +20,12 @@ class AsyncUserNotifier extends AsyncNotifier<User?> {
 
     try {
       return await _userRepository.getMe();
-    } on UnauthorizedFailure {
-      return null;
+    } on Failure catch (e) {
+      _localLogout();
+      if (e is UnauthorizedFailure || e is ForbiddenFailure) {
+        return null;
+      }
+      rethrow;
     }
   }
 
@@ -96,6 +100,10 @@ class AsyncUserNotifier extends AsyncNotifier<User?> {
     );
   }
 
+  Future<void> _localLogout() async {
+    await _authSession.updateToken(null);
+  }
+
   Future<void> logout(String deviceId) async {
     if (state.value == null) {
       throw UnauthorizedFailure();
@@ -105,7 +113,7 @@ class AsyncUserNotifier extends AsyncNotifier<User?> {
       await _userRepository.logout(deviceId);
     } catch (_) {}
 
-    await _authSession.updateToken(null);
+    await _localLogout();
 
     state = const AsyncData(null);
   }

@@ -78,6 +78,14 @@ class _HomeTabState extends ConsumerState<HomeTab> {
                     context.push("/events/day/${day.toIso8601String()}"),
                 onPageChanged: (month) => updateMonth(ref, month),
               ),
+              Text(
+                "Соседи",
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onSurface,
+                  fontSize: 18,
+                  fontWeight: .w500,
+                ),
+              ),
               neighboursState.when(
                 data: (neighbours) => neighbours.isEmpty
                     ? Center(

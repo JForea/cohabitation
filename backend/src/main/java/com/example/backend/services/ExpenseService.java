@@ -3,15 +3,16 @@ package com.example.backend.services;
 import com.example.backend.dtos.in.expenses.CreateExpenseRequest;
 import com.example.backend.dtos.out.expenses.CreateExpenseResponse;
 import com.example.backend.dtos.out.expenses.ExpenseDto;
-import com.example.backend.entities.Expense;
-import com.example.backend.entities.Profile;
-import com.example.backend.entities.ProfileMonthlyExpense;
-import com.example.backend.entities.User;
+import com.example.backend.entities.*;
 import com.example.backend.exceptions.AccessForbiddenException;
+import com.example.backend.exceptions.ResourceNotFoundException;
 import com.example.backend.intefaces.ExpenseNotificationHandler;
 import com.example.backend.intefaces.FileStorage;
+import com.example.backend.repositories.ApartmentRepository;
 import com.example.backend.repositories.ExpenseRepository;
 import com.example.backend.repositories.ProfileMonthlyExpenseRepository;
+import com.example.backend.types.BuyingCategory;
+import com.example.backend.types.ExpenseCategory;
 import com.example.backend.types.Role;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
@@ -19,13 +20,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
-import java.time.Instant;
-import java.time.Month;
-import java.time.Year;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.List;
-import java.util.Objects;
+import java.time.*;
+import java.util.*;
 
 @Service
 public class ExpenseService {
@@ -39,25 +35,35 @@ public class ExpenseService {
 
     private final ExpenseNotificationHandler expenseNotificationHandler;
 
+    private final ApartmentRepository apartmentRepository;
+
     private final String bucketName = "checks";
 
     public ExpenseService(ExpenseRepository expenseRepository,
                           FileStorage fileStorage,
                           ProfileMonthlyExpenseRepository profileMonthlyExpenseRepository,
-                          ExpenseNotificationHandler expenseNotificationHandler) {
+                          ExpenseNotificationHandler expenseNotificationHandler,
+                          ApartmentRepository apartmentRepository) {
         this.expenseRepository = expenseRepository;
         this.fileStorage = fileStorage;
         this.profileMonthlyExpenseRepository = profileMonthlyExpenseRepository;
         this.expenseNotificationHandler = expenseNotificationHandler;
+        this.apartmentRepository = apartmentRepository;
     }
 
     @Transactional
     public CreateExpenseResponse create(
             User user,
+            Integer apartmentId,
             CreateExpenseRequest dto,
             String checkImageName) {
         try {
+            Apartment apartment = apartmentRepository.findById(apartmentId).orElseThrow(
+                    () -> new ResourceNotFoundException("Apartment not found.")
+            );
+
             Expense expense = new Expense(
+                    apartment,
                     dto.name(),
                     dto.amount(),
                     dto.category(),
@@ -135,6 +141,28 @@ public class ExpenseService {
             amount = 0;
 
         return amount;
+    }
+
+    public Map<ExpenseCategory, Integer> getSumByCategory(Integer apartmentId, YearMonth period) {
+        Map<ExpenseCategory, Integer> result = new HashMap<>();
+
+        for (ExpenseCategory category : ExpenseCategory.values()) {
+            Instant start = period.atDay(1).atStartOfDay(ZoneOffset.UTC).toInstant();
+            Instant end = period.plusMonths(1).atDay(1).atStartOfDay(ZoneOffset.UTC).toInstant();
+
+            Integer expenseAmount = expenseRepository.getAmountSumByApartmentIdAndCategoryAndCreatedAtBetween(
+                    apartmentId,
+                    category,
+                    start,
+                    end
+            );
+
+            if (expenseAmount != null) {
+                result.put(category, expenseAmount);
+            }
+        }
+
+        return result;
     }
 
     @Transactional

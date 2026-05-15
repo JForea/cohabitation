@@ -2,7 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/shared/data/failures/failures.dart';
 import 'package:frontend/shared/data/models/apartment.dart';
 import 'package:frontend/shared/data/models/profile/profile.dart';
-import 'package:frontend/shared/data/providers/async_user_provider.dart';
+import 'package:frontend/shared/data/providers/user_provider.dart';
 import 'package:frontend/shared/data/repositories/apartment_repository.dart';
 
 final asyncApartmentProvider =
@@ -17,7 +17,7 @@ class ApartmentNotifier extends AsyncNotifier<Apartment?> {
   Future<Apartment?> build() async {
     _apartmentRepository = ref.read(apartmentRepositoryProvider);
     _apartmentId = ref.watch(
-      asyncUserProvider.select((s) => s.value?.profile?.apartmentId),
+      userProvider.select((u) => u?.profile?.apartmentId),
     );
 
     if (_apartmentId == null) {

@@ -103,7 +103,7 @@ class ExpenseRepository {
           checkImageUrl: response.data["checkImageUrl"],
           name: name,
           createdBy: ProfileBrief.fromFullProfile(createdBy),
-          sum: amount,
+          amount: amount,
           createdAt: DateTime.now(),
         );
       } catch (e) {

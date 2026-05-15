@@ -38,7 +38,7 @@ class AuthDataHolder {
   AuthDataHolder({
     this.email = "",
     this.password = "",
-    this.male = false,
+    this.male = true,
     this.name = "",
     this.emailError = "",
     this.passwordError = "",

@@ -1,7 +1,6 @@
 package com.example.backend.dtos.out.expenses;
 
 import com.example.backend.dtos.out.profile.ProfileBriefDto;
-import com.example.backend.dtos.out.profile.ProfileDto;
 import com.example.backend.entities.Expense;
 import com.example.backend.types.ExpenseCategory;
 
@@ -11,7 +10,7 @@ import java.time.ZoneId;
 public record ExpenseDto(
         Long id,
         String name,
-        Integer sum,
+        Integer amount,
         ExpenseCategory category,
         String checkImageUrl,
         ProfileBriefDto createdBy,

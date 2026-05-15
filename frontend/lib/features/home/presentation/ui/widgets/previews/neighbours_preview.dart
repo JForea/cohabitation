@@ -11,28 +11,14 @@ class NeighboursPreview extends StatelessWidget {
   Widget build(BuildContext context) {
     final mediaQuery = MediaQuery.of(context);
 
-    return Column(
-      crossAxisAlignment: .start,
-      spacing: 15,
+    return Row(
+      spacing: 10,
       children: [
-        Text(
-          "Соседи",
-          style: TextStyle(
-            color: Theme.of(context).colorScheme.onSurface,
-            fontSize: 18,
-            fontWeight: .w500,
+        ...neighbours.map(
+          (p) => NeighbourPreviewCard(
+            profile: p,
+            width: (mediaQuery.size.width - 20 * 2 - 10 * 2) / 3,
           ),
-        ),
-        Row(
-          spacing: 10,
-          children: [
-            ...neighbours.map(
-              (p) => NeighbourPreviewCard(
-                profile: p,
-                width: (mediaQuery.size.width - 20 * 2 - 10 * 2) / 3,
-              ),
-            ),
-          ],
         ),
       ],
     );

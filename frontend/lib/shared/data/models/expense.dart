@@ -9,7 +9,7 @@ class Expense {
     this.checkImageUrl,
     required this.name,
     required this.createdBy,
-    required this.sum,
+    required this.amount,
     required this.createdAt,
   });
 
@@ -22,14 +22,14 @@ class Expense {
       checkImageUrl: json["checkImageUrl"] as String?,
       name: json["name"] as String,
       createdBy: ProfileBrief.fromJson(json["createdBy"]),
-      sum: json["sum"] as int,
+      amount: json["amount"] as int,
       createdAt: DateTime.parse(json["createdAt"] as String),
     );
   }
 
   final int id;
   final String name;
-  final int sum;
+  final int amount;
   final ExpenseCategory category;
   final String? checkImageUrl;
   final ProfileBrief createdBy;
@@ -38,7 +38,7 @@ class Expense {
   Expense copyWith({
     int? id,
     String? name,
-    int? sum,
+    int? amount,
     ExpenseCategory? category,
     String? checkImageUrl,
     ProfileBrief? createdBy,
@@ -49,7 +49,7 @@ class Expense {
       category: category ?? this.category,
       id: id ?? this.id,
       name: name ?? this.name,
-      sum: sum ?? this.sum,
+      amount: amount ?? this.amount,
       checkImageUrl: clearCheckImageUrl == null || clearCheckImageUrl
           ? null
           : (checkImageUrl ?? this.checkImageUrl),

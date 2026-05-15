@@ -7,6 +7,8 @@ import com.example.backend.entities.User;
 import com.example.backend.intefaces.FileStorage;
 import com.example.backend.security.CustomUserDetails;
 import com.example.backend.services.ExpenseService;
+import com.example.backend.types.BuyingCategory;
+import com.example.backend.types.ExpenseCategory;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -16,7 +18,9 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.YearMonth;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @PreAuthorize("@apartmentSecurity.hasAccess(#apartmentId, authentication)")
@@ -35,13 +39,14 @@ public class ExpenseController {
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<CreateExpenseResponse> create(
+            @PathVariable Integer apartmentId,
             @RequestPart("data") @Valid CreateExpenseRequest dto,
             @RequestPart(value = "image", required = false) MultipartFile image,
             @AuthenticationPrincipal CustomUserDetails details
     ) {
         User user = details.getUser();
         String checkImageName = fileStorage.save("checks", image);
-        CreateExpenseResponse response = expenseService.create(user, dto, checkImageName);
+        CreateExpenseResponse response = expenseService.create(user, apartmentId, dto, checkImageName);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
@@ -60,6 +65,14 @@ public class ExpenseController {
             @PathVariable Integer apartmentId
     ) {
         return ResponseEntity.ok(expenseService.getAmount(apartmentId));
+    }
+
+    @GetMapping("/stats/categories")
+    public ResponseEntity<Map<ExpenseCategory, Integer>> getSumByCategory(
+            @PathVariable Integer apartmentId,
+            @RequestParam YearMonth period
+    ) {
+        return ResponseEntity.ok(expenseService.getSumByCategory(apartmentId, period));
     }
 
     @DeleteMapping

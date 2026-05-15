@@ -21,8 +21,8 @@ public class Expense {
     @Column(name="name", nullable = false, length = 64)
     private String name;
 
-    @Column(name = "sum", nullable = false)
-    private Integer sum;
+    @Column(name = "amount", nullable = false)
+    private Integer amount;
 
     @Enumerated
     @Column(name = "category", nullable = false)
@@ -35,17 +35,23 @@ public class Expense {
     @JoinColumn(name = "profile_id", nullable = false)
     private Profile createdBy;
 
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "apartment_id", nullable = false)
+    private Apartment apartment;
+
     public Expense() {}
 
     public Expense(
+            Apartment apartment,
             String name,
-            Integer sum,
+            Integer amount,
             ExpenseCategory category,
             String checkImageName,
             Profile createdBy
     ) {
+        this.apartment = apartment;
         this.name = name;
-        this.sum = sum;
+        this.amount = amount;
         this.category = category;
         this.checkImageName = checkImageName;
         this.createdBy = createdBy;
@@ -74,10 +80,10 @@ public class Expense {
     public void setName(String name) {this.name = name;}
 
     public Integer getAmount() {
-        return sum;
+        return amount;
     }
 
-    public void setSum(Integer sum) {this.sum = sum;}
+    public void setAmount(Integer amount) {this.amount = amount;}
 
     public Instant getCreatedAt() {
         return createdAt;
@@ -87,4 +93,7 @@ public class Expense {
         return id;
     }
 
+    public Apartment getApartment() {
+        return apartment;
+    }
 }

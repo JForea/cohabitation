@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:frontend/features/expenses/data/providers/expenses_amount_by_category_provider.dart';
+import 'package:frontend/features/expenses/presentation/ui/widgets/cards/expenses_amount_by_categories_card.dart';
 import 'package:frontend/features/expenses/presentation/ui/widgets/cards/monthly_expenses_card.dart';
 import 'package:frontend/features/expenses/presentation/ui/widgets/lists/expense_list.dart';
 import 'package:frontend/features/expenses/presentation/ui/widgets/lists/inhabitants_expenses_amount_list.dart';
 import 'package:frontend/shared/data/providers/apartment_provider.dart';
 import 'package:frontend/shared/data/providers/async_apartment_provider.dart';
+import 'package:frontend/shared/data/providers/async_user_provider.dart';
 import 'package:frontend/shared/data/providers/expenses_provider.dart';
 import 'package:frontend/shared/data/providers/neighbours_provider.dart';
 import 'package:frontend/shared/data/providers/selected_provider.dart';
@@ -27,12 +30,15 @@ class _ExpensesTabState extends ConsumerState<ExpensesTab> {
   late String budget;
 
   final String key = "expenses";
+  late final DateTime month;
 
   Future<void> refresh(WidgetRef ref) async {
+    await ref.read(asyncUserProvider.notifier).refresh();
     ref.invalidate(asyncApartmentProvider);
     ref.invalidate(expensesProvider);
     ref.invalidate(selectedProvider(key));
     ref.read(neighboursProvider.notifier).refresh();
+    ref.read(expensesAmountByCategoryProvider(month).notifier).refresh();
   }
 
   void setBudget(String s) {
@@ -86,6 +92,8 @@ class _ExpensesTabState extends ConsumerState<ExpensesTab> {
   @override
   void initState() {
     budget = "";
+    DateTime now = DateTime.now();
+    month = DateTime(now.year, now.month);
     super.initState();
   }
 
@@ -100,6 +108,9 @@ class _ExpensesTabState extends ConsumerState<ExpensesTab> {
     final selected = ref.watch(selectedProvider(key));
     final profile = ref.watch(userProvider.select((u) => u?.profile));
     final neighboursState = ref.watch(neighboursProvider);
+    final expensesAmountByCategoriesState = ref.watch(
+      expensesAmountByCategoryProvider(month),
+    );
 
     return RefreshIndicator(
       onRefresh: () => refresh(ref),
@@ -137,7 +148,6 @@ class _ExpensesTabState extends ConsumerState<ExpensesTab> {
                   ? () => onSettingsClick(context)
                   : null,
             ),
-
           Text("Статистика", style: TextStyle(fontWeight: .w500, fontSize: 16)),
           neighboursState.when(
             data: (neighbours) => InhabitantsExpensesAmountList(
@@ -147,6 +157,15 @@ class _ExpensesTabState extends ConsumerState<ExpensesTab> {
             error: (_, _) => Text("Не удалось загрузить статистику"),
             loading: () => Center(child: CircularProgressIndicator()),
           ),
+          if (currentExpenseAmount != null && currentExpenseAmount != 0)
+            expensesAmountByCategoriesState.when(
+              data: (expensesAmountByCategories) =>
+                  ExpensesAmountByCategoriesCard(
+                    expensesAmountByCategories: expensesAmountByCategories,
+                  ),
+              loading: () => SizedBox(),
+              error: (_, _) => SizedBox(),
+            ),
           Column(
             crossAxisAlignment: .start,
             spacing: 8,

@@ -4,6 +4,7 @@ import com.example.backend.entities.Apartment;
 import com.example.backend.entities.Profile;
 import com.example.backend.entities.ProfileMonthlyExpense;
 import com.example.backend.types.ExpenseCategory;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.ListCrudRepository;
 import org.springframework.data.repository.query.Param;
@@ -53,5 +54,20 @@ public interface ProfileMonthlyExpenseRepository extends ListCrudRepository<Prof
             Month month,
             Profile profile,
             ExpenseCategory category
+    );
+    @Modifying
+    @Query("""
+        UPDATE ProfileMonthlyExpense p
+        SET p.amount = CASE
+            WHEN p.amount - :amount < 0 THEN 0
+            ELSE p.amount - :amount
+        END
+        WHERE p.profile.id = :profileId
+            AND p.expenseCategory = :category
+    """)
+    void subtractAmountByProfileAndCategory(
+            @Param("amount") Integer amount,
+            @Param("profileId") Long profileId,
+            @Param("category") ExpenseCategory category
     );
 }

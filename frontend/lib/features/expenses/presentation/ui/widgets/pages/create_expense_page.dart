@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:frontend/features/expenses/data/providers/expenses_amount_by_category_provider.dart';
 import 'package:frontend/features/expenses/presentation/ui/widgets/fields/image_uploader_field.dart';
 import 'package:frontend/features/expenses/utils/expense_validators.dart';
 import 'package:frontend/shared/data/failures/failures.dart';
@@ -38,6 +39,8 @@ class _CreateApartmentPageState extends ConsumerState<CreateExpensePage> {
 
   late String nameErrorMessage;
   late String sumErrorMessage;
+
+  late final DateTime month;
 
   void setName(String s) {
     name = s;
@@ -83,6 +86,9 @@ class _CreateApartmentPageState extends ConsumerState<CreateExpensePage> {
 
     ref.read(expensesProvider.notifier).addExpenseAmount(price!);
     ref.read(asyncUserProvider.notifier).addExpenseAmount(price!);
+    ref
+        .read(expensesAmountByCategoryProvider(month).notifier)
+        .addExpense(category, price!);
 
     try {
       await ref
@@ -104,6 +110,9 @@ class _CreateApartmentPageState extends ConsumerState<CreateExpensePage> {
       }
       ref.read(expensesProvider.notifier).addExpenseAmount(-price!);
       ref.read(asyncUserProvider.notifier).addExpenseAmount(-price!);
+      ref
+          .read(expensesAmountByCategoryProvider(month).notifier)
+          .addExpense(category, -price!);
     }
   }
 
@@ -115,6 +124,10 @@ class _CreateApartmentPageState extends ConsumerState<CreateExpensePage> {
 
     nameErrorMessage = "";
     sumErrorMessage = "";
+
+    DateTime now = .now();
+    month = DateTime(now.year, now.month);
+
     super.initState();
   }
 

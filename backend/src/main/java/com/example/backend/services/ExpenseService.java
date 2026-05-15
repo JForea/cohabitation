@@ -165,20 +165,20 @@ public class ExpenseService {
         return result;
     }
 
+    private record SubtractKey(
+       Long profileId,
+       ExpenseCategory category
+    ) {}
+
     @Transactional
     public void deleteMany(User user, Integer apartmentId, List<Long> ids) {
         List<Expense> expenses = expenseRepository.findAllByCreatedBy_Apartment_IdAndIdIn(apartmentId, ids);
         Profile profile = user.getCurrentProfile();
 
-        if (profile.getRole() != Role.INHABITANT) {
-            expenseRepository.deleteAll(expenses);
-            expenseNotificationHandler.handleManyExpensesDelete(user, expenses);
-            return;
-        }
-
         Instant now = Instant.now();
 
         List<String> filenames = new ArrayList<>();
+        Map<SubtractKey, Integer> subtractValues = new HashMap<>();
         for (Expense expense : expenses) {
             if ((!Objects.equals(expense.getCreatedBy().getId(), profile.getId()) ||
                     now.getEpochSecond() - expense.getCreatedAt().getEpochSecond() > 3600) &&
@@ -187,9 +187,23 @@ public class ExpenseService {
             }
             if (expense.getCheckImageName() != null)
                 filenames.add(expense.getCheckImageName());
+
+            SubtractKey key = new SubtractKey(expense.getCreatedBy().getId(), expense.getCategory());
+
+            subtractValues.putIfAbsent(key, 0);
+            subtractValues.put(key, subtractValues.get(key) + expense.getAmount());
         }
 
         fileStorage.deleteMany(bucketName, filenames);
+
+        for (var entry : subtractValues.entrySet()) {
+            SubtractKey key = entry.getKey();
+            profileMonthlyExpenseRepository.subtractAmountByProfileAndCategory(
+                    entry.getValue(),
+                    key.profileId(),
+                    key.category()
+            );
+        }
 
         expenseRepository.deleteAll(expenses);
     }

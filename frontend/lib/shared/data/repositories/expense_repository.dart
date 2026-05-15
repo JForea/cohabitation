@@ -10,6 +10,7 @@ import 'package:frontend/shared/data/network/dio_provider.dart';
 import 'package:frontend/shared/data/types/expense_category.dart';
 import 'package:frontend/shared/utils/util_functions.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
 
 final expenseRepositoryProvider = Provider<ExpenseRepository>((ref) {
   final dio = ref.read(dioProvider);
@@ -107,6 +108,32 @@ class ExpenseRepository {
           createdAt: DateTime.now(),
         );
       } catch (e) {
+        throw ResponseParsingFailure();
+      }
+    } on DioException catch (e) {
+      throw mapDioException(e);
+    }
+  }
+
+  Future<Map<ExpenseCategory, int>> getAmountStatsByCategoryAndMonth(
+    int apartmentId,
+    DateTime month,
+  ) async {
+    try {
+      final response = await _dio.get(
+        "${_baseUrl(apartmentId)}/stats/categories",
+        queryParameters: {"period": DateFormat("yyyy-MM").format(month)},
+      );
+
+      try {
+        Map<ExpenseCategory, int> result = {};
+        for (final category in ExpenseCategory.values) {
+          final key = UtilFunctions.tValueToStringRequest(category);
+          result[category] = response.data[key] ?? 0;
+        }
+
+        return result;
+      } catch (_) {
         throw ResponseParsingFailure();
       }
     } on DioException catch (e) {

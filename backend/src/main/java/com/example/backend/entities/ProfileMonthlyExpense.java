@@ -7,7 +7,15 @@ import java.time.Month;
 import java.time.Year;
 
 @Entity
-@Table(name = "monthly_expense")
+@Table(
+        name = "monthly_expense",
+        uniqueConstraints = {
+                @UniqueConstraint(
+                        name = "UN_monthly_expense",
+                        columnNames = {"profile_id", "expense_category", "year", "month"}
+                )
+        }
+)
 public class ProfileMonthlyExpense {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

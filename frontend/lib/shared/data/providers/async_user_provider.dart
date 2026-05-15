@@ -117,4 +117,16 @@ class AsyncUserNotifier extends AsyncNotifier<User?> {
 
     state = const AsyncData(null);
   }
+
+  Future<void> refresh() async {
+    try {
+      state = AsyncData(await _userRepository.getMe());
+    } on Failure catch (e) {
+      _localLogout();
+      if (e is UnauthorizedFailure || e is ForbiddenFailure) {
+        return;
+      }
+      rethrow;
+    }
+  }
 }

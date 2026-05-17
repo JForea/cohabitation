@@ -11,13 +11,16 @@ import com.example.backend.intefaces.FileStorage;
 import com.example.backend.repositories.ApartmentRepository;
 import com.example.backend.repositories.ExpenseRepository;
 import com.example.backend.repositories.ProfileMonthlyExpenseRepository;
-import com.example.backend.types.BuyingCategory;
+import com.example.backend.specifications.ExpenseSpecifications;
 import com.example.backend.types.ExpenseCategory;
 import com.example.backend.types.Role;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.time.*;
@@ -110,19 +113,38 @@ public class ExpenseService {
     }
 
     @Transactional
-    public List<ExpenseDto> get(Integer apartmentId, Short page, Short size) {
-        return expenseRepository.findAllByCreatedBy_Apartment_Id(apartmentId, PageRequest.of(page, size))
-                .map(
-                        expense -> {
-                            String checkImageName = expense.getCheckImageName();
-                            return new ExpenseDto(
-                                    expense,
-                                    checkImageName != null
-                                            ? fileStorage.getPresignedUrl(bucketName, checkImageName)
-                                            : null
-                            );
-                        }
-                ).toList();
+    public List<ExpenseDto> get(
+            Integer apartmentId,
+            Short page,
+            Short size,
+            Long profileId,
+            ExpenseCategory category,
+            YearMonth period
+    ) {
+        Pageable pageable = PageRequest.of(
+                page,
+                size,
+                Sort.by(Sort.Direction.DESC, "createdAt")
+        );
+
+        Specification<Expense> spec =
+                Specification.where(ExpenseSpecifications.byApartmentId(apartmentId))
+                        .and(ExpenseSpecifications.byProfileId(profileId))
+                        .and(ExpenseSpecifications.byCategory(category))
+                        .and(ExpenseSpecifications.byCategory(category))
+                        .and(ExpenseSpecifications.byPeriod(period));
+
+        return expenseRepository.findAll(spec, pageable)
+                .map(expense -> {
+                    String checkImageName = expense.getCheckImageName();
+
+                    return new ExpenseDto(
+                            expense,
+                            checkImageName != null
+                                    ? fileStorage.getPresignedUrl(bucketName, checkImageName)
+                                    : null
+                    );
+                }).toList();
     }
 
     public Integer getAmount(Integer apartmentId) {

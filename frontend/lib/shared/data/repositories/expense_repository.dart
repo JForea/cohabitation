@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/shared/data/failures/failures.dart';
 import 'package:frontend/shared/data/failures/map_dio_exceptiond.dart';
+import 'package:frontend/shared/data/filters/expenses_filter.dart';
 import 'package:frontend/shared/data/models/expense.dart';
 import 'package:frontend/shared/data/models/profile/profile.dart';
 import 'package:frontend/shared/data/models/profile/profile_brief.dart';
@@ -45,9 +46,17 @@ class ExpenseRepository {
     required int apartmentId,
     required int page,
     required int pageSize,
+    required ExpensesFilter filter,
   }) async {
     try {
-      final query = {'page': '$page', 'size': '$pageSize'};
+      final query = {
+        'page': '$page',
+        'size': '$pageSize',
+        if (filter.category != null)
+          'category': UtilFunctions.tValueToStringRequest(filter.category!),
+        if (filter.profileId != null) 'profileId': '${filter.profileId}',
+        'period': DateFormat("yyyy-MM").format(filter.month),
+      };
 
       final response = await _dio.get(
         _baseUrl(apartmentId),

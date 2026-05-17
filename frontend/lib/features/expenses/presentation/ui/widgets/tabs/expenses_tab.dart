@@ -5,6 +5,7 @@ import 'package:frontend/features/expenses/presentation/ui/widgets/cards/expense
 import 'package:frontend/features/expenses/presentation/ui/widgets/cards/monthly_expenses_card.dart';
 import 'package:frontend/features/expenses/presentation/ui/widgets/lists/expense_list.dart';
 import 'package:frontend/features/expenses/presentation/ui/widgets/lists/inhabitants_expenses_amount_list.dart';
+import 'package:frontend/shared/data/filters/expenses_filter.dart';
 import 'package:frontend/shared/data/providers/apartment_provider.dart';
 import 'package:frontend/shared/data/providers/async_apartment_provider.dart';
 import 'package:frontend/shared/data/providers/async_user_provider.dart';
@@ -18,6 +19,7 @@ import 'package:frontend/shared/presentation/ui/widgets/modals/app_modal.dart';
 import 'package:frontend/shared/presentation/ui/widgets/other/empty_message_widget.dart';
 import 'package:frontend/shared/presentation/ui/widgets/wrappers/tab_wrapper.dart';
 import 'package:frontend/shared/utils/util_functions.dart';
+import 'package:go_router/go_router.dart';
 
 class ExpensesTab extends ConsumerStatefulWidget {
   const ExpensesTab({super.key});
@@ -99,10 +101,14 @@ class _ExpensesTabState extends ConsumerState<ExpensesTab> {
 
   @override
   Widget build(BuildContext context) {
-    final expenseState = ref.watch(expensesProvider);
+    final expenseState = ref.watch(
+      expensesProvider(ExpensesFilter(month: month)),
+    );
     final budget = ref.watch(apartmentProvider.select((a) => a?.budget));
     final currentExpenseAmount = ref.watch(
-      expensesProvider.select((s) => s.value?.currentExpenseAmount),
+      expensesProvider(
+        ExpensesFilter(month: month),
+      ).select((s) => s.value?.currentExpenseAmount),
     );
     final role = ref.watch(userProvider.select((u) => u?.profile?.role));
     final selected = ref.watch(selectedProvider(key));
@@ -148,24 +154,49 @@ class _ExpensesTabState extends ConsumerState<ExpensesTab> {
                   ? () => onSettingsClick(context)
                   : null,
             ),
-          Text("Статистика", style: TextStyle(fontWeight: .w500, fontSize: 16)),
-          neighboursState.when(
-            data: (neighbours) => InhabitantsExpensesAmountList(
-              inhabitants: [?profile, ...neighbours],
-              onTap: () {},
-            ),
-            error: (_, _) => Text("Не удалось загрузить статистику"),
-            loading: () => Center(child: CircularProgressIndicator()),
-          ),
-          if (currentExpenseAmount != null && currentExpenseAmount != 0)
-            expensesAmountByCategoriesState.when(
-              data: (expensesAmountByCategories) =>
-                  ExpensesAmountByCategoriesCard(
-                    expensesAmountByCategories: expensesAmountByCategories,
+          Column(
+            children: [
+              Row(
+                children: [
+                  Text(
+                    "Статистика",
+                    style: TextStyle(fontWeight: .w500, fontSize: 16),
                   ),
-              loading: () => SizedBox(),
-              error: (_, _) => SizedBox(),
-            ),
+                  Spacer(),
+                  GestureDetector(
+                    onTap: () => context.push("/expenses/details/by-profile"),
+                    child: Text(
+                      "Подробно >",
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.primary,
+                        fontSize: 14,
+                        fontWeight: .w500,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 8),
+              neighboursState.when(
+                data: (neighbours) => InhabitantsExpensesAmountList(
+                  inhabitants: [?profile, ...neighbours],
+                  onTap: () {},
+                ),
+                error: (_, _) => Text("Не удалось загрузить статистику"),
+                loading: () => Center(child: CircularProgressIndicator()),
+              ),
+              SizedBox(height: 16),
+              if (currentExpenseAmount != null && currentExpenseAmount != 0)
+                expensesAmountByCategoriesState.when(
+                  data: (expensesAmountByCategories) =>
+                      ExpensesAmountByCategoriesCard(
+                        expensesAmountByCategories: expensesAmountByCategories,
+                      ),
+                  loading: () => SizedBox(),
+                  error: (_, _) => SizedBox(),
+                ),
+            ],
+          ),
           Column(
             crossAxisAlignment: .start,
             spacing: 8,

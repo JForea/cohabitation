@@ -54,9 +54,12 @@ public class ExpenseController {
     public ResponseEntity<List<ExpenseDto>> get(
             @PathVariable Integer apartmentId,
             @RequestParam(defaultValue = "0") Short page,
-            @RequestParam(defaultValue = "10") Short size
+            @RequestParam(defaultValue = "10") Short size,
+            @RequestParam(required = false) Long profileId,
+            @RequestParam(required = false) ExpenseCategory category,
+            @RequestParam YearMonth period
     ) {
-        List<ExpenseDto> expenses = expenseService.get(apartmentId, page, size);
+        List<ExpenseDto> expenses = expenseService.get(apartmentId, page, size, profileId, category, period);
         return ResponseEntity.ok(expenses);
     }
 

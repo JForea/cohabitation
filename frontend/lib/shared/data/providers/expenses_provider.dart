@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/shared/data/failures/failures.dart';
+import 'package:frontend/shared/data/filters/expenses_filter.dart';
 import 'package:frontend/shared/data/models/expenses_info.dart';
 import 'package:frontend/shared/data/models/profile/profile.dart';
 import 'package:frontend/shared/data/providers/apartment_provider.dart';
@@ -7,11 +8,13 @@ import 'package:frontend/shared/data/repositories/expense_repository.dart';
 import 'package:frontend/shared/data/types/expense_category.dart';
 import 'package:image_picker/image_picker.dart';
 
-final expensesProvider = AsyncNotifierProvider<ExpensesNotifier, ExpensesInfo>(
-  ExpensesNotifier.new,
-);
+final expensesProvider = AsyncNotifierProvider.family(ExpensesNotifier.new);
 
 class ExpensesNotifier extends AsyncNotifier<ExpensesInfo> {
+  ExpensesNotifier(ExpensesFilter filter) : _filter = filter;
+
+  final ExpensesFilter _filter;
+
   late ExpenseRepository _expenseRepository;
 
   late int? _apartmentId;
@@ -37,6 +40,7 @@ class ExpensesNotifier extends AsyncNotifier<ExpensesInfo> {
         apartmentId: _apartmentId!,
         page: _page,
         pageSize: _pageSize,
+        filter: _filter,
       ),
     );
   }
@@ -56,6 +60,7 @@ class ExpensesNotifier extends AsyncNotifier<ExpensesInfo> {
         apartmentId: _apartmentId!,
         page: _page + 1,
         pageSize: _pageSize,
+        filter: _filter,
       );
 
       _page++;
@@ -154,6 +159,7 @@ class ExpensesNotifier extends AsyncNotifier<ExpensesInfo> {
         apartmentId: _apartmentId!,
         page: 0,
         pageSize: _pageSize,
+        filter: _filter,
       );
 
       final amount = await _expenseRepository.getExpenseAmount(_apartmentId!);

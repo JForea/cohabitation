@@ -38,6 +38,8 @@ class InhabitantExpensesAmountCard extends StatelessWidget {
                 children: [
                   Text(
                     inhabitant.name,
+                    maxLines: 1,
+                    overflow: .ellipsis,
                     style: TextStyle(
                       color: Theme.of(context).colorScheme.onSurface,
                       fontSize: 14,

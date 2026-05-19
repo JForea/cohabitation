@@ -30,19 +30,22 @@ class _ExpensesDetailsByProfilePageState
   void selectProfile(Profile profile) {
     setState(() {
       _profile = profile;
+      ref
+          .read(expensesProvider.notifier)
+          .setFilter(
+            ExpensesFilter(
+              category: null,
+              month: _month,
+              profileId: _profile?.id,
+            ),
+          );
     });
   }
 
   void onScroll() {
     if (_scrollController.position.pixels >=
         _scrollController.position.maxScrollExtent - 200) {
-      ref
-          .read(
-            expensesProvider(
-              ExpensesFilter(month: _month, profileId: _profile?.id),
-            ).notifier,
-          )
-          .loadMore();
+      ref.read(expensesProvider.notifier).loadMore();
     }
   }
 
@@ -54,6 +57,17 @@ class _ExpensesDetailsByProfilePageState
 
     _scrollController = ScrollController();
     _scrollController.addListener(onScroll);
+
+    ref
+        .read(expensesProvider.notifier)
+        .setFilter(
+          ExpensesFilter(
+            category: null,
+            month: _month,
+            profileId: _profile?.id,
+          ),
+        );
+
     super.initState();
   }
 
@@ -61,9 +75,7 @@ class _ExpensesDetailsByProfilePageState
   Widget build(BuildContext context) {
     final userProfile = ref.watch(userProvider.select((u) => u?.profile));
     final neighboursState = ref.watch(neighboursProvider);
-    final expensesState = ref.watch(
-      expensesProvider(ExpensesFilter(month: _month, profileId: _profile?.id)),
-    );
+    final expensesState = ref.watch(expensesProvider);
 
     return Scaffold(
       body: PageWrapper(

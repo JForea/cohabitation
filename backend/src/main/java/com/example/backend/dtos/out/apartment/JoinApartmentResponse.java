@@ -4,13 +4,17 @@ import com.example.backend.dtos.out.profile.ProfileDto;
 import com.example.backend.entities.Apartment;
 import com.example.backend.entities.Profile;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
+
 public record JoinApartmentResponse(
         Integer id,
         String name,
         String address,
         Integer budget,
         Integer currentExpenseSum,
-        ProfileDto profile
+        ProfileDto profile,
+        LocalDate createdAt
 ) {
     public JoinApartmentResponse(
             Apartment apartment,
@@ -24,7 +28,8 @@ public record JoinApartmentResponse(
                 apartment.getAddress(),
                 apartment.getBudget(),
                 currentExpenseSum,
-                new ProfileDto(profile, profileExpenseAmount)
+                new ProfileDto(profile, profileExpenseAmount),
+                apartment.getCreatedAt().atZone(ZoneId.systemDefault()).toLocalDate()
         );
     }
 }

@@ -1,7 +1,9 @@
 package com.example.backend.entities;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.CreationTimestamp;
 
+import java.time.Instant;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -33,6 +35,10 @@ public class Apartment {
 
     @Column(name = "minutes_offset", nullable = false)
     private Short minutesOffset;
+
+    @CreationTimestamp
+    @Column(name = "created_at", nullable = false)
+    private Instant createdAt;
 
     public Apartment() {}
 
@@ -100,5 +106,9 @@ public class Apartment {
 
     public void setMinutesOffset(Short minutesOffset) {
         this.minutesOffset = minutesOffset;
+    }
+
+    public Instant getCreatedAt() {
+        return createdAt;
     }
 }

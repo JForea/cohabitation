@@ -14,6 +14,7 @@ import 'package:frontend/shared/data/providers/neighbours_provider.dart';
 import 'package:frontend/shared/data/providers/selected_provider.dart';
 import 'package:frontend/shared/data/providers/user_provider.dart';
 import 'package:frontend/shared/presentation/ui/widgets/buttons/custom_text_button.dart';
+import 'package:frontend/shared/presentation/ui/widgets/buttons/details_text_button.dart';
 import 'package:frontend/shared/presentation/ui/widgets/inputs/controlled_named_text_field.dart';
 import 'package:frontend/shared/presentation/ui/widgets/modals/app_modal.dart';
 import 'package:frontend/shared/presentation/ui/widgets/other/empty_message_widget.dart';
@@ -96,19 +97,22 @@ class _ExpensesTabState extends ConsumerState<ExpensesTab> {
     budget = "";
     DateTime now = DateTime.now();
     month = DateTime(now.year, now.month);
+
+    ref
+        .read(expensesProvider.notifier)
+        .setFilter(
+          ExpensesFilter(category: null, month: month, profileId: null),
+        );
+
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    final expenseState = ref.watch(
-      expensesProvider(ExpensesFilter(month: month)),
-    );
+    final expenseState = ref.watch(expensesProvider);
     final budget = ref.watch(apartmentProvider.select((a) => a?.budget));
     final currentExpenseAmount = ref.watch(
-      expensesProvider(
-        ExpensesFilter(month: month),
-      ).select((s) => s.value?.currentExpenseAmount),
+      expensesProvider.select((s) => s.value?.currentExpenseAmount),
     );
     final role = ref.watch(userProvider.select((u) => u?.profile?.role));
     final selected = ref.watch(selectedProvider(key));
@@ -163,16 +167,9 @@ class _ExpensesTabState extends ConsumerState<ExpensesTab> {
                     style: TextStyle(fontWeight: .w500, fontSize: 16),
                   ),
                   Spacer(),
-                  GestureDetector(
+                  DetailsTextButton(
                     onTap: () => context.push("/expenses/details/by-profile"),
-                    child: Text(
-                      "Подробно >",
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.primary,
-                        fontSize: 14,
-                        fontWeight: .w500,
-                      ),
-                    ),
+                    text: "Подробно >",
                   ),
                 ],
               ),
@@ -201,9 +198,18 @@ class _ExpensesTabState extends ConsumerState<ExpensesTab> {
             crossAxisAlignment: .start,
             spacing: 8,
             children: [
-              Text(
-                "Последние расходы",
-                style: TextStyle(fontWeight: .w500, fontSize: 16),
+              Row(
+                children: [
+                  Text(
+                    "Последние расходы",
+                    style: TextStyle(fontWeight: .w500, fontSize: 16),
+                  ),
+                  Spacer(),
+                  DetailsTextButton(
+                    onTap: () => context.push("/expenses/details/by-month"),
+                    text: "Все >",
+                  ),
+                ],
               ),
               expenseState.when(
                 data: (state) => state.expenses.isEmpty

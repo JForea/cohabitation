@@ -8,7 +8,6 @@ import 'package:frontend/features/expenses/data/providers/expenses_amount_by_cat
 import 'package:frontend/features/expenses/presentation/ui/widgets/fields/image_uploader_field.dart';
 import 'package:frontend/features/expenses/utils/expense_validators.dart';
 import 'package:frontend/shared/data/failures/failures.dart';
-import 'package:frontend/shared/data/filters/expenses_filter.dart';
 import 'package:frontend/shared/data/providers/async_user_provider.dart';
 import 'package:frontend/shared/data/providers/expenses_provider.dart';
 import 'package:frontend/shared/data/providers/user_provider.dart';
@@ -85,9 +84,7 @@ class _CreateApartmentPageState extends ConsumerState<CreateExpensePage> {
 
     if (!ok) return;
 
-    ref
-        .read(expensesProvider(ExpensesFilter(month: month)).notifier)
-        .addExpenseAmount(price!);
+    ref.read(expensesProvider.notifier).addExpenseAmount(price!);
     ref.read(asyncUserProvider.notifier).addExpenseAmount(price!);
     ref
         .read(expensesAmountByCategoryProvider(month).notifier)
@@ -95,7 +92,7 @@ class _CreateApartmentPageState extends ConsumerState<CreateExpensePage> {
 
     try {
       await ref
-          .read(expensesProvider(ExpensesFilter(month: month)).notifier)
+          .read(expensesProvider.notifier)
           .create(
             name: name,
             amount: price!,
@@ -111,9 +108,7 @@ class _CreateApartmentPageState extends ConsumerState<CreateExpensePage> {
       if (context.mounted) {
         showErrorDialog(context, e.message);
       }
-      ref
-          .read(expensesProvider(ExpensesFilter(month: month)).notifier)
-          .addExpenseAmount(-price!);
+      ref.read(expensesProvider.notifier).addExpenseAmount(-price!);
       ref.read(asyncUserProvider.notifier).addExpenseAmount(-price!);
       ref
           .read(expensesAmountByCategoryProvider(month).notifier)

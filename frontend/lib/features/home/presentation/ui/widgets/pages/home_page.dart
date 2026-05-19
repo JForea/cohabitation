@@ -7,7 +7,6 @@ import 'package:frontend/features/home/data/providers/page_provider.dart';
 import 'package:frontend/features/home/presentation/ui/widgets/tabs/home_tab.dart';
 import 'package:frontend/features/profile/presentation/ui/widgets/tabs/profile_tab.dart';
 import 'package:frontend/features/tasks/presentation/ui/widgets/tabs/tasks_tab.dart';
-import 'package:frontend/shared/data/filters/expenses_filter.dart';
 import 'package:frontend/shared/data/providers/buyings_provider.dart';
 import 'package:frontend/shared/data/providers/expenses_provider.dart';
 import 'package:frontend/shared/data/providers/selected_provider.dart';
@@ -76,9 +75,7 @@ class _HomePageState extends ConsumerState<HomePage> {
             ? () => context.push("/expenses/create")
             : () async {
                 await ref
-                    .read(
-                      expensesProvider(ExpensesFilter(month: month)).notifier,
-                    )
+                    .read(expensesProvider.notifier)
                     .deleteMany(ref.read(selectedProvider(key)).toList());
                 ref.invalidate(selectedProvider(key));
               },

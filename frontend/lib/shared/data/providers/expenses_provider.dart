@@ -8,12 +8,10 @@ import 'package:frontend/shared/data/repositories/expense_repository.dart';
 import 'package:frontend/shared/data/types/expense_category.dart';
 import 'package:image_picker/image_picker.dart';
 
-final expensesProvider = AsyncNotifierProvider.family(ExpensesNotifier.new);
+final expensesProvider = AsyncNotifierProvider(ExpensesNotifier.new);
 
 class ExpensesNotifier extends AsyncNotifier<ExpensesInfo> {
-  ExpensesNotifier(ExpensesFilter filter) : _filter = filter;
-
-  final ExpensesFilter _filter;
+  late ExpensesFilter _filter;
 
   late ExpenseRepository _expenseRepository;
 
@@ -31,6 +29,9 @@ class ExpensesNotifier extends AsyncNotifier<ExpensesInfo> {
     _apartmentId = ref.watch(apartmentProvider.select((a) => a?.id));
 
     if (_apartmentId == null) throw NotInApartmentFailure();
+
+    final now = DateTime.now();
+    _filter = ExpensesFilter(month: DateTime(now.year, now.month));
 
     return ExpensesInfo(
       currentExpenseAmount: await _expenseRepository.getExpenseAmount(
@@ -173,5 +174,10 @@ class ExpensesNotifier extends AsyncNotifier<ExpensesInfo> {
     } finally {
       _isLoading = false;
     }
+  }
+
+  Future<void> setFilter(ExpensesFilter filter) async {
+    _filter = filter;
+    await refresh();
   }
 }

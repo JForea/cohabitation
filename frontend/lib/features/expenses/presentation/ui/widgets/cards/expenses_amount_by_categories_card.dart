@@ -29,7 +29,7 @@ class ExpensesAmountByCategoriesCard extends StatelessWidget {
 
   final Map<ExpenseCategory, int> expensesAmountByCategories;
 
-  _getColor(ExpenseCategory category) {
+  Color _getColor(ExpenseCategory category) {
     return switch (category) {
       .householdGoods => AppColors.purple,
       .housinAndCommunalServices => AppColors.green,

@@ -40,6 +40,7 @@ class ApartmentNotifier extends AsyncNotifier<Apartment?> {
         Apartment(
           address: address,
           budget: createApartmentResponse.budget,
+          createdAt: createApartmentResponse.createdAt,
           id: createApartmentResponse.id,
           name: name,
         ),

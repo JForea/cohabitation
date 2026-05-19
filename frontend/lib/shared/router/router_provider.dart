@@ -5,6 +5,7 @@ import 'package:frontend/features/auth/login/presentation/ui/widgets/pages/login
 import 'package:frontend/features/buyings/presentation/ui/widgets/pages/create_buying_page.dart';
 import 'package:frontend/features/events/presentation/ui/widgets/pages/events_page.dart';
 import 'package:frontend/features/expenses/presentation/ui/widgets/pages/create_expense_page.dart';
+import 'package:frontend/features/expenses/presentation/ui/widgets/pages/expenses_details_by_month_page.dart';
 import 'package:frontend/features/expenses/presentation/ui/widgets/pages/expenses_details_by_profile_page.dart';
 import 'package:frontend/features/notifications/ui/presentation/widgets/pages/notifications_page.dart';
 import 'package:frontend/features/settings/presentation/ui/widgets/pages/settings_page.dart';
@@ -119,6 +120,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: "/expenses/details/by-profile",
         builder: (context, state) => ExpensesDetailsByProfilePage(),
+      ),
+      GoRoute(
+        path: "/expenses/details/by-month",
+        builder: (context, state) => ExpensesDetailsByMonthPage(),
       ),
       GoRoute(path: "/settings", builder: (context, state) => SettingsPage()),
     ],

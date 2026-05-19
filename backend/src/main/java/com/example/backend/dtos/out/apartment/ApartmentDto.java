@@ -2,14 +2,17 @@ package com.example.backend.dtos.out.apartment;
 
 import com.example.backend.entities.Apartment;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
+
 public record ApartmentDto(
         Integer id,
         String name,
         String address,
         Integer budget,
         Integer currentExpenseSum,
-        String inviteCode
-) {
+        String inviteCode,
+        LocalDate createdAt) {
     public ApartmentDto(Apartment apartment, Integer currentExpenseSum, String inviteCode) {
         this(
                 apartment.getId(),
@@ -17,7 +20,8 @@ public record ApartmentDto(
                 apartment.getAddress(),
                 apartment.getBudget(),
                 currentExpenseSum,
-                inviteCode
+                inviteCode,
+                apartment.getCreatedAt().atZone(ZoneId.systemDefault()).toLocalDate()
         );
     }
 }

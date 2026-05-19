@@ -80,9 +80,8 @@ public class ApartmentService {
         userRepository.save(user);
 
         return new CreateApartmentResponse(
-                apartment.getId(),
-                apartment.getBudget(),
-                new ProfileDto(profile, 0)
+                apartment,
+                profile
         );
     }
 

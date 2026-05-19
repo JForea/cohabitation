@@ -5,6 +5,7 @@ class Apartment {
     required this.id,
     required this.name,
     this.inviteCode,
+    required this.createdAt,
   });
 
   factory Apartment.fromJson(Map<String, dynamic> json) {
@@ -14,6 +15,7 @@ class Apartment {
       id: json["id"] as int,
       name: json["name"] as String,
       inviteCode: json["inviteCode"] as String?,
+      createdAt: DateTime.parse(json["createdAt"]),
     );
   }
 
@@ -22,6 +24,7 @@ class Apartment {
   final String? address;
   final int budget;
   final String? inviteCode;
+  final DateTime createdAt;
 
   Apartment copyWith({
     int? id,
@@ -29,13 +32,18 @@ class Apartment {
     String? address,
     int? budget,
     String? inviteCode,
+    DateTime? createdAt,
+    bool? clearInviteCode,
   }) {
     return Apartment(
       budget: budget ?? this.budget,
       id: id ?? this.id,
       name: name ?? this.name,
       address: address ?? this.address,
-      inviteCode: inviteCode ?? this.inviteCode,
+      inviteCode: clearInviteCode != null && clearInviteCode
+          ? null
+          : inviteCode ?? this.inviteCode,
+      createdAt: createdAt ?? this.createdAt,
     );
   }
 }

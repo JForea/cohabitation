@@ -25,7 +25,7 @@ class ProfileList extends StatelessWidget {
           final p = profiles[index];
 
           return Padding(
-            padding: const EdgeInsets.only(right: 8),
+            padding: EdgeInsets.only(right: 8),
             child: Avatar(
               name: p.name,
               size: 40,

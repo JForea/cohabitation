@@ -6,7 +6,7 @@ import 'package:frontend/shared/data/models/task.dart';
 import 'package:frontend/shared/data/providers/apartment_provider.dart';
 import 'package:frontend/shared/data/repositories/task_repository.dart';
 import 'package:frontend/shared/data/types/room.dart';
-import 'package:frontend/shared/data/types/task_filter.dart';
+import 'package:frontend/shared/data/filters/task_filter.dart';
 import 'package:frontend/shared/data/types/task_priority.dart';
 
 final tasksProvider = AsyncNotifierProvider<_TasksNotifier, List<Task>>(
@@ -24,7 +24,7 @@ class _TasksNotifier extends AsyncNotifier<List<Task>> {
   bool _hasMore = true;
   bool _isLoading = false;
 
-  TaskFilter _filter = const TaskFilter();
+  late TaskFilter _filter;
 
   @override
   Future<List<Task>> build() async {
@@ -32,6 +32,8 @@ class _TasksNotifier extends AsyncNotifier<List<Task>> {
     _taskRepository = ref.read(taskRepositoryProvider);
 
     if (_apartmentId == null) NotInApartmentFailure();
+
+    _filter = TaskFilter();
 
     return _taskRepository.getPage(
       apartmentId: _apartmentId!,
@@ -82,6 +84,8 @@ class _TasksNotifier extends AsyncNotifier<List<Task>> {
         apartmentId: _apartmentId!,
         page: 0,
         pageSize: _pageSize,
+        assignedTo: _filter.assignedTo,
+        done: _filter.done,
       );
 
       _page = 0;
@@ -93,7 +97,7 @@ class _TasksNotifier extends AsyncNotifier<List<Task>> {
     }
   }
 
-  Future<void> switchFilter({int? assignedTo, bool? done}) async {
+  Future<void> setFilter({int? assignedTo, bool? done}) async {
     _filter = TaskFilter(assignedTo: assignedTo, done: done);
 
     await refresh();

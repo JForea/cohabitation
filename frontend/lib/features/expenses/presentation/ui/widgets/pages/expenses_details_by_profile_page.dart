@@ -21,6 +21,8 @@ class ExpensesDetailsByProfilePage extends ConsumerStatefulWidget {
 
 class _ExpensesDetailsByProfilePageState
     extends ConsumerState<ExpensesDetailsByProfilePage> {
+  late final ScrollController _scrollController;
+
   late Profile? _profile;
 
   late final DateTime _month;
@@ -31,11 +33,27 @@ class _ExpensesDetailsByProfilePageState
     });
   }
 
+  void onScroll() {
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - 200) {
+      ref
+          .read(
+            expensesProvider(
+              ExpensesFilter(month: _month, profileId: _profile?.id),
+            ).notifier,
+          )
+          .loadMore();
+    }
+  }
+
   @override
   void initState() {
     _profile = ref.read(userProvider.select((u) => u?.profile));
     final now = DateTime.now();
     _month = DateTime(now.year, now.month);
+
+    _scrollController = ScrollController();
+    _scrollController.addListener(onScroll);
     super.initState();
   }
 

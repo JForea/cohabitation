@@ -9,6 +9,7 @@ class PageWrapper extends StatelessWidget {
     required this.bottomFloatingButtonExists,
     required this.pathIfCantPop,
     required this.children,
+    this.controller,
   });
 
   final List<Widget> children;
@@ -16,10 +17,12 @@ class PageWrapper extends StatelessWidget {
   final bool backButton;
   final bool bottomFloatingButtonExists;
   final String pathIfCantPop;
+  final ScrollController? controller;
 
   @override
   Widget build(BuildContext context) {
     return CustomScrollView(
+      controller: controller,
       slivers: [
         SliverPadding(
           padding: EdgeInsets.only(

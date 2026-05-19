@@ -66,7 +66,7 @@ class _NotificationsNotifier extends AsyncNotifier<List<NotificationValue>> {
         _hasMore = false;
       }
 
-      state = AsyncData(notifications);
+      state = AsyncData([...previous, ...notifications]);
     } finally {
       _isLoading = false;
     }

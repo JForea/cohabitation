@@ -6,15 +6,18 @@ class TabWrapper extends StatelessWidget {
     required this.children,
     required this.floatingButtonExists,
     required this.appBarExists,
+    this.scrollController,
   });
 
   final List<Widget> children;
   final bool floatingButtonExists;
   final bool appBarExists;
+  final ScrollController? scrollController;
 
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
+      controller: scrollController,
       physics: AlwaysScrollableScrollPhysics(),
       child: Container(
         padding: .only(

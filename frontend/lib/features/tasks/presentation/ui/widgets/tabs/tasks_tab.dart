@@ -10,14 +10,21 @@ import 'package:frontend/shared/presentation/ui/widgets/other/empty_message_widg
 import 'package:frontend/shared/presentation/ui/widgets/snack_bars/message_snack_bar.dart';
 import 'package:frontend/shared/presentation/ui/widgets/wrappers/tab_wrapper.dart';
 
-class TasksTab extends ConsumerWidget {
+class TasksTab extends ConsumerStatefulWidget {
   const TasksTab({super.key});
 
-  final String selectedKey = "tasks";
+  @override
+  ConsumerState<ConsumerStatefulWidget> createState() => _TasksTabState();
+}
+
+class _TasksTabState extends ConsumerState<TasksTab> {
+  late final ScrollController _scrollController;
+
+  late final String _selectedKey;
 
   Future<void> _refresh(WidgetRef ref, int apartmentId) async {
     await ref.read(tasksProvider.notifier).refresh();
-    ref.invalidate(selectedProvider(selectedKey));
+    ref.invalidate(selectedProvider(_selectedKey));
   }
 
   Future<void> switchStatus(
@@ -26,7 +33,7 @@ class TasksTab extends ConsumerWidget {
     int apartmentId,
     Task task,
   ) async {
-    final currentTaskDone = task.completedBy != null;
+    late final currentTaskDone = task.completedBy != null;
 
     try {
       await ref
@@ -49,23 +56,40 @@ class TasksTab extends ConsumerWidget {
   }
 
   void onSelect(WidgetRef ref, int id) {
-    ref.read(selectedProvider(selectedKey).notifier).select(id);
+    ref.read(selectedProvider(_selectedKey).notifier).select(id);
   }
 
   void onSelectCancel(WidgetRef ref, int id) {
-    ref.read(selectedProvider(selectedKey).notifier).selectCancel(id);
+    ref.read(selectedProvider(_selectedKey).notifier).selectCancel(id);
+  }
+
+  void onScroll() {
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - 200) {
+      ref.read(tasksProvider.notifier).loadMore();
+    }
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  void initState() {
+    super.initState();
+
+    _selectedKey = "tasks";
+    _scrollController = ScrollController();
+    _scrollController.addListener(onScroll);
+  }
+
+  @override
+  Widget build(BuildContext context) {
     int apartmentId = ref.watch(apartmentProvider.select((a) => a!.id));
-    final selectedTasks = ref.watch(selectedProvider(selectedKey));
+    final selectedTasks = ref.watch(selectedProvider(_selectedKey));
     final tasksState = ref.watch(tasksProvider);
 
     return RefreshIndicator(
       onRefresh: () => _refresh(ref, apartmentId),
       child: TabWrapper(
         appBarExists: false,
+        scrollController: _scrollController,
         floatingButtonExists: true,
         children: [
           const Text(

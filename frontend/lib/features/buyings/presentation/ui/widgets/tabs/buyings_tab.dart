@@ -7,34 +7,58 @@ import 'package:frontend/shared/data/providers/user_provider.dart';
 import 'package:frontend/shared/presentation/ui/widgets/other/empty_message_widget.dart';
 import 'package:frontend/shared/presentation/ui/widgets/wrappers/tab_wrapper.dart';
 
-class BuyingsTab extends ConsumerWidget {
+class BuyingsTab extends ConsumerStatefulWidget {
   const BuyingsTab({super.key});
 
-  final String selectedKey = "buyings";
+  @override
+  ConsumerState<ConsumerStatefulWidget> createState() => _BuyingsTabstate();
+}
+
+class _BuyingsTabstate extends ConsumerState<BuyingsTab> {
+  late final ScrollController _scrollController;
+
+  late final String _selectedKey;
 
   Future<void> _refresh(WidgetRef ref, int apartmentId) async {
-    ref.invalidate(selectedProvider(selectedKey));
+    ref.invalidate(selectedProvider(_selectedKey));
     await ref.read(buyingsProvider.notifier).refresh();
   }
 
   void onSelect(WidgetRef ref, int id) {
-    ref.read(selectedProvider(selectedKey).notifier).select(id);
+    ref.read(selectedProvider(_selectedKey).notifier).select(id);
   }
 
   void onSelectCancel(WidgetRef ref, int id) {
-    ref.read(selectedProvider(selectedKey).notifier).selectCancel(id);
+    ref.read(selectedProvider(_selectedKey).notifier).selectCancel(id);
+  }
+
+  void onScroll() {
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - 200) {
+      ref.read(buyingsProvider.notifier).loadMore();
+    }
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  void initState() {
+    super.initState();
+
+    _selectedKey = "buyings";
+    _scrollController = ScrollController();
+    _scrollController.addListener(onScroll);
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final profile = ref.watch(userProvider.select((u) => u!.profile!));
     int apartmentId = profile.apartmentId;
     final buyingsState = ref.watch(buyingsProvider);
-    final buyingsSelected = ref.watch(selectedProvider(selectedKey));
+    final buyingsSelected = ref.watch(selectedProvider(_selectedKey));
 
     return RefreshIndicator(
       onRefresh: () => _refresh(ref, apartmentId),
       child: TabWrapper(
+        scrollController: _scrollController,
         appBarExists: false,
         floatingButtonExists: true,
         children: [

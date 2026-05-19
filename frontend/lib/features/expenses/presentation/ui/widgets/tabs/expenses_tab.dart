@@ -202,7 +202,7 @@ class _ExpensesTabState extends ConsumerState<ExpensesTab> {
             spacing: 8,
             children: [
               Text(
-                "История",
+                "Последние расходы",
                 style: TextStyle(fontWeight: .w500, fontSize: 16),
               ),
               expenseState.when(
@@ -216,7 +216,7 @@ class _ExpensesTabState extends ConsumerState<ExpensesTab> {
                         ),
                       )
                     : ExpenseList(
-                        expenses: state.expenses,
+                        expenses: state.expenses.take(5).toList(),
                         selected: selected,
                         onSelect: onSelect,
                         onSelectCancel: onSelectCancel,

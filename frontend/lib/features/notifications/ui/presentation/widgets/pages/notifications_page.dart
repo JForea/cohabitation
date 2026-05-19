@@ -7,8 +7,16 @@ import 'package:frontend/shared/presentation/ui/widgets/buttons/custom_app_float
 import 'package:frontend/shared/presentation/ui/widgets/snack_bars/message_snack_bar.dart';
 import 'package:frontend/shared/presentation/ui/widgets/wrappers/page_wrapper.dart';
 
-class NotificationsPage extends ConsumerWidget {
+class NotificationsPage extends ConsumerStatefulWidget {
   const NotificationsPage({super.key});
+
+  @override
+  ConsumerState<ConsumerStatefulWidget> createState() =>
+      _NotificationsPageState();
+}
+
+class _NotificationsPageState extends ConsumerState<NotificationsPage> {
+  late final ScrollController _scrollController;
 
   Future<void> _refresh(WidgetRef ref) async {
     await ref.read(notificationsProvider.notifier).refresh();
@@ -60,8 +68,29 @@ class NotificationsPage extends ConsumerWidget {
     }
   }
 
+  void onScroll() {
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - 200) {
+      ref.read(notificationsProvider.notifier).loadMore();
+    }
+  }
+
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  void initState() {
+    super.initState();
+
+    _scrollController = ScrollController();
+    _scrollController.addListener(onScroll);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final notifications = ref.watch(notificationsProvider);
 
     return RefreshIndicator(
@@ -75,6 +104,7 @@ class NotificationsPage extends ConsumerWidget {
           backButton: true,
           pathIfCantPop: "/",
           pageName: "Уведомления",
+          controller: _scrollController,
           bottomFloatingButtonExists: true,
           children: [
             notifications.when(

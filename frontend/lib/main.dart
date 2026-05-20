@@ -13,14 +13,14 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 Future<void> main() async {
   await dotenv.load(fileName: ".env");
 
-  WidgetsFlutterBinding.ensureInitialized();
-
-  await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
-
   final authSession = AuthSession(FlutterSecureStorage());
   await authSession.init();
 
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
 
   await initializeDateFormatting("ru_RU");
 

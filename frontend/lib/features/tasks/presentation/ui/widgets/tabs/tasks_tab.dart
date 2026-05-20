@@ -78,10 +78,12 @@ class _TasksTabState extends ConsumerState<TasksTab> {
   }
 
   void onSelectFilter(TaskFilter filter, int index) {
-    ref.read(tasksTabIndexProvider.notifier).setIndex(index);
-    ref
-        .read(tasksProvider.notifier)
-        .setFilter(assignedTo: filter.assignedTo, done: filter.done);
+    if (index != ref.read(tasksTabIndexProvider)) {
+      ref.read(tasksTabIndexProvider.notifier).setIndex(index);
+      ref
+          .read(tasksProvider.notifier)
+          .setFilter(assignedTo: filter.assignedTo, done: filter.done);
+    }
   }
 
   @override

@@ -3,18 +3,19 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/shared/data/failures/failures.dart';
 import 'package:frontend/shared/data/failures/map_dio_exceptiond.dart';
 import 'package:frontend/shared/data/models/rule.dart';
-import 'package:frontend/shared/data/network/dio_provider.dart';
+import 'package:frontend/shared/data/network/api_client.dart';
+import 'package:frontend/shared/data/network/api_client_provider.dart';
 
 final ruleRepositoryProvider = Provider<RuleRepository>((ref) {
-  final dio = ref.read(dioProvider);
+  final apiClient = ref.read(apiClientProvider);
 
-  return RuleRepository(dio);
+  return RuleRepository(apiClient);
 });
 
 class RuleRepository {
-  RuleRepository(this._dio);
+  RuleRepository(this._apiClient);
 
-  final Dio _dio;
+  final ApiClient _apiClient;
 
   String _baseUrl(int apartmentId) {
     return "/apartments/$apartmentId/rules";
@@ -22,11 +23,9 @@ class RuleRepository {
 
   Future<List<Rule>> getAll(int apartmentId) async {
     try {
-      final response = await _dio.get(_baseUrl(apartmentId));
+      final response = await _apiClient.get(_baseUrl(apartmentId));
 
-      return (response.data as List)
-          .map((json) => Rule.fromJson(json))
-          .toList();
+      return (response as List).map((json) => Rule.fromJson(json)).toList();
     } on DioException catch (e) {
       throw mapDioException(e);
     }
@@ -34,13 +33,13 @@ class RuleRepository {
 
   Future<Rule> create(int apartmentId, String text) async {
     try {
-      final response = await _dio.post(
+      final response = await _apiClient.post(
         _baseUrl(apartmentId),
         data: {"text": text},
       );
 
       try {
-        return Rule(id: response.data["id"] as int, text: text);
+        return Rule(id: response["id"] as int, text: text);
       } catch (e) {
         throw ResponseParsingFailure();
       }
@@ -51,7 +50,7 @@ class RuleRepository {
 
   Future<void> delete(int apartmentId, int ruleId) async {
     try {
-      await _dio.delete("${_baseUrl(apartmentId)}/$ruleId");
+      await _apiClient.delete("${_baseUrl(apartmentId)}/$ruleId");
     } on DioException catch (e) {
       throw mapDioException(e);
     }

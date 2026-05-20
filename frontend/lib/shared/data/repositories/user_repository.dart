@@ -3,18 +3,20 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/shared/data/failures/failures.dart';
 import 'package:frontend/shared/data/failures/map_dio_exceptiond.dart';
 import 'package:frontend/shared/data/models/user.dart';
-import 'package:frontend/shared/data/network/dio_provider.dart';
+import 'package:frontend/shared/data/network/api_client.dart';
+import 'package:frontend/shared/data/network/api_client_provider.dart';
 
 final userRepositoryProvider = Provider<UserRepository>((ref) {
-  final dio = ref.read(dioProvider);
+  final apiClient = ref.read(apiClientProvider);
 
-  return UserRepository(dio);
+  return UserRepository(apiClient);
 });
 
 class UserRepository {
-  UserRepository(this._dio, {String baseUrl = "/users"}) : _baseUrl = baseUrl;
+  UserRepository(this._apiClient, {String baseUrl = "/users"})
+    : _baseUrl = baseUrl;
 
-  final Dio _dio;
+  final ApiClient _apiClient;
   final String _baseUrl;
 
   Future<User> authorize(
@@ -32,7 +34,7 @@ class UserRepository {
     }
 
     try {
-      final response = await _dio.post(
+      final response = await _apiClient.post(
         '$_baseUrl/auth/${register ? "registry" : "login"}',
         data: {
           "email": email,
@@ -49,7 +51,7 @@ class UserRepository {
       );
 
       try {
-        return User.fromJson(response.data);
+        return User.fromJson(response);
       } catch (e) {
         throw ResponseParsingFailure();
       }
@@ -68,9 +70,9 @@ class UserRepository {
 
   Future<User> getMe() async {
     try {
-      final response = await _dio.get("$_baseUrl/me");
+      final response = await _apiClient.get("$_baseUrl/me");
       try {
-        return User.fromJson(response.data);
+        return User.fromJson(response);
       } catch (e) {
         throw ResponseParsingFailure();
       }
@@ -81,7 +83,10 @@ class UserRepository {
 
   Future<void> logout(String deviceId) async {
     try {
-      await _dio.post("$_baseUrl/auth/logout", data: {"deviceId": deviceId});
+      await _apiClient.post(
+        "$_baseUrl/auth/logout",
+        data: {"deviceId": deviceId},
+      );
     } on DioException catch (e) {
       throw mapDioException(e);
     }

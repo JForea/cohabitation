@@ -5,21 +5,22 @@ import 'package:frontend/shared/data/failures/map_dio_exceptiond.dart';
 import 'package:frontend/shared/data/models/profile/profile.dart';
 import 'package:frontend/shared/data/models/profile/profile_brief.dart';
 import 'package:frontend/shared/data/models/task.dart';
-import 'package:frontend/shared/data/network/dio_provider.dart';
+import 'package:frontend/shared/data/network/api_client.dart';
+import 'package:frontend/shared/data/network/api_client_provider.dart';
 import 'package:frontend/shared/data/types/room.dart';
 import 'package:frontend/shared/data/types/task_priority.dart';
 import 'package:frontend/shared/utils/util_functions.dart';
 
 final taskRepositoryProvider = Provider<TaskRepository>((ref) {
-  final dio = ref.read(dioProvider);
+  final apiClient = ref.read(apiClientProvider);
 
-  return TaskRepository(dio);
+  return TaskRepository(apiClient);
 });
 
 class TaskRepository {
-  TaskRepository(this._dio);
+  TaskRepository(this._apiClient);
 
-  final Dio _dio;
+  final ApiClient _apiClient;
 
   String _baseUrl(int apartmentId) {
     return "/apartments/$apartmentId/tasks";
@@ -40,13 +41,13 @@ class TaskRepository {
         if (done != null) 'done': '$done',
       };
 
-      final response = await _dio.get(
+      final response = await _apiClient.get(
         _baseUrl(apartmentId),
         queryParameters: query,
       );
 
       try {
-        final data = response.data as List;
+        final data = response as List;
 
         return data.map((taskJson) => Task.fromJson(taskJson)).toList();
       } catch (e) {
@@ -73,7 +74,7 @@ class TaskRepository {
           ? null
           : DateTime.now().add(Duration(days: dueDateOffset));
 
-      final response = await _dio.post(
+      final response = await _apiClient.post(
         _baseUrl(apartmentId),
         data: {
           "name": name,
@@ -90,7 +91,7 @@ class TaskRepository {
 
       try {
         return Task(
-          id: response.data["id"] as int,
+          id: response["id"] as int,
           createdBy: ProfileBrief.fromFullProfile(craeatedBy),
           name: name,
           description: description,
@@ -116,7 +117,7 @@ class TaskRepository {
     Profile userProfile,
   ) async {
     try {
-      await _dio.patch("${_baseUrl(apartmentId)}/$taskId");
+      await _apiClient.patch("${_baseUrl(apartmentId)}/$taskId");
     } on DioException catch (e) {
       throw mapDioException(e);
     }
@@ -124,7 +125,7 @@ class TaskRepository {
 
   Future<void> deleteMany(int apartmentId, List<int> ids) async {
     try {
-      await _dio.delete(_baseUrl(apartmentId), data: ids);
+      await _apiClient.delete(_baseUrl(apartmentId), data: ids);
     } on DioException catch (e) {
       throw mapDioException(e);
     }

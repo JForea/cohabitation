@@ -3,18 +3,19 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/shared/data/failures/failures.dart';
 import 'package:frontend/shared/data/failures/map_dio_exceptiond.dart';
 import 'package:frontend/shared/data/models/notification_value.dart';
-import 'package:frontend/shared/data/network/dio_provider.dart';
+import 'package:frontend/shared/data/network/api_client.dart';
+import 'package:frontend/shared/data/network/api_client_provider.dart';
 
 final notificationRepositoryProvider = Provider<NotificationRepository>((ref) {
-  final dio = ref.read(dioProvider);
+  final apiClient = ref.read(apiClientProvider);
 
-  return NotificationRepository(dio);
+  return NotificationRepository(apiClient);
 });
 
 class NotificationRepository {
-  NotificationRepository(this._dio);
+  NotificationRepository(this._apiClient);
 
-  final Dio _dio;
+  final ApiClient _apiClient;
 
   String _baseUrl(int apartmentId) {
     return "/apartments/$apartmentId/notifications";
@@ -28,13 +29,13 @@ class NotificationRepository {
     try {
       final query = {"page": page, "size": pageSize};
 
-      final response = await _dio.get(
+      final response = await _apiClient.get(
         _baseUrl(apartmentId),
         queryParameters: query,
       );
 
       try {
-        return (response.data as List)
+        return (response as List)
             .map((n) => NotificationValue.fromJson(n))
             .toList();
       } catch (e) {
@@ -47,7 +48,7 @@ class NotificationRepository {
 
   Future<void> markAsRead(int apartmentId, int notificationId) async {
     try {
-      await _dio.patch("${_baseUrl(apartmentId)}/$notificationId");
+      await _apiClient.patch("${_baseUrl(apartmentId)}/$notificationId");
     } on DioException catch (e) {
       throw mapDioException(e);
     }
@@ -55,7 +56,7 @@ class NotificationRepository {
 
   Future<void> markAsReadAll(int apartmentId) async {
     try {
-      await _dio.patch(_baseUrl(apartmentId));
+      await _apiClient.patch(_baseUrl(apartmentId));
     } on DioException catch (e) {
       throw mapDioException(e);
     }
@@ -63,9 +64,11 @@ class NotificationRepository {
 
   Future<int> getUnreadCount(int apartmentId) async {
     try {
-      final response = await _dio.get("${_baseUrl(apartmentId)}/unread-count");
+      final response = await _apiClient.get(
+        "${_baseUrl(apartmentId)}/unread-count",
+      );
       try {
-        return response.data;
+        return response;
       } catch (e) {
         throw ResponseParsingFailure();
       }

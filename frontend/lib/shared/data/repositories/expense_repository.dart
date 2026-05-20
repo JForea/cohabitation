@@ -7,22 +7,23 @@ import 'package:frontend/shared/data/filters/expenses_filter.dart';
 import 'package:frontend/shared/data/models/expense.dart';
 import 'package:frontend/shared/data/models/profile/profile.dart';
 import 'package:frontend/shared/data/models/profile/profile_brief.dart';
-import 'package:frontend/shared/data/network/dio_provider.dart';
+import 'package:frontend/shared/data/network/api_client.dart';
+import 'package:frontend/shared/data/network/api_client_provider.dart';
 import 'package:frontend/shared/data/types/expense_category.dart';
 import 'package:frontend/shared/utils/util_functions.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 
 final expenseRepositoryProvider = Provider<ExpenseRepository>((ref) {
-  final dio = ref.read(dioProvider);
+  final apiClient = ref.read(apiClientProvider);
 
-  return ExpenseRepository(dio);
+  return ExpenseRepository(apiClient);
 });
 
 class ExpenseRepository {
-  ExpenseRepository(this._dio);
+  ExpenseRepository(this._apiClient);
 
-  final Dio _dio;
+  final ApiClient _apiClient;
 
   String _baseUrl(int apartmentId) {
     return "/apartments/$apartmentId/expenses";
@@ -30,10 +31,10 @@ class ExpenseRepository {
 
   Future<int> getExpenseAmount(int apartmentId) async {
     try {
-      final response = await _dio.get("${_baseUrl(apartmentId)}/amount");
+      final response = await _apiClient.get("${_baseUrl(apartmentId)}/amount");
 
       try {
-        return response.data;
+        return response;
       } catch (e) {
         throw ResponseParsingFailure();
       }
@@ -58,12 +59,12 @@ class ExpenseRepository {
         'period': DateFormat("yyyy-MM").format(filter.month),
       };
 
-      final response = await _dio.get(
+      final response = await _apiClient.get(
         _baseUrl(apartmentId),
         queryParameters: query,
       );
 
-      final data = response.data as List;
+      final data = response as List;
 
       try {
         return data.map((json) => Expense.fromJson(json)).toList();
@@ -104,13 +105,16 @@ class ExpenseRepository {
           ),
       });
 
-      final response = await _dio.post(_baseUrl(apartmentId), data: formData);
+      final response = await _apiClient.post(
+        _baseUrl(apartmentId),
+        data: formData,
+      );
 
       try {
         return Expense(
-          id: response.data["id"],
+          id: response["id"],
           category: category,
-          checkImageUrl: response.data["checkImageUrl"],
+          checkImageUrl: response["checkImageUrl"],
           name: name,
           createdBy: ProfileBrief.fromFullProfile(createdBy),
           amount: amount,
@@ -129,7 +133,7 @@ class ExpenseRepository {
     DateTime month,
   ) async {
     try {
-      final response = await _dio.get(
+      final response = await _apiClient.get(
         "${_baseUrl(apartmentId)}/stats/categories",
         queryParameters: {"period": DateFormat("yyyy-MM").format(month)},
       );
@@ -138,7 +142,7 @@ class ExpenseRepository {
         Map<ExpenseCategory, int> result = {};
         for (final category in ExpenseCategory.values) {
           final key = UtilFunctions.tValueToStringRequest(category);
-          result[category] = response.data[key] ?? 0;
+          result[category] = response[key] ?? 0;
         }
 
         return result;
@@ -152,7 +156,7 @@ class ExpenseRepository {
 
   Future<void> deleteMany(int apartmentId, List<int> ids) async {
     try {
-      await _dio.delete(_baseUrl(apartmentId), data: ids);
+      await _apiClient.delete(_baseUrl(apartmentId), data: ids);
     } on DioException catch (e) {
       throw mapDioException(e);
     }

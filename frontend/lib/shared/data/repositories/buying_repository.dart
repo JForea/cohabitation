@@ -6,18 +6,19 @@ import 'package:frontend/shared/data/failures/map_dio_exceptiond.dart';
 import 'package:frontend/shared/data/models/buying.dart';
 import 'package:frontend/shared/data/models/profile/profile.dart';
 import 'package:frontend/shared/data/models/profile/profile_brief.dart';
-import 'package:frontend/shared/data/network/dio_provider.dart';
+import 'package:frontend/shared/data/network/api_client.dart';
+import 'package:frontend/shared/data/network/api_client_provider.dart';
 
 final buyingRepositoryProvider = Provider<BuyingRepository>((ref) {
-  final dio = ref.read(dioProvider);
+  final apiClient = ref.read(apiClientProvider);
 
-  return BuyingRepository(dio);
+  return BuyingRepository(apiClient);
 });
 
 class BuyingRepository {
-  BuyingRepository(this._dio);
+  BuyingRepository(this._apiClient);
 
-  final Dio _dio;
+  final ApiClient _apiClient;
 
   String _baseUrl(int apartmentId) {
     return "/apartments/$apartmentId/buyings";
@@ -38,12 +39,12 @@ class BuyingRepository {
         if (isPublic != null) 'isPublic': '$isPublic',
       };
 
-      final response = await _dio.get(
+      final response = await _apiClient.get(
         _baseUrl(apartmentId),
         queryParameters: query,
       );
 
-      final data = response.data as List;
+      final data = response as List;
 
       try {
         return data.map((buyingJson) => Buying.fromJson(buyingJson)).toList();
@@ -63,7 +64,7 @@ class BuyingRepository {
     required bool isPublic,
   }) async {
     try {
-      final response = await _dio.post(
+      final response = await _apiClient.post(
         _baseUrl(apartmentId),
         data: {
           "name": buyingRedacted.name,
@@ -76,7 +77,7 @@ class BuyingRepository {
 
       try {
         return Buying(
-          id: response.data["id"] as int,
+          id: response["id"] as int,
           createdBy: ProfileBrief.fromFullProfile(createdBy),
           name: buyingRedacted.name,
           quantity: buyingRedacted.quantity,
@@ -101,7 +102,7 @@ class BuyingRepository {
     required bool isPublic,
   }) async {
     try {
-      final response = await _dio.post(
+      final response = await _apiClient.post(
         "${_baseUrl(apartmentId)}/bulk",
         data: {
           "buyings": buyingsRedacted
@@ -124,7 +125,7 @@ class BuyingRepository {
         for (int i = 0; i < buyingsRedacted.length; i++) {
           buyings.add(
             Buying(
-              id: response.data[i]["id"] as int,
+              id: response[i]["id"] as int,
               createdBy: ProfileBrief.fromFullProfile(createdBy),
               name: buyingsRedacted[i].name,
               quantity: buyingsRedacted[i].quantity,
@@ -148,7 +149,7 @@ class BuyingRepository {
     required Profile userProfile,
   }) async {
     try {
-      await _dio.patch("${_baseUrl(apartmentId)}/$buyingId");
+      await _apiClient.patch("${_baseUrl(apartmentId)}/$buyingId");
     } on DioException catch (e) {
       throw mapDioException(e);
     }
@@ -156,7 +157,7 @@ class BuyingRepository {
 
   Future<void> deleteMany(int apartmentId, List<int> ids) async {
     try {
-      await _dio.delete(_baseUrl(apartmentId), data: ids);
+      await _apiClient.delete(_baseUrl(apartmentId), data: ids);
     } on DioException catch (e) {
       throw mapDioException(e);
     }

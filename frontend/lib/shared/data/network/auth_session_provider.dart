@@ -3,7 +3,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 final authSessionProvider = Provider<AuthSession>((ref) {
   final session = AuthSession(FlutterSecureStorage());
-  ref.onDispose(session.clearCache);
+  // ref.onDispose(session.clearCache);
   return session;
 });
 

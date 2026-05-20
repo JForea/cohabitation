@@ -3,19 +3,20 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/shared/data/failures/failures.dart';
 import 'package:frontend/shared/data/failures/map_dio_exceptiond.dart';
 import 'package:frontend/shared/data/models/profile/profile.dart';
-import 'package:frontend/shared/data/network/dio_provider.dart';
+import 'package:frontend/shared/data/network/api_client.dart';
+import 'package:frontend/shared/data/network/api_client_provider.dart';
 import 'package:frontend/shared/data/types/role.dart';
 
 final profileRepositoryProvider = Provider<ProfileRepository>((ref) {
-  final dio = ref.read(dioProvider);
+  final apiClient = ref.read(apiClientProvider);
 
-  return ProfileRepository(dio);
+  return ProfileRepository(apiClient);
 });
 
 class ProfileRepository {
-  ProfileRepository(this._dio);
+  ProfileRepository(this._apiClient);
 
-  final Dio _dio;
+  final ApiClient _apiClient;
 
   String _baseUrl(int apartmentId) {
     return "/apartments/$apartmentId/profiles";
@@ -28,13 +29,13 @@ class ProfileRepository {
     try {
       final query = {"excludeMe": "$excludeMe"};
 
-      final response = await _dio.get(
+      final response = await _apiClient.get(
         _baseUrl(apartmentId),
         queryParameters: query,
       );
 
       try {
-        return (response.data as List)
+        return (response as List)
             .map((json) => Profile.fromJson(json))
             .toList();
       } catch (e) {
@@ -47,7 +48,7 @@ class ProfileRepository {
 
   Future<void> kick(int apartmentId, int profileId) async {
     try {
-      await _dio.post("${_baseUrl(apartmentId)}/$profileId/kick");
+      await _apiClient.post("${_baseUrl(apartmentId)}/$profileId/kick");
     } on DioException catch (e) {
       throw mapDioException(e);
     }
@@ -55,7 +56,7 @@ class ProfileRepository {
 
   Future<void> setRole(int apartmentId, int profileId, Role role) async {
     try {
-      await _dio.patch(
+      await _apiClient.patch(
         "${_baseUrl(apartmentId)}/$profileId",
         queryParameters: {"role": role.name.toUpperCase()},
       );

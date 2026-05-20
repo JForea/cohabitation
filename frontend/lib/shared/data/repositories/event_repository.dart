@@ -6,20 +6,21 @@ import 'package:frontend/shared/data/failures/map_dio_exceptiond.dart';
 import 'package:frontend/shared/data/models/event.dart';
 import 'package:frontend/shared/data/models/profile/profile.dart';
 import 'package:frontend/shared/data/models/profile/profile_brief.dart';
-import 'package:frontend/shared/data/network/dio_provider.dart';
+import 'package:frontend/shared/data/network/api_client.dart';
+import 'package:frontend/shared/data/network/api_client_provider.dart';
 import 'package:frontend/shared/utils/util_functions.dart';
 import 'package:intl/intl.dart';
 
 final eventRepositoryProvider = Provider<EventRepository>((ref) {
-  final dio = ref.read(dioProvider);
+  final apiClient = ref.read(apiClientProvider);
 
-  return EventRepository(dio);
+  return EventRepository(apiClient);
 });
 
 class EventRepository {
-  EventRepository(this._dio);
+  EventRepository(this._apiClient);
 
-  final Dio _dio;
+  final ApiClient _apiClient;
 
   String _baseUrl(int apartmentId) {
     return "/apartments/$apartmentId/events";
@@ -32,15 +33,13 @@ class EventRepository {
         "month": DateFormat.MMMM("en_US").format(month).toUpperCase(),
       };
 
-      final response = await _dio.get(
+      final response = await _apiClient.get(
         "${_baseUrl(apartmentId)}/calendar",
         queryParameters: query,
       );
 
       try {
-        return (response.data as List)
-            .map((date) => DateTime.parse(date))
-            .toSet();
+        return (response as List).map((date) => DateTime.parse(date)).toSet();
       } catch (e) {
         throw ResponseParsingFailure();
       }
@@ -51,12 +50,12 @@ class EventRepository {
 
   Future<List<Event>> getEventsByDay(int apartmentId, DateTime day) async {
     try {
-      final response = await _dio.get(
+      final response = await _apiClient.get(
         "${_baseUrl(apartmentId)}/day/${UtilFunctions.dateToStringRequest(day)}",
       );
 
       try {
-        return (response.data as List).map((e) => Event.fromJson(e)).toList();
+        return (response as List).map((e) => Event.fromJson(e)).toList();
       } catch (e) {
         throw ResponseParsingFailure();
       }
@@ -76,7 +75,7 @@ class EventRepository {
     try {
       String twoDigits(int n) => n.toString().padLeft(2, '0');
 
-      final response = await _dio.post(
+      final response = await _apiClient.post(
         _baseUrl(apartmentId),
         data: {
           "name": name,
@@ -90,7 +89,7 @@ class EventRepository {
 
       try {
         return Event(
-          id: response.data["id"],
+          id: response["id"],
           createdBy: ProfileBrief.fromFullProfile(createdBy),
           name: name,
           description: description,

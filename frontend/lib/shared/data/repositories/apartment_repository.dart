@@ -5,25 +5,26 @@ import 'package:frontend/shared/data/failures/failures.dart';
 import 'package:frontend/shared/data/failures/map_dio_exceptiond.dart';
 import 'package:frontend/shared/data/models/apartment.dart';
 import 'package:frontend/shared/data/dtos/create_apartment_response.dart';
-import 'package:frontend/shared/data/network/dio_provider.dart';
+import 'package:frontend/shared/data/network/api_client.dart';
+import 'package:frontend/shared/data/network/api_client_provider.dart';
 
 final apartmentRepositoryProvider = Provider<ApartmentRepository>((ref) {
-  final dio = ref.read(dioProvider);
+  final apiClient = ref.read(apiClientProvider);
 
-  return ApartmentRepository(dio);
+  return ApartmentRepository(apiClient);
 });
 
 class ApartmentRepository {
-  ApartmentRepository(this._dio, {String baseUrl = "/apartments"})
+  ApartmentRepository(this._apiClient, {String baseUrl = "/apartments"})
     : _baseUrl = baseUrl;
 
-  final Dio _dio;
+  final ApiClient _apiClient;
   final String _baseUrl;
 
   Future<Apartment> get(int apartmentId) async {
     try {
-      final response = await _dio.get("$_baseUrl/$apartmentId");
-      return Apartment.fromJson(response.data);
+      final response = await _apiClient.get("$_baseUrl/$apartmentId");
+      return Apartment.fromJson(response);
     } on DioException catch (e) {
       throw mapDioException(e);
     }
@@ -36,7 +37,7 @@ class ApartmentRepository {
     try {
       final minutesOffset = DateTime.now().timeZoneOffset.inMinutes;
 
-      final response = await _dio.post(
+      final response = await _apiClient.post(
         _baseUrl,
         data: {
           "name": name,
@@ -46,7 +47,7 @@ class ApartmentRepository {
       );
 
       try {
-        return CreateApartmentResponse.fromJson(response.data);
+        return CreateApartmentResponse.fromJson(response);
       } catch (e) {
         throw ResponseParsingFailure();
       }
@@ -61,13 +62,13 @@ class ApartmentRepository {
 
   Future<JoinApartmentResponse> join(String inviteCode) async {
     try {
-      final response = await _dio.post(
+      final response = await _apiClient.post(
         "$_baseUrl/join",
         queryParameters: {'code': inviteCode},
       );
 
       try {
-        return JoinApartmentResponse.fromJson(response.data);
+        return JoinApartmentResponse.fromJson(response);
       } catch (e) {
         throw ResponseParsingFailure();
       }
@@ -82,7 +83,7 @@ class ApartmentRepository {
 
   Future<void> leave() async {
     try {
-      await _dio.post("$_baseUrl/leave");
+      await _apiClient.post("$_baseUrl/leave");
     } on DioException catch (e) {
       if (e.response?.statusCode == 403) {
         throw NotInApartmentFailure();
@@ -94,8 +95,8 @@ class ApartmentRepository {
 
   Future<String> generateCode(int apartmentId) async {
     try {
-      final response = await _dio.patch("$_baseUrl/$apartmentId/code");
-      return response.data["inviteCode"];
+      final response = await _apiClient.patch("$_baseUrl/$apartmentId/code");
+      return response["inviteCode"];
     } on DioException catch (e) {
       throw mapDioException(e);
     }
@@ -103,7 +104,7 @@ class ApartmentRepository {
 
   Future<void> setBudget(int apartmentId, int budget) async {
     try {
-      await _dio.patch(
+      await _apiClient.patch(
         "$_baseUrl/$apartmentId/budget",
         data: {"budget": budget},
       );
@@ -114,7 +115,7 @@ class ApartmentRepository {
 
   Future<void> delete(int apartmentId) async {
     try {
-      await _dio.delete("$_baseUrl/$apartmentId");
+      await _apiClient.delete("$_baseUrl/$apartmentId");
     } on DioException catch (e) {
       throw mapDioException(e);
     }

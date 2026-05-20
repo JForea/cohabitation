@@ -27,13 +27,15 @@ class BuyingRepository {
     required int apartmentId,
     required int page,
     required int pageSize,
-    required bool isPublic,
+    required int? assignedTo,
+    required bool? isPublic,
   }) async {
     try {
       final query = {
         'page': '$page',
         'size': '$pageSize',
-        'isPublic': '$isPublic',
+        if (assignedTo != null) 'assignedTo': '$assignedTo',
+        if (isPublic != null) 'isPublic': '$isPublic',
       };
 
       final response = await _dio.get(

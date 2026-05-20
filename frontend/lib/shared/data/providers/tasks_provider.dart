@@ -72,10 +72,14 @@ class _TasksNotifier extends AsyncNotifier<List<Task>> {
     }
   }
 
-  Future<void> refresh() async {
+  Future<void> refresh({bool? fullRefresh}) async {
     if (_apartmentId == null) throw NotInApartmentFailure();
 
     if (_isLoading) return;
+
+    if (fullRefresh != null && fullRefresh) {
+      state = AsyncLoading();
+    }
 
     _isLoading = true;
 
@@ -100,7 +104,7 @@ class _TasksNotifier extends AsyncNotifier<List<Task>> {
   Future<void> setFilter({int? assignedTo, bool? done}) async {
     _filter = TaskFilter(assignedTo: assignedTo, done: done);
 
-    await refresh();
+    await refresh(fullRefresh: true);
   }
 
   Future<void> create({

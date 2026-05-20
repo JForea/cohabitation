@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:frontend/shared/data/filters/buying_filter.dart';
 import 'package:frontend/features/buyings/data/models/buying_redacted.dart';
 import 'package:frontend/shared/data/failures/failures.dart';
 import 'package:frontend/shared/data/models/buying.dart';
@@ -26,6 +27,8 @@ class _BuyingNotifier extends AsyncNotifier<Map<BuyingCategory, List<Buying>>> {
 
   late int? _apartmentId;
 
+  late BuyingFilter _filter;
+
   @override
   Future<Map<BuyingCategory, List<Buying>>> build() async {
     _buyingsRepository = ref.read(buyingRepositoryProvider);
@@ -35,6 +38,8 @@ class _BuyingNotifier extends AsyncNotifier<Map<BuyingCategory, List<Buying>>> {
       throw NotInApartmentFailure();
     }
 
+    _filter = BuyingFilter();
+
     _page = 0;
     _hasMore = true;
     _isLoading = false;
@@ -43,7 +48,8 @@ class _BuyingNotifier extends AsyncNotifier<Map<BuyingCategory, List<Buying>>> {
       apartmentId: _apartmentId!,
       page: _page,
       pageSize: _pageSize,
-      isPublic: true,
+      assignedTo: _filter.assignedTo,
+      isPublic: _filter.isPublic,
     );
 
     final map = <BuyingCategory, List<Buying>>{};
@@ -194,7 +200,8 @@ class _BuyingNotifier extends AsyncNotifier<Map<BuyingCategory, List<Buying>>> {
         apartmentId: _apartmentId!,
         page: _page + 1,
         pageSize: _pageSize,
-        isPublic: true,
+        assignedTo: _filter.assignedTo,
+        isPublic: _filter.isPublic,
       );
 
       _page++;
@@ -213,7 +220,7 @@ class _BuyingNotifier extends AsyncNotifier<Map<BuyingCategory, List<Buying>>> {
     }
   }
 
-  Future<void> refresh() async {
+  Future<void> refresh({bool? fullRefresh}) async {
     if (_apartmentId == null) throw NotInApartmentFailure();
 
     final previous = state;
@@ -222,7 +229,9 @@ class _BuyingNotifier extends AsyncNotifier<Map<BuyingCategory, List<Buying>>> {
     final previousHasMore = _hasMore;
 
     try {
-      state = AsyncLoading();
+      if (fullRefresh != null && fullRefresh) {
+        state = AsyncLoading();
+      }
 
       final current = <BuyingCategory, List<Buying>>{};
 
@@ -230,7 +239,8 @@ class _BuyingNotifier extends AsyncNotifier<Map<BuyingCategory, List<Buying>>> {
         apartmentId: _apartmentId!,
         page: 0,
         pageSize: _pageSize,
-        isPublic: true,
+        assignedTo: _filter.assignedTo,
+        isPublic: _filter.isPublic,
       );
 
       _page = 0;
@@ -275,5 +285,10 @@ class _BuyingNotifier extends AsyncNotifier<Map<BuyingCategory, List<Buying>>> {
 
       rethrow;
     }
+  }
+
+  Future<void> setFilter(BuyingFilter filter) async {
+    _filter = filter;
+    await refresh(fullRefresh: true);
   }
 }

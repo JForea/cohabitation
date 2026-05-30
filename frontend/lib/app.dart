@@ -15,18 +15,22 @@ class App extends ConsumerWidget {
     final router = ref.watch(routerProvider);
 
     if (authState.isLoading) {
-      return MaterialApp(
-        theme: customTheme,
-        builder: (context, child) =>
-            Scaffold(body: Center(child: CircularProgressIndicator())),
+      return SafeArea(
+        child: MaterialApp(
+          theme: customTheme,
+          builder: (context, child) =>
+              Scaffold(body: Center(child: CircularProgressIndicator())),
+        ),
       );
     }
 
-    return MaterialApp.router(
-      debugShowCheckedModeBanner: false,
-      title: 'Flutter Demo',
-      theme: customTheme,
-      routerConfig: router,
+    return SafeArea(
+      child: MaterialApp.router(
+        debugShowCheckedModeBanner: false,
+        title: 'Flutter Demo',
+        theme: customTheme,
+        routerConfig: router,
+      ),
     );
   }
 }

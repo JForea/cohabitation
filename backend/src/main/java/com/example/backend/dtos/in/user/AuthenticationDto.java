@@ -7,11 +7,12 @@ import jakarta.validation.constraints.NotNull;
 import org.hibernate.validator.constraints.Length;
 
 public record AuthenticationDto(
-    @Email(message = "Email is invalid.")
-    @NotBlank(message = "Email must be provided.")
-    String email,
-    @NotBlank(message = "Password must be provided.")
-    @Length(min = 8, max = 32, message = "Password length must be 8-32 characters length.")
-    String password,
-    DeviceTokenDto deviceToken
+        @Length(max = 255)
+        @Email(message = "Email is invalid.")
+        @NotBlank(message = "Email must be provided.")
+        String email,
+        @NotBlank(message = "Password must be provided.")
+        @Length(min = 8, max = 32, message = "Password length must be 8-32 characters length.")
+        String password,
+        DeviceTokenDto deviceToken
 ) {}

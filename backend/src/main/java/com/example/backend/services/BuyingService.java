@@ -43,9 +43,6 @@ public class BuyingService {
 
     @Transactional
     public IdResponse<Long> create(User user, CreateBuyingDto dto) {
-        if (!dto.isPublic() && dto.assignedTo() != null)
-            throw new BadRequestException("Buying shouldn't be private and have assigned user at the same time.");
-
         Profile createdBy = user.getCurrentProfile();
         Profile assignedTo = null;
         if (dto.assignedTo() != null) {
@@ -72,9 +69,6 @@ public class BuyingService {
 
     @Transactional
     public List<IdResponse<Long>> createMany(User user, CreateManyBuyingsDto dto) {
-        if (!dto.isPublic() && dto.assignedTo() != null)
-            throw new BadRequestException("Buying shouldn't be private and have assigned user at the same time.");
-
         Profile createdBy = user.getCurrentProfile();
         Profile assignedTo;
         if (dto.assignedTo() != null) {
@@ -100,9 +94,6 @@ public class BuyingService {
     }
 
     public List<BuyingDto> get(Integer apartmentId, User user, Integer assignedTo, Boolean isPublic) {
-        if (assignedTo != null && isPublic != null && !isPublic)
-            throw new BadRequestException("You can't view others buying lists.");
-
         Specification<Buying> spec = Specification
                 .where(BuyingSpecifications.byApartment(apartmentId))
                 .and(BuyingSpecifications.byAssignedTo(assignedTo))

@@ -42,7 +42,7 @@ public class NotificationService implements
     private final IPushNotificationService iPushNotificationService;
 
     public NotificationService(ProfileNotificationRepository profileNotificationRepository,
-                               NotificationTextFactory iNotificationTextFactory,
+                               INotificationTextFactory iNotificationTextFactory,
                                NotificationRepository notificationRepository,
                                ProfileRepository profileRepository,
                                IPushNotificationService iPushNotificationService) {
@@ -231,15 +231,17 @@ public class NotificationService implements
     public void handleManyTasksDelete(User user, List<Task> tasks) {
         Profile profile = user.getCurrentProfile();
         for (Task task : tasks) {
-            new Notification(
-                    profile,
-                    NotificationType.TASK_DELETED,
-                    EntityType.TASK,
-                    Map.of(
-                            "taskId", task.getId(),
-                            "taskName", task.getName(),
-                            "userName", profile.getName(),
-                            "points", task.getPoints()
+            notificationRepository.save(
+                    new Notification(
+                            profile,
+                            NotificationType.TASK_DELETED,
+                            EntityType.TASK,
+                            Map.of(
+                                    "taskId", task.getId(),
+                                    "taskName", task.getName(),
+                                    "userName", profile.getName(),
+                                    "points", task.getPoints()
+                            )
                     )
             );
         }

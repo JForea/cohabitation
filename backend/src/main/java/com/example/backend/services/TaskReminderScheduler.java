@@ -17,6 +17,7 @@ import java.time.ZoneOffset;
 import java.util.*;
 
 @Service
+@Transactional
 public class TaskReminderScheduler {
 
     private static final Logger log = LoggerFactory.getLogger(TaskReminderScheduler.class);
@@ -31,14 +32,13 @@ public class TaskReminderScheduler {
     }
 
     @Scheduled(cron = "0 0 * * * *")
-    @Transactional
     public void sendTaskReminders() {
         List<Task> tasks = taskRepository.findAllForReminder();
 
         Set<Integer> userIds = new HashSet<>();
         List<TokenDto> tokens = new ArrayList<>();
 
-        int remindingTime = 1 * 55;
+        int remindingTime = 8 * 60;
 
         for (Task task : tasks) {
             short minutesOffset =

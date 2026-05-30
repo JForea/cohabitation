@@ -3,8 +3,8 @@ package com.example.backend.services;
 import com.example.backend.dtos.inner.TokenDto;
 import com.example.backend.intefaces.IPushNotificationService;
 import com.example.backend.repositories.DeviceTokenRepository;
-import com.google.firebase.FirebaseApp;
 import com.google.firebase.messaging.*;
+import jakarta.transaction.Transactional;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -33,6 +33,7 @@ public class PushNotificationService implements IPushNotificationService {
     }
 
     @Async("pushExecutor")
+    @Transactional
     public void send(
             List<TokenDto> tokenDtos,
             String title,
@@ -66,9 +67,15 @@ public class PushNotificationService implements IPushNotificationService {
                     badTokenDeviceIds.add(tokenDtos.get(i).id());
             }
 
-            deviceTokenRepository.deleteByIdIn(badTokenDeviceIds);
+            if (!badTokenDeviceIds.isEmpty())
+                deleteInvalidDevices(badTokenDeviceIds);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Transactional
+    private void deleteInvalidDevices(List<Integer> badTokenDeviceIds) {
+        deviceTokenRepository.deleteByIdIn(badTokenDeviceIds);
     }
 }

@@ -1,7 +1,6 @@
 package com.example.backend.dtos.out.tasks;
 
 import com.example.backend.dtos.out.profile.ProfileBriefDto;
-import com.example.backend.dtos.out.profile.ProfileDto;
 import com.example.backend.entities.Task;
 import com.example.backend.types.Room;
 import com.example.backend.types.TaskPriority;

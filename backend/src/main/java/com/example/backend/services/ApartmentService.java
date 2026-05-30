@@ -5,7 +5,6 @@ import com.example.backend.dtos.out.apartment.ApartmentDto;
 import com.example.backend.dtos.out.apartment.CreateApartmentResponse;
 import com.example.backend.dtos.out.apartment.InviteCodeResponse;
 import com.example.backend.dtos.out.apartment.JoinApartmentResponse;
-import com.example.backend.dtos.out.profile.ProfileDto;
 import com.example.backend.entities.*;
 import com.example.backend.exceptions.ResourceNotFoundException;
 import com.example.backend.exceptions.StateConflictException;
@@ -113,7 +112,6 @@ public class ApartmentService {
 
             profile.setLeftAt(null);
             profile.setName(user.getName());
-            profile.setAvatarColor(user.getAvatarColor());
             profile.setRole(Role.INHABITANT);
             profileRepository.save(profile);
 
@@ -175,6 +173,8 @@ public class ApartmentService {
         boolean generated = false;
         StringBuilder inviteCodeBuilder = new StringBuilder();
         while (!generated) {
+            inviteCodeBuilder = new StringBuilder();
+
             for (int i = 0; i < inviteCodeLength; i++) {
                 inviteCodeBuilder.append(charset.charAt(random.nextInt(charset.length())));
             }

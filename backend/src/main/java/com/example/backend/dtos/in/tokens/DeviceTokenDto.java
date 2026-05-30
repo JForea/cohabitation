@@ -10,6 +10,7 @@ public record DeviceTokenDto(
         @Length(max=255)
         String deviceId,
         @NotBlank
+        @Length(max=2048)
         String token,
         @NotNull
         Platform platform

@@ -66,7 +66,6 @@ public class ImageService implements FileStorage {
 
             try {
                 String originalName = image.getOriginalFilename();
-                assert originalName != null;
 
                 String filename = UUID.randomUUID().toString().replace("-", "") +
                         originalName.substring(originalName.lastIndexOf("."));
@@ -144,6 +143,7 @@ public class ImageService implements FileStorage {
 
         } catch (Exception e) {
             log.error("Delete many images error: ", e);
+            throw new RuntimeException("Delete many images error.", e);
         }
     }
 }

@@ -24,4 +24,5 @@ public interface UserRepository extends ListCrudRepository<User, Integer> {
         WHERE u.id = :id
     """)
     void setCurrentProfileNullWhereId(Integer id);
+    Boolean existsByEmail(String email);
 }

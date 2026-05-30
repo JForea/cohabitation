@@ -34,7 +34,7 @@ public class EventService {
     }
 
     @Transactional
-    public IdResponse<Long> create(User user, Integer apartmentId, CreateEventRequest dto) {
+    public IdResponse<Long> create(User user, CreateEventRequest dto) {
         Event event = eventRepository.save(new Event(
                 user.getCurrentProfile(),
                 dto.name(),

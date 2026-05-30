@@ -4,6 +4,7 @@ import com.example.backend.dtos.in.user.AuthenticationDto;
 import com.example.backend.dtos.in.user.RegisterDto;
 import com.example.backend.dtos.out.user.UserDto;
 import com.example.backend.entities.User;
+import com.example.backend.exceptions.StateConflictException;
 import com.example.backend.repositories.ProfileMonthlyExpenseRepository;
 import com.example.backend.repositories.UserRepository;
 import com.example.backend.types.Color;
@@ -40,6 +41,9 @@ public class UserService {
     }
 
     public UserDto create(RegisterDto dto) {
+        if (userRepository.existsByEmail(dto.email()))
+            throw new StateConflictException("Email is occupied.");
+
         User user = userRepository.save(new User(
                 dto.email(),
                 passwordEncoder.encode(dto.password()),

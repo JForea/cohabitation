@@ -5,7 +5,6 @@ import com.example.backend.dtos.out.notifications.NotificationDto;
 import com.example.backend.entities.*;
 import com.example.backend.exceptions.BadRequestException;
 import com.example.backend.exceptions.ResourceNotFoundException;
-import com.example.backend.factories.NotificationTextFactory;
 import com.example.backend.intefaces.*;
 import com.example.backend.repositories.NotificationRepository;
 import com.example.backend.repositories.ProfileNotificationRepository;

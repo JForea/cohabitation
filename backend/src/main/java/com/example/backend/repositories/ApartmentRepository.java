@@ -30,4 +30,5 @@ public interface ApartmentRepository extends ListCrudRepository<Apartment, Integ
             @Param("id") Integer id,
             @Param("budget") Integer budget
     );
+    boolean existsByName(String name);
 }

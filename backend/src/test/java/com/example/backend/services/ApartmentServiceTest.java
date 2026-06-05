@@ -11,7 +11,6 @@ import com.example.backend.entities.User;
 import com.example.backend.exceptions.ResourceNotFoundException;
 import com.example.backend.intefaces.ApartmentNotificationHandler;
 import com.example.backend.repositories.ApartmentRepository;
-import com.example.backend.repositories.ProfileMonthlyExpenseRepository;
 import com.example.backend.repositories.ProfileRepository;
 import com.example.backend.repositories.UserRepository;
 import com.example.backend.types.Color;
@@ -44,9 +43,6 @@ public class ApartmentServiceTest {
 
     @Mock
     private UserRepository userRepository;
-
-    @Mock
-    private ProfileMonthlyExpenseRepository profileMonthlyExpenseRepository;
 
     @Mock
     private ApartmentNotificationHandler apartmentNotificationHandler;
@@ -223,15 +219,6 @@ public class ApartmentServiceTest {
         when(apartmentRepository.findByInviteCode(inviteCode)).thenReturn(Optional.of(apartment));
 
         when(profileRepository.findByApartmentAndUser(apartment, user)).thenReturn(Optional.of(oldProfile));
-
-        Integer monthlyExpenses = 0;
-
-        when(profileMonthlyExpenseRepository.getSumByProfileAndYearAndMonth(
-                any(Profile.class),
-                anyInt(),
-                any(Month.class)
-        )).thenReturn(monthlyExpenses);
-
 
         ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
         ArgumentCaptor<Profile> profileCaptor = ArgumentCaptor.forClass(Profile.class);

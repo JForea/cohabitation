@@ -10,7 +10,6 @@ import com.example.backend.intefaces.ExpenseNotificationHandler;
 import com.example.backend.intefaces.FileStorage;
 import com.example.backend.repositories.ApartmentRepository;
 import com.example.backend.repositories.ExpenseRepository;
-import com.example.backend.repositories.ProfileMonthlyExpenseRepository;
 import com.example.backend.specifications.ExpenseSpecifications;
 import com.example.backend.types.ExpenseCategory;
 import com.example.backend.types.Role;
@@ -34,8 +33,6 @@ public class ExpenseService {
 
     private final FileStorage fileStorage;
 
-    private final ProfileMonthlyExpenseRepository profileMonthlyExpenseRepository;
-
     private final ExpenseNotificationHandler expenseNotificationHandler;
 
     private final ApartmentRepository apartmentRepository;
@@ -44,12 +41,10 @@ public class ExpenseService {
 
     public ExpenseService(ExpenseRepository expenseRepository,
                           FileStorage fileStorage,
-                          ProfileMonthlyExpenseRepository profileMonthlyExpenseRepository,
                           ExpenseNotificationHandler expenseNotificationHandler,
                           ApartmentRepository apartmentRepository) {
         this.expenseRepository = expenseRepository;
         this.fileStorage = fileStorage;
-        this.profileMonthlyExpenseRepository = profileMonthlyExpenseRepository;
         this.expenseNotificationHandler = expenseNotificationHandler;
         this.apartmentRepository = apartmentRepository;
     }
@@ -75,28 +70,6 @@ public class ExpenseService {
             );
 
             expenseRepository.save(expense);
-
-            Calendar calendar = Calendar.getInstance();
-
-            Month month = Month.of(calendar.get(Calendar.MONTH));
-            Year year = Year.of(calendar.get(Calendar.YEAR));
-
-            ProfileMonthlyExpense monthlyExpense =
-                    profileMonthlyExpenseRepository.findByYearAndMonthAndProfileAndExpenseCategory(
-                            year.getValue(),
-                            month,
-                            user.getCurrentProfile(),
-                            dto.category()
-                    ).orElse(new ProfileMonthlyExpense(
-                            user.getCurrentProfile(),
-                            dto.category(),
-                            year,
-                            month
-                    ));
-
-            monthlyExpense.addAmount(expense.getAmount());
-
-            profileMonthlyExpenseRepository.save(monthlyExpense);
 
             expenseNotificationHandler.handleExpenseCreate(user, expense);
 
@@ -148,36 +121,68 @@ public class ExpenseService {
     }
 
     public Integer getAmount(Integer apartmentId) {
-        Calendar calendar = Calendar.getInstance();
-
-        Month month = Month.of(calendar.get(Calendar.MONTH));
-        Year year = Year.of(calendar.get(Calendar.YEAR));
-
-        Integer amount = profileMonthlyExpenseRepository.getSumByApartmentIdAndYearAndMonth(
-                apartmentId,
-                year.getValue(),
-                month
+        Apartment apartment = apartmentRepository.findById(apartmentId).orElseThrow(() ->
+                new ResourceNotFoundException("Apartment not found.")
         );
 
-        if (amount == null)
-            amount = 0;
+        YearMonth currentMonth = YearMonth.now();
 
-        return amount;
+        ZoneOffset offset = ZoneOffset.ofTotalSeconds(
+                apartment.getMinutesOffset() * 60
+        );
+
+        Instant start = currentMonth
+                .atDay(1)
+                .atStartOfDay(offset)
+                .toInstant();
+
+        Instant end = currentMonth
+                .plusMonths(1)
+                .atDay(1)
+                .atStartOfDay(offset)
+                .toInstant();
+
+        Integer amount = expenseRepository.getAmountSumByApartmentIdAndCreatedAtInPeriod(
+                apartmentId,
+                start,
+                end
+        );
+
+        return amount != null ? amount : 0;
     }
 
-    public Map<ExpenseCategory, Integer> getSumByCategory(Integer apartmentId, YearMonth period) {
+    public Map<ExpenseCategory, Integer> getSumByCategory(
+            Integer apartmentId,
+            YearMonth period
+    ) {
+        Apartment apartment = apartmentRepository.findById(apartmentId)
+                .orElseThrow();
+
+        ZoneOffset offset = ZoneOffset.ofTotalSeconds(
+                apartment.getMinutesOffset() * 60
+        );
+
+        Instant start = period
+                .atDay(1)
+                .atStartOfDay(offset)
+                .toInstant();
+
+        Instant end = period
+                .plusMonths(1)
+                .atDay(1)
+                .atStartOfDay(offset)
+                .toInstant();
+
         Map<ExpenseCategory, Integer> result = new HashMap<>();
 
         for (ExpenseCategory category : ExpenseCategory.values()) {
-            Instant start = period.atDay(1).atStartOfDay(ZoneOffset.UTC).toInstant();
-            Instant end = period.plusMonths(1).atDay(1).atStartOfDay(ZoneOffset.UTC).toInstant();
-
-            Integer expenseAmount = expenseRepository.getAmountSumByApartmentIdAndCategoryAndCreatedAtBetween(
-                    apartmentId,
-                    category,
-                    start,
-                    end
-            );
+            Integer expenseAmount =
+                    expenseRepository.getAmountSumByApartmentIdAndCategoryAndCreatedAtBetween(
+                            apartmentId,
+                            category,
+                            start,
+                            end
+                    );
 
             if (expenseAmount != null) {
                 result.put(category, expenseAmount);
@@ -217,15 +222,6 @@ public class ExpenseService {
         }
 
         fileStorage.deleteMany(bucketName, filenames);
-
-        for (var entry : subtractValues.entrySet()) {
-            SubtractKey key = entry.getKey();
-            profileMonthlyExpenseRepository.subtractAmountByProfileAndCategory(
-                    entry.getValue(),
-                    key.profileId(),
-                    key.category()
-            );
-        }
 
         expenseRepository.deleteAll(expenses);
     }

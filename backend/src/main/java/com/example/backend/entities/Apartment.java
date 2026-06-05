@@ -8,7 +8,19 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 @Entity
-@Table(name = "apartment")
+@Table(
+        name = "apartment",
+        check = {
+                @CheckConstraint(
+                        name = "CK_apartment_minutes_offest",
+                        constraint = "minutes_offset >= -720 AND minutes_offset <= 840"
+                ),
+                @CheckConstraint(
+                        name = "CK_apartment_budget",
+                        constraint = "budget > 0"
+                )
+        }
+)
 public class Apartment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -34,7 +46,7 @@ public class Apartment {
     private Set<Profile> profiles = new LinkedHashSet<>();
 
     @Column(name = "minutes_offset", nullable = false)
-    private Short minutesOffset;
+    private Short minutesOffset = 0;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false)

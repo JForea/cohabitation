@@ -10,14 +10,19 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 @Entity
-@Table(name = "profile")
+@Table(
+        name = "profile",
+        check = {
+                @CheckConstraint(name = "CK_profile_points", constraint = "points >= 0")
+        }
+)
 public class Profile {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @Column(name = "name", length = 63)
+    @Column(name = "name", length = 64)
     private String name;
 
     @Column(name = "points", nullable = false)
@@ -44,9 +49,6 @@ public class Profile {
 
     @OneToMany(mappedBy = "createdBy", orphanRemoval = true)
     private Set<Expense> expenses = new LinkedHashSet<>();
-
-    @OneToMany(mappedBy = "profile", cascade = CascadeType.REMOVE, orphanRemoval = true)
-    private Set<ProfileMonthlyExpense> profileMonthlyExpenses = new LinkedHashSet<>();
 
     @OneToMany(mappedBy = "createdBy", orphanRemoval = true)
     private Set<Buying> createdByings = new LinkedHashSet<>();
@@ -162,10 +164,6 @@ public class Profile {
         this.expenses = expenses;
     }
 
-    public Set<ProfileMonthlyExpense> getMonthlyExpenses() {return this.profileMonthlyExpenses;}
-
-    public void setMonthlyExpenses(Set<ProfileMonthlyExpense> profileMonthlyExpens) {this.profileMonthlyExpenses = profileMonthlyExpens;}
-
     public Apartment getApartment() {
         return apartment;
     }
@@ -216,10 +214,6 @@ public class Profile {
 
     public Set<ProfileNotification> getProfileNotifications() {
         return profileNotifications;
-    }
-
-    public Set<ProfileMonthlyExpense> getProfileMonthlyExpenses() {
-        return profileMonthlyExpenses;
     }
 
     public Set<Notification> getNotifications() {

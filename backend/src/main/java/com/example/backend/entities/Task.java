@@ -9,7 +9,12 @@ import java.time.Instant;
 import java.time.LocalDate;
 
 @Entity
-@Table(name = "task")
+@Table(
+        name = "task",
+        check = {
+                @CheckConstraint(name = "CK_task_points", constraint = "points >= 0")
+        }
+)
 public class Task {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -43,7 +48,7 @@ public class Task {
     private TaskPriority priority = TaskPriority.MEDIUM;
 
     @Column(name = "points", nullable = false)
-    private Short points = 5;
+    private Short points = 0;
 
     @Column(name = "repeat_time")
     private Short repeatTime;

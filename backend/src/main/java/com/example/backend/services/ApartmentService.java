@@ -14,9 +14,7 @@ import com.example.backend.types.Role;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
-import java.time.Instant;
-import java.time.Month;
-import java.time.Year;
+import java.time.*;
 import java.util.Calendar;
 import java.util.Optional;
 import java.util.Random;
@@ -30,9 +28,9 @@ public class ApartmentService {
 
     private final UserRepository userRepository;
 
-    private final ProfileMonthlyExpenseRepository profileMonthlyExpenseRepository;
-
     private final ApartmentNotificationHandler apartmentNotificationHandler;
+
+    private final ExpenseRepository expenseRepository;
 
     private final Random random;
 
@@ -40,29 +38,41 @@ public class ApartmentService {
             ApartmentRepository apartmentRepository,
             ProfileRepository profileRepository,
             UserRepository userRepository,
-            ProfileMonthlyExpenseRepository profileMonthlyExpenseRepository,
-            ApartmentNotificationHandler apartmentNotificationHandler) {
+            ApartmentNotificationHandler apartmentNotificationHandler,
+            ExpenseRepository expenseRepository) {
         this.apartmentRepository = apartmentRepository;
         this. profileRepository = profileRepository;
         this.userRepository = userRepository;
-        this.profileMonthlyExpenseRepository = profileMonthlyExpenseRepository;
         random = new Random();
         this.apartmentNotificationHandler = apartmentNotificationHandler;
+        this.expenseRepository = expenseRepository;
     }
 
     private Integer getMonthlyExpensesInApartment(Apartment apartment) {
-        Calendar calendar = Calendar.getInstance();
+        YearMonth currentMonth = YearMonth.now();
 
-        Month month = Month.of(calendar.get(Calendar.MONTH));
-        Year year = Year.of(calendar.get(Calendar.YEAR));
-
-        Integer sum = profileMonthlyExpenseRepository.getSumByApartmentAndYearAndMonth(
-                apartment,
-                year.getValue(),
-                month
+        ZoneOffset offset = ZoneOffset.ofTotalSeconds(
+                apartment.getMinutesOffset() * 60
         );
 
-        return sum == null ? 0 : sum;
+        Instant start = currentMonth
+                .atDay(1)
+                .atStartOfDay(offset)
+                .toInstant();
+
+        Instant end = currentMonth
+                .plusMonths(1)
+                .atDay(1)
+                .atStartOfDay(offset)
+                .toInstant();
+
+        Integer amount = expenseRepository.getAmountSumByApartmentIdAndCreatedAtInPeriod(
+                apartment.getId(),
+                start,
+                end
+        );
+
+        return amount != null ? amount : 0;
     }
 
     @Transactional
@@ -100,6 +110,35 @@ public class ApartmentService {
         );
     }
 
+    private Integer getMonthlyExpensesByProfile(Profile profile) {
+        Apartment apartment = profile.getApartment();
+
+        ZoneOffset offset = ZoneOffset.ofTotalSeconds(
+                apartment.getMinutesOffset() * 60
+        );
+
+        YearMonth currentMonth = YearMonth.now(offset);
+
+        Instant start = currentMonth
+                .atDay(1)
+                .atStartOfDay(offset)
+                .toInstant();
+
+        Instant end = currentMonth
+                .plusMonths(1)
+                .atDay(1)
+                .atStartOfDay(offset)
+                .toInstant();
+
+        Integer amount = expenseRepository.getAmountSumByProfileAndCreatedAtInPeriod(
+                profile,
+                start,
+                end
+        );
+
+        return amount != null ? amount : 0;
+    }
+
     @Transactional
     public JoinApartmentResponse join(User user, String code) throws StateConflictException {
         Apartment apartment = apartmentRepository.findByInviteCode(code).orElseThrow(() ->
@@ -120,17 +159,7 @@ public class ApartmentService {
 
             Integer monthlyExpenses = getMonthlyExpensesInApartment(apartment);
 
-            Calendar calendar = Calendar.getInstance();
-
-            Month month = Month.of(calendar.get(Calendar.MONTH));
-            Year year = Year.of(calendar.get(Calendar.YEAR));
-
-            Integer profileMonthlyExpense = profileMonthlyExpenseRepository.
-                    getSumByProfileAndYearAndMonth(
-                            user.getCurrentProfile(),
-                            year.getValue(),
-                            month
-                    );
+            Integer profileMonthlyExpense = getMonthlyExpensesByProfile(profile);
 
             apartmentNotificationHandler.handleJoinNotification(profile, true);
 

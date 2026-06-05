@@ -8,7 +8,6 @@ import com.example.backend.exceptions.AccessForbiddenException;
 import com.example.backend.exceptions.BadRequestException;
 import com.example.backend.exceptions.ResourceNotFoundException;
 import com.example.backend.intefaces.ProfileNotificationHandler;
-import com.example.backend.repositories.ProfileMonthlyExpenseRepository;
 import com.example.backend.repositories.ProfileRepository;
 import com.example.backend.repositories.UserRepository;
 import com.example.backend.types.Role;
@@ -34,9 +33,6 @@ public class ProfileServiceTest {
     private ProfileRepository profileRepository;
 
     @Mock
-    private ProfileMonthlyExpenseRepository profileMonthlyExpenseRepository;
-
-    @Mock
     private UserRepository userRepository;
 
     @Mock
@@ -59,10 +55,6 @@ public class ProfileServiceTest {
 
         when(profileRepository.findAllByApartment_IdAndLeftAtNull(apartmentId))
                 .thenReturn(List.of(profile1, profile2));
-
-        when(profileMonthlyExpenseRepository
-                .getSumByProfileAndYearAndMonth(any(), anyInt(), any()))
-                .thenReturn(100);
 
         List<ProfileDto> result = profileService.getAll(user, apartmentId, false);
 

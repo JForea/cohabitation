@@ -1,9 +1,9 @@
 package com.example.backend.dtos.in.rules;
 
 import jakarta.validation.constraints.NotBlank;
-import org.hibernate.validator.constraints.Length;
+import jakarta.validation.constraints.Size;
 
 public record CreateRuleRequest(
-        @NotBlank @Length(max = 255)
+        @NotBlank @Size(max = 255)
         String text
 ) {}

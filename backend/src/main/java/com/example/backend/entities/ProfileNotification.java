@@ -7,7 +7,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "user_notification")
+@Table(name = "profile_notification")
 public class ProfileNotification {
     @EmbeddedId
     private ProfileNotificationKey key;

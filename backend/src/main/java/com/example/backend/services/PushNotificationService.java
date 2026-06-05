@@ -25,7 +25,6 @@ public class PushNotificationService implements IPushNotificationService {
     }
 
     private boolean isInvalidToken(FirebaseMessagingException e) {
-
         MessagingErrorCode code = e.getMessagingErrorCode();
 
         return code == MessagingErrorCode.UNREGISTERED
@@ -48,6 +47,9 @@ public class PushNotificationService implements IPushNotificationService {
                                 .build()
                         ).build())
                 .toList();
+
+        if (messages.isEmpty())
+            return;
 
         try {
             BatchResponse batchResponse = firebaseMessaging.sendEach(messages);

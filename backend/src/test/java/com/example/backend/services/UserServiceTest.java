@@ -7,7 +7,6 @@ import com.example.backend.entities.Apartment;
 import com.example.backend.entities.Profile;
 import com.example.backend.entities.User;
 import com.example.backend.exceptions.StateConflictException;
-import com.example.backend.repositories.ProfileMonthlyExpenseRepository;
 import com.example.backend.repositories.UserRepository;
 import com.example.backend.types.Color;
 import org.junit.jupiter.api.Test;
@@ -19,7 +18,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import java.time.Month;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -34,9 +32,6 @@ public class UserServiceTest {
 
     @Mock
     private PasswordEncoder passwordEncoder;
-
-    @Mock
-    private ProfileMonthlyExpenseRepository profileMonthlyExpenseRepository;
 
     @InjectMocks
     private UserService userService;
@@ -136,12 +131,6 @@ public class UserServiceTest {
         when(passwordEncoder.matches("password", "encodedPassword"))
                 .thenReturn(true);
 
-        when(profileMonthlyExpenseRepository.getSumByProfileAndYearAndMonth(
-                eq(profile),
-                anyInt(),
-                any(Month.class)
-        )).thenReturn(1000);
-
         UserDto result = userService.authenticate(dto);
 
         assertNotNull(result);
@@ -150,12 +139,6 @@ public class UserServiceTest {
         verify(userRepository).findByEmail("test@gmail.com");
 
         verify(passwordEncoder).matches("password", "encodedPassword");
-
-        verify(profileMonthlyExpenseRepository).getSumByProfileAndYearAndMonth(
-                eq(profile),
-                anyInt(),
-                any(Month.class)
-        );
     }
 
     @Test
@@ -177,8 +160,6 @@ public class UserServiceTest {
         verify(userRepository).findByEmail("test@gmail.com");
 
         verify(passwordEncoder, never()).matches(any(), any());
-
-        verify(profileMonthlyExpenseRepository, never()).getSumByProfileAndYearAndMonth(any(), anyInt(), any());
     }
 
     @Test
@@ -212,8 +193,6 @@ public class UserServiceTest {
         verify(userRepository).findByEmail("test@gmail.com");
 
         verify(passwordEncoder).matches("wrongPassword", "encodedPassword");
-
-        verify(profileMonthlyExpenseRepository, never()).getSumByProfileAndYearAndMonth(any(), anyInt(), any());
     }
 
     @Test
@@ -247,24 +226,11 @@ public class UserServiceTest {
 
         when(apartment.getId()).thenReturn(1);
 
-        when(profileMonthlyExpenseRepository
-                .getSumByProfileAndYearAndMonth(
-                        any(),
-                        anyInt(),
-                        any(Month.class)
-                )).thenReturn(null);
-
         UserDto result = userService.authenticate(dto);
 
         assertNotNull(result);
 
         assertEquals(0, result.profile().monthlyExpensesAmount());
-
-        verify(profileMonthlyExpenseRepository).getSumByProfileAndYearAndMonth(
-                eq(profile),
-                anyInt(),
-                any(Month.class)
-        );
     }
 
     @Test
@@ -287,23 +253,10 @@ public class UserServiceTest {
 
         when(apartment.getId()).thenReturn(1);
 
-        when(profileMonthlyExpenseRepository
-                .getSumByProfileAndYearAndMonth(
-                        any(),
-                        anyInt(),
-                        any(Month.class)
-                )).thenReturn(null);
-
         UserDto result = userService.getCurrentInfo(user);
 
         assertNotNull(result);
 
         assertEquals(0, result.profile().monthlyExpensesAmount());
-
-        verify(profileMonthlyExpenseRepository).getSumByProfileAndYearAndMonth(
-                eq(profile),
-                anyInt(),
-                any(Month.class)
-        );
     }
 }

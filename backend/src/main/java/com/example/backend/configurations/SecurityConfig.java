@@ -40,11 +40,11 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
 
-        // TODO: DEVELOPMENT ONLY
         config.setAllowedOriginPatterns(List.of(
-                "http://localhost:*",
-                "http://127.0.0.1:*",
-                "http://192.168.*:*"
+                "https://ngrigorenko655.fvds.ru",
+                "http://ngrigorenko655.fvds.ru",
+                "http://localhost:[*]",
+                "https://localhost:[*]"
         ));
 
         config.setAllowedMethods(List.of(

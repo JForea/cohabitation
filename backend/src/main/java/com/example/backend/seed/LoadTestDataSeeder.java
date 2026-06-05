@@ -91,9 +91,6 @@ public class LoadTestDataSeeder implements CommandLineRunner {
         createEvents(profilesByApartment);
         System.out.println("[LoadTestDataSeeder] Events seeded...");
 
-        createMonthlyExpenses(profiles);
-        System.out.println("[LoadTestDataSeeder] Monthly expenses seeded...");
-
         createNotifications(profilesByApartment);
         System.out.println("[LoadTestDataSeeder] Notifications seeded...");
 
@@ -161,13 +158,7 @@ public class LoadTestDataSeeder implements CommandLineRunner {
                 entityManager.persist(user);
                 users.add(user);
 
-                boolean isCreator = j == 1;
-
-                Profile profile = new Profile(
-                        user,
-                        apartment,
-                        isCreator
-                );
+                Profile profile = new Profile(user, apartment, j == 1);
 
                 entityManager.persist(profile);
 
@@ -200,7 +191,6 @@ public class LoadTestDataSeeder implements CommandLineRunner {
                 );
 
                 token.setUpdatedAt(Instant.now().minus(Duration.ofDays(randomInt(0, 30))));
-
                 entityManager.persist(token);
             }
         }
@@ -396,35 +386,6 @@ public class LoadTestDataSeeder implements CommandLineRunner {
                 );
 
                 entityManager.persist(event);
-            }
-        }
-    }
-
-    private void createMonthlyExpenses(List<Profile> profiles) {
-        ExpenseCategory[] categories = ExpenseCategory.values();
-        Year currentYear = Year.now();
-        Month currentMonth = LocalDate.now().getMonth();
-
-        for (Profile profile : profiles) {
-            for (int monthOffset = 0; monthOffset < 4; monthOffset++) {
-                Month month = currentMonth.minus(monthOffset);
-
-                for (ExpenseCategory category : categories) {
-                    ProfileMonthlyExpense monthlyExpense = new ProfileMonthlyExpense(
-                            profile,
-                            category,
-                            currentYear,
-                            month
-                    );
-
-                    int expensesCount = randomInt(1, 10);
-
-                    for (int i = 0; i < expensesCount; i++) {
-                        monthlyExpense.addAmount(randomInt(100, 5_000));
-                    }
-
-                    entityManager.persist(monthlyExpense);
-                }
             }
         }
     }

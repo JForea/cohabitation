@@ -10,7 +10,6 @@ import com.example.backend.intefaces.ExpenseNotificationHandler;
 import com.example.backend.intefaces.FileStorage;
 import com.example.backend.repositories.ApartmentRepository;
 import com.example.backend.repositories.ExpenseRepository;
-import com.example.backend.repositories.ProfileMonthlyExpenseRepository;
 import com.example.backend.types.Color;
 import com.example.backend.types.ExpenseCategory;
 import com.example.backend.types.Role;
@@ -46,9 +45,6 @@ public class ExpenseServiceTest {
     private FileStorage fileStorage;
 
     @Mock
-    private ProfileMonthlyExpenseRepository profileMonthlyExpenseRepository;
-
-    @Mock
     private ExpenseNotificationHandler expenseNotificationHandler;
 
     @Mock
@@ -82,21 +78,11 @@ public class ExpenseServiceTest {
 
         when(apartmentRepository.findById(apartmentId)).thenReturn(Optional.of(apartment));
 
-        when(profileMonthlyExpenseRepository.findByYearAndMonthAndProfileAndExpenseCategory(
-                anyInt(),
-                any(Month.class),
-                eq(profile),
-                eq(ExpenseCategory.PRODUCTS)
-        )).thenReturn(Optional.empty());
-
         when(expenseRepository.save(any(Expense.class))).thenAnswer(inv -> {
                 Expense expense = inv.getArgument(0);
                 ReflectionTestUtils.setField(expense, "id", expenseId);
                 return expense;
         });
-
-        when(profileMonthlyExpenseRepository.save(any(ProfileMonthlyExpense.class)))
-                .thenAnswer(inv -> inv.getArgument(0));
 
         when(fileStorage.getPresignedUrl(anyString(), eq(checkImageName))).thenReturn(signedUrl);
 
@@ -107,7 +93,6 @@ public class ExpenseServiceTest {
 
         verify(apartmentRepository).findById(apartmentId);
         verify(expenseRepository).save(any(Expense.class));
-        verify(profileMonthlyExpenseRepository).save(any(ProfileMonthlyExpense.class));
         verify(expenseNotificationHandler).handleExpenseCreate(eq(user), any(Expense.class));
         verify(fileStorage).getPresignedUrl(anyString(), eq(checkImageName));
     }
@@ -132,23 +117,12 @@ public class ExpenseServiceTest {
         when(apartmentRepository.findById(apartmentId))
                 .thenReturn(Optional.of(apartment));
 
-        when(profileMonthlyExpenseRepository
-                .findByYearAndMonthAndProfileAndExpenseCategory(
-                        anyInt(),
-                        any(Month.class),
-                        eq(profile),
-                        eq(ExpenseCategory.PRODUCTS)
-                )).thenReturn(Optional.empty());
-
         when(expenseRepository.save(any(Expense.class)))
                 .thenAnswer(inv -> {
                     Expense expense = inv.getArgument(0);
                     ReflectionTestUtils.setField(expense, "id", 1L);
                     return expense;
                 });
-
-        when(profileMonthlyExpenseRepository.save(any(ProfileMonthlyExpense.class)))
-                .thenAnswer(inv -> inv.getArgument(0));
 
         CreateExpenseResponse response =
                 expenseService.create(user, apartmentId, dto, null);
@@ -158,8 +132,6 @@ public class ExpenseServiceTest {
 
         verify(apartmentRepository).findById(apartmentId);
         verify(expenseRepository).save(any(Expense.class));
-        verify(profileMonthlyExpenseRepository)
-                .save(any(ProfileMonthlyExpense.class));
         verify(expenseNotificationHandler)
                 .handleExpenseCreate(eq(user), any(Expense.class));
 
@@ -192,7 +164,6 @@ public class ExpenseServiceTest {
 
         verify(apartmentRepository).findById(apartmentId);
         verify(expenseRepository, never()).save(any());
-        verify(profileMonthlyExpenseRepository, never()).save(any());
         verifyNoInteractions(expenseNotificationHandler);
 
         verify(fileStorage).delete(anyString(), eq(checkImageName));
@@ -219,7 +190,6 @@ public class ExpenseServiceTest {
         verify(apartmentRepository).findById(apartmentId);
 
         verify(expenseRepository, never()).save(any());
-        verify(profileMonthlyExpenseRepository, never()).save(any());
 
         verifyNoInteractions(expenseNotificationHandler);
 
@@ -283,32 +253,14 @@ public class ExpenseServiceTest {
 
         Integer expenseAmount = 1000;
 
-        when(profileMonthlyExpenseRepository.getSumByApartmentIdAndYearAndMonth(
-                eq(apartmentId),
-                anyInt(),
-                any(Month.class)
-        )).thenReturn(expenseAmount);
-
         Integer result = expenseService.getAmount(apartmentId);
 
         assertEquals(expenseAmount, result);
-
-        verify(profileMonthlyExpenseRepository).getSumByApartmentIdAndYearAndMonth(
-                eq(apartmentId),
-                anyInt(),
-                any(Month.class)
-        );
     }
 
     @Test
     void shouldReturnZeroIfAmountIsNull() {
         Integer apartmentId = 1;
-
-        when(profileMonthlyExpenseRepository.getSumByApartmentIdAndYearAndMonth(
-                eq(apartmentId),
-                anyInt(),
-                any(Month.class)
-        )).thenReturn(null);
 
         Integer result = expenseService.getAmount(apartmentId);
 
@@ -376,16 +328,11 @@ public class ExpenseServiceTest {
 
         doNothing().when(fileStorage).deleteMany(anyString(), anyList());
 
-        doNothing().when(profileMonthlyExpenseRepository)
-                .subtractAmountByProfileAndCategory(anyInt(), anyLong(), any());
-
         expenseService.deleteMany(user, apartmentId, List.of(1L, 2L));
 
         verify(expenseRepository).findAllByCreatedBy_Apartment_IdAndIdIn(apartmentId, List.of(1L, 2L));
 
         verify(fileStorage).deleteMany(anyString(), anyList());
-
-        verify(profileMonthlyExpenseRepository).subtractAmountByProfileAndCategory(anyInt(), anyLong(), any());
 
         verify(expenseRepository).deleteAll(anyList());
     }
@@ -432,8 +379,6 @@ public class ExpenseServiceTest {
                 .findAllByCreatedBy_Apartment_IdAndIdIn(apartmentId, List.of(userProfileId, otherUserProfileId));
 
         verify(fileStorage, never()).deleteMany(anyString(), anyList());
-        verify(profileMonthlyExpenseRepository, never())
-                .subtractAmountByProfileAndCategory(anyInt(), anyLong(), any());
         verify(expenseRepository, never()).deleteAll(anyList());
     }
 

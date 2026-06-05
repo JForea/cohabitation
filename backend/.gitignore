@@ -29,3 +29,7 @@ replay_pid*
 
 # Firebase
 firebase-service-account.json
+
+# Resources
+src/main/resources/static
+target/

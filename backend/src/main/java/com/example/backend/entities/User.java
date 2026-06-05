@@ -14,17 +14,17 @@ public class User {
     @Column(name = "id", nullable = false)
     private Integer id;
 
-    @Column(name = "email", nullable = false, unique = true, length = 255)
+    @Column(name = "email", nullable = false, unique = true)
     private String email;
 
-    @Column(name = "password", nullable = false, length = 255)
+    @Column(name = "password", nullable = false)
     private String password;
 
     @Column(name = "name", nullable = false, length = 64)
     private String name;
 
     @Column(name = "male", nullable = false)
-    private Boolean male = false;
+    private Boolean male;
 
     @Enumerated
     @Column(name = "avatar_color", nullable = false)

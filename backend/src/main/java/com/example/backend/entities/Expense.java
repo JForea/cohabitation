@@ -7,7 +7,12 @@ import org.hibernate.annotations.CreationTimestamp;
 import java.time.Instant;
 
 @Entity
-@Table(name = "expense")
+@Table(
+        name = "expense",
+        check = {
+                @CheckConstraint(name = "CK_expense_amount", constraint = "amount > 0")
+        }
+)
 public class Expense {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

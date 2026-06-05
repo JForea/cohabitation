@@ -28,47 +28,49 @@ class ProfileTab extends ConsumerWidget {
       child: Column(
         children: [
           ProfileAppBar(profile: profile),
-          TabWrapper(
-            floatingButtonExists: false,
-            appBarExists: true,
-            children: [
-              neighboursState.when(
-                data: (neighbours) => NeighboursTopList(
-                  userProfile: profile,
-                  neighbours: neighbours,
+          Expanded(
+            child: TabWrapper(
+              floatingButtonExists: false,
+              appBarExists: true,
+              children: [
+                neighboursState.when(
+                  data: (neighbours) => NeighboursTopList(
+                    userProfile: profile,
+                    neighbours: neighbours,
+                  ),
+                  error: (e, _) => Text("Произошла ошибка."),
+                  loading: () => Center(child: CircularProgressIndicator()),
                 ),
-                error: (e, _) => Text("Произошла ошибка."),
-                loading: () => Center(child: CircularProgressIndicator()),
-              ),
-              Column(
-                spacing: 8,
-                crossAxisAlignment: .start,
-                children: [
-                  Text(
-                    "Правила",
-                    style: TextStyle(
-                      color: Theme.of(context).colorScheme.onSurface,
-                      fontSize: 16,
-                      fontWeight: .w500,
+                Column(
+                  spacing: 8,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "Правила",
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.onSurface,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
-                  ),
-                  rulesState.when(
-                    data: (rules) => rules.isEmpty
-                        ? Center(
-                            child: EmptyMessageWidget(
-                              iconSize: 60,
-                              fontSize: 14,
-                              assetPath: "assets/icons/pin.svg",
-                              message: "Правил пока что нет",
-                            ),
-                          )
-                        : RuleList(titleNeeded: false, rules: rules),
-                    error: (e, _) => Text("Произошла ошибка при загрузке."),
-                    loading: () => Center(child: CircularProgressIndicator()),
-                  ),
-                ],
-              ),
-            ],
+                    rulesState.when(
+                      data: (rules) => rules.isEmpty
+                          ? Center(
+                              child: EmptyMessageWidget(
+                                iconSize: 60,
+                                fontSize: 14,
+                                assetPath: "assets/icons/pin.svg",
+                                message: "Правил пока что нет",
+                              ),
+                            )
+                          : RuleList(titleNeeded: false, rules: rules),
+                      error: (e, _) => Text("Произошла ошибка при загрузке."),
+                      loading: () => Center(child: CircularProgressIndicator()),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ],
       ),

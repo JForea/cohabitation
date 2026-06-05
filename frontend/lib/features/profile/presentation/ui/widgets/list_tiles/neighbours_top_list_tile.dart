@@ -19,7 +19,7 @@ class NeighboursTopListTile extends StatelessWidget {
   final bool isActiveUser;
 
   Widget _getPlaceIndicator(BuildContext context) {
-    final svgSize = 20.0;
+    final svgSize = 24.0;
 
     return switch (position) {
       1 => SvgPicture.asset(

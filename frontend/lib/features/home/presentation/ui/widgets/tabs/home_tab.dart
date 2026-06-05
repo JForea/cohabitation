@@ -65,44 +65,46 @@ class _HomeTabState extends ConsumerState<HomeTab> {
             address: address,
             unreadNotificationsCount: unreadNotificationsCount ?? 0,
           ),
-          TabWrapper(
-            floatingButtonExists: false,
-            appBarExists: true,
-            children: [
-              Calendar(
-                dates: calendarDates,
-                focusedDay: focusedDay,
-                firstDay: firstDay,
-                lastDay: lastDay,
-                onDaySelected: (day) =>
-                    context.push("/events/day/${day.toIso8601String()}"),
-                onPageChanged: (month) => updateMonth(ref, month),
-              ),
-              Text(
-                "Соседи",
-                style: TextStyle(
-                  color: Theme.of(context).colorScheme.onSurface,
-                  fontSize: 18,
-                  fontWeight: .w500,
+          Expanded(
+            child: TabWrapper(
+              floatingButtonExists: false,
+              appBarExists: true,
+              children: [
+                Calendar(
+                  dates: calendarDates,
+                  focusedDay: focusedDay,
+                  firstDay: firstDay,
+                  lastDay: lastDay,
+                  onDaySelected: (day) =>
+                      context.push("/events/day/${day.toIso8601String()}"),
+                  onPageChanged: (month) => updateMonth(ref, month),
                 ),
-              ),
-              neighboursState.when(
-                data: (neighbours) => neighbours.isEmpty
-                    ? Center(
-                        child: EmptyMessageWidget(
-                          iconSize: 70,
-                          fontSize: 16,
-                          assetPath: "assets/icons/user.svg",
-                          message: "У вас пока нет соседей",
+                Text(
+                  "Соседи",
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSurface,
+                    fontSize: 18,
+                    fontWeight: .w500,
+                  ),
+                ),
+                neighboursState.when(
+                  data: (neighbours) => neighbours.isEmpty
+                      ? Center(
+                          child: EmptyMessageWidget(
+                            iconSize: 70,
+                            fontSize: 16,
+                            assetPath: "assets/icons/user.svg",
+                            message: "У вас пока нет соседей",
+                          ),
+                        )
+                      : NeighboursPreview(
+                          neighbours: neighbours.take(3).toList(),
                         ),
-                      )
-                    : NeighboursPreview(
-                        neighbours: neighbours.take(3).toList(),
-                      ),
-                error: (e, _) => Text("Произошла ошибка при загрузке."),
-                loading: () => Center(child: CircularProgressIndicator()),
-              ),
-            ],
+                  error: (e, _) => Text("Произошла ошибка при загрузке."),
+                  loading: () => Center(child: CircularProgressIndicator()),
+                ),
+              ],
+            ),
           ),
         ],
       ),

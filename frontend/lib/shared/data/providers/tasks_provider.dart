@@ -24,16 +24,18 @@ class _TasksNotifier extends AsyncNotifier<List<Task>> {
   bool _hasMore = true;
   bool _isLoading = false;
 
-  late TaskFilter _filter;
+  late TaskFilter _filter = TaskFilter();
 
   @override
   Future<List<Task>> build() async {
     _apartmentId = ref.watch(apartmentProvider.select((a) => a?.id));
     _taskRepository = ref.read(taskRepositoryProvider);
 
-    if (_apartmentId == null) NotInApartmentFailure();
+    if (_apartmentId == null) throw NotInApartmentFailure();
 
-    _filter = TaskFilter();
+    _page = 0;
+    _hasMore = true;
+    _isLoading = false;
 
     return _taskRepository.getPage(
       apartmentId: _apartmentId!,
@@ -45,7 +47,7 @@ class _TasksNotifier extends AsyncNotifier<List<Task>> {
   }
 
   Future<void> loadMore() async {
-    if (_apartmentId == null) NotInApartmentFailure();
+    if (_apartmentId == null) throw NotInApartmentFailure();
 
     if (_isLoading || !_hasMore) return;
 
@@ -58,6 +60,8 @@ class _TasksNotifier extends AsyncNotifier<List<Task>> {
         apartmentId: _apartmentId!,
         page: _page + 1,
         pageSize: _pageSize,
+        assignedTo: _filter.assignedTo,
+        done: _filter.done,
       );
 
       _page++;
@@ -77,13 +81,17 @@ class _TasksNotifier extends AsyncNotifier<List<Task>> {
 
     if (_isLoading) return;
 
-    if (fullRefresh != null && fullRefresh) {
-      state = AsyncLoading();
-    }
-
-    _isLoading = true;
+    final previous = state;
+    final previousPage = _page;
+    final previousHasMore = _hasMore;
 
     try {
+      _isLoading = true;
+
+      if (fullRefresh == true) {
+        state = const AsyncLoading();
+      }
+
       final tasks = await _taskRepository.getPage(
         apartmentId: _apartmentId!,
         page: 0,
@@ -96,6 +104,11 @@ class _TasksNotifier extends AsyncNotifier<List<Task>> {
       _hasMore = tasks.length >= _pageSize;
 
       state = AsyncData(tasks);
+    } catch (e) {
+      _page = previousPage;
+      _hasMore = previousHasMore;
+      state = previous;
+      rethrow;
     } finally {
       _isLoading = false;
     }
@@ -155,7 +168,8 @@ class _TasksNotifier extends AsyncNotifier<List<Task>> {
         ? task.copyWith(completedBy: ProfileBrief.fromFullProfile(userProfile))
         : task.copyWith(clearCompletedBy: true);
 
-    final updated = [...previous]..[index] = updatedTask;
+    List<Task> updated = [...previous];
+    updated[index] = updatedTask;
 
     state = AsyncData(updated);
 

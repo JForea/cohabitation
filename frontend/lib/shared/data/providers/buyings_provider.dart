@@ -27,7 +27,7 @@ class _BuyingNotifier extends AsyncNotifier<Map<BuyingCategory, List<Buying>>> {
 
   late int? _apartmentId;
 
-  late BuyingFilter _filter;
+  late BuyingFilter _filter = BuyingFilter();
 
   @override
   Future<Map<BuyingCategory, List<Buying>>> build() async {
@@ -37,8 +37,6 @@ class _BuyingNotifier extends AsyncNotifier<Map<BuyingCategory, List<Buying>>> {
     if (_apartmentId == null) {
       throw NotInApartmentFailure();
     }
-
-    _filter = BuyingFilter();
 
     _page = 0;
     _hasMore = true;
@@ -53,7 +51,6 @@ class _BuyingNotifier extends AsyncNotifier<Map<BuyingCategory, List<Buying>>> {
     );
 
     final map = <BuyingCategory, List<Buying>>{};
-
     _addToMap(map, buyings);
 
     return map;
@@ -222,15 +219,17 @@ class _BuyingNotifier extends AsyncNotifier<Map<BuyingCategory, List<Buying>>> {
 
   Future<void> refresh({bool? fullRefresh}) async {
     if (_apartmentId == null) throw NotInApartmentFailure();
+    if (_isLoading) return;
 
     final previous = state;
-
     final previousPage = _page;
     final previousHasMore = _hasMore;
 
     try {
-      if (fullRefresh != null && fullRefresh) {
-        state = AsyncLoading();
+      _isLoading = true;
+
+      if (fullRefresh == true) {
+        state = const AsyncLoading();
       }
 
       final current = <BuyingCategory, List<Buying>>{};
@@ -247,15 +246,14 @@ class _BuyingNotifier extends AsyncNotifier<Map<BuyingCategory, List<Buying>>> {
       _hasMore = buyings.length >= _pageSize;
 
       _addToMap(current, buyings);
-
       state = AsyncData(current);
     } catch (e) {
       _page = previousPage;
       _hasMore = previousHasMore;
-
       state = previous;
-
       rethrow;
+    } finally {
+      _isLoading = false;
     }
   }
 

@@ -11,7 +11,9 @@ import 'package:image_picker/image_picker.dart';
 final expensesProvider = AsyncNotifierProvider(ExpensesNotifier.new);
 
 class ExpensesNotifier extends AsyncNotifier<ExpensesInfo> {
-  late ExpensesFilter _filter;
+  late ExpensesFilter _filter = ExpensesFilter(
+    month: DateTime(DateTime.now().year, DateTime.now().month),
+  );
 
   late ExpenseRepository _expenseRepository;
 
@@ -30,8 +32,9 @@ class ExpensesNotifier extends AsyncNotifier<ExpensesInfo> {
 
     if (_apartmentId == null) throw NotInApartmentFailure();
 
-    final now = DateTime.now();
-    _filter = ExpensesFilter(month: DateTime(now.year, now.month));
+    _page = 0;
+    _hasMore = true;
+    _isLoading = false;
 
     return ExpensesInfo(
       currentExpenseAmount: await _expenseRepository.getExpenseAmount(
@@ -148,14 +151,24 @@ class ExpensesNotifier extends AsyncNotifier<ExpensesInfo> {
     }
   }
 
-  Future<void> refresh() async {
+  Future<void> refresh({bool fullRefresh = false}) async {
     if (_apartmentId == null) {
       throw NotInApartmentFailure();
     }
 
-    _isLoading = true;
+    if (_isLoading) return;
+
+    final previousState = state;
+    final previousPage = _page;
+    final previousHasMore = _hasMore;
 
     try {
+      _isLoading = true;
+
+      if (fullRefresh) {
+        state = const AsyncLoading();
+      }
+
       final expenses = await _expenseRepository.getPage(
         apartmentId: _apartmentId!,
         page: 0,
@@ -171,6 +184,11 @@ class ExpensesNotifier extends AsyncNotifier<ExpensesInfo> {
       state = AsyncData(
         ExpensesInfo(currentExpenseAmount: amount, expenses: expenses),
       );
+    } catch (e) {
+      _page = previousPage;
+      _hasMore = previousHasMore;
+      state = previousState;
+      rethrow;
     } finally {
       _isLoading = false;
     }

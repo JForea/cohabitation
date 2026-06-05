@@ -2,7 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/features/buyings/data/models/buying_redacted.dart';
 import 'package:frontend/shared/data/failures/failures.dart';
-import 'package:frontend/shared/data/failures/map_dio_exceptiond.dart';
+import 'package:frontend/shared/data/failures/map_dio_exception.dart';
 import 'package:frontend/shared/data/models/buying.dart';
 import 'package:frontend/shared/data/models/profile/profile.dart';
 import 'package:frontend/shared/data/models/profile/profile_brief.dart';

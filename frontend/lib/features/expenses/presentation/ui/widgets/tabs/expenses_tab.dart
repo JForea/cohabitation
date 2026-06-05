@@ -33,12 +33,22 @@ class _ExpensesTabState extends ConsumerState<ExpensesTab> {
   late String budget;
 
   final String key = "expenses";
-  late final DateTime month;
+  late DateTime month;
+
+  Future<void> pushPageAndWait(String path) async {
+    await context.push(path);
+
+    await ref
+        .read(expensesProvider.notifier)
+        .setFilter(
+          ExpensesFilter(category: null, month: month, profileId: null),
+        );
+  }
 
   Future<void> refresh(WidgetRef ref) async {
     await ref.read(asyncUserProvider.notifier).refresh();
     ref.invalidate(asyncApartmentProvider);
-    ref.invalidate(expensesProvider);
+    ref.read(expensesProvider.notifier).refresh();
     ref.invalidate(selectedProvider(key));
     ref.read(neighboursProvider.notifier).refresh();
     ref.read(expensesAmountByCategoryProvider(month).notifier).refresh();
@@ -71,6 +81,7 @@ class _ExpensesTabState extends ConsumerState<ExpensesTab> {
             ),
           ),
           ControlledNamedTextField(
+            text: budget,
             title: "Общий бюджет",
             hintText: "50 000 ₽",
             onChange: setBudget,
@@ -168,7 +179,8 @@ class _ExpensesTabState extends ConsumerState<ExpensesTab> {
                   ),
                   Spacer(),
                   DetailsTextButton(
-                    onTap: () => context.push("/expenses/details/by-profile"),
+                    onTap: () async =>
+                        await pushPageAndWait("/expenses/details/by-profile"),
                     text: "Подробно >",
                   ),
                 ],
@@ -206,7 +218,8 @@ class _ExpensesTabState extends ConsumerState<ExpensesTab> {
                   ),
                   Spacer(),
                   DetailsTextButton(
-                    onTap: () => context.push("/expenses/details/by-month"),
+                    onTap: () async =>
+                        await pushPageAndWait("/expenses/details/by-month"),
                     text: "Все >",
                   ),
                 ],

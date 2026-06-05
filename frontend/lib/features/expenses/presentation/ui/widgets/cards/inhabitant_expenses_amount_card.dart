@@ -55,7 +55,7 @@ class InhabitantExpensesAmountCard extends StatelessWidget {
             ),
             SizedBox(width: 25),
             SizedBox(
-              width: 60,
+              width: 80,
               child: Text(
                 "${inhabitant.monthlyExpensesAmount} ₽",
                 style: TextStyle(

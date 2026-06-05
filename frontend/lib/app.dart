@@ -18,6 +18,7 @@ class App extends ConsumerWidget {
       return SafeArea(
         child: MaterialApp(
           theme: customTheme,
+          title: 'Flatly',
           builder: (context, child) =>
               Scaffold(body: Center(child: CircularProgressIndicator())),
         ),
@@ -27,7 +28,7 @@ class App extends ConsumerWidget {
     return SafeArea(
       child: MaterialApp.router(
         debugShowCheckedModeBanner: false,
-        title: 'Flutter Demo',
+        title: 'Flatly',
         theme: customTheme,
         routerConfig: router,
       ),

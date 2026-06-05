@@ -85,7 +85,7 @@ class MonthlyExpensesCard extends StatelessWidget {
                       children: [
                         Text("записей", style: minorTextStyle),
                         Text("о расходах", style: minorTextStyle),
-                        Text("5", style: statsTextStyle),
+                        Text("2", style: statsTextStyle),
                       ],
                     ),
                   ],

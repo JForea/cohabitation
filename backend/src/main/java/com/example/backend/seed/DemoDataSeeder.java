@@ -239,8 +239,8 @@ public class DemoDataSeeder implements CommandLineRunner {
                     randomEnum(Room.class, random),
                     randomEnum(TaskPriority.class, random),
                     (short) (random.nextInt(8) + 3),
-                    null,
-                    LocalDate.now().plusDays(random.nextInt(20) + 1)
+                    LocalDate.now().plusDays(random.nextInt(20) + 1),
+                    null
             );
 
             if (i % 3 == 0) {

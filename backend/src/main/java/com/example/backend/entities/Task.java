@@ -50,9 +50,6 @@ public class Task {
     @Column(name = "points", nullable = false)
     private Short points = 0;
 
-    @Column(name = "repeat_time")
-    private Short repeatTime;
-
     @Column(name = "due_date")
     private LocalDate dueTime;
 
@@ -63,8 +60,15 @@ public class Task {
     @Column(name = "completed_at")
     private Instant completedAt;
 
+    @Column(name = "deleted_at")
+    private Instant deletedAt;
+
     @Column(name = "last_reminder_date")
     private LocalDate lastReminderDate;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "repeat_rule_id")
+    private TaskRepeatRule repeatRule;
 
     public Task() {}
 
@@ -76,8 +80,8 @@ public class Task {
             Room room,
             TaskPriority priority,
             Short points,
-            Short repeatTime,
-            LocalDate dueTime
+            LocalDate dueTime,
+            TaskRepeatRule repeatRule
     ) {
         this.createdBy = createdBy;
         this.assignedTo = assignedTo;
@@ -89,8 +93,8 @@ public class Task {
             this.priority = priority;
         if (points != null)
             this.points = points;
-        this.repeatTime = repeatTime;
         this.dueTime = dueTime;
+        this.repeatRule = repeatRule;
     }
 
     public LocalDate getDueTime() {
@@ -105,20 +109,20 @@ public class Task {
         return completedAt;
     }
 
+    public void setDeletedAt(Instant deletedAt) {
+        this.deletedAt = deletedAt;
+    }
+
+    public Instant getDeletedAt() {
+        return deletedAt;
+    }
+
     public void setCompletedAt(Instant completedAt) {
         this.completedAt = completedAt;
     }
 
     public Instant getCreatedAt() {
         return createdAt;
-    }
-
-    public Short getRepeatTime() {
-        return repeatTime;
-    }
-
-    public void setRepeatTime(Short repeatTime) {
-        this.repeatTime = repeatTime;
     }
 
     public Short getPoints() {
@@ -195,5 +199,13 @@ public class Task {
 
     public void setLastReminderDate(LocalDate lastReminderDate) {
         this.lastReminderDate = lastReminderDate;
+    }
+
+    public TaskRepeatRule getRepeatRule() {
+        return repeatRule;
+    }
+
+    public void setRepeatRule(TaskRepeatRule repeatRule) {
+        this.repeatRule = repeatRule;
     }
 }

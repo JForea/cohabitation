@@ -1,4 +1,4 @@
-package com.example.backend.services;
+package com.example.backend.schedulers;
 
 import com.example.backend.dtos.inner.TokenDto;
 import com.example.backend.entities.Task;
@@ -9,14 +9,14 @@ import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.*;
 
-@Service
+@Component
 @Transactional
 public class TaskReminderScheduler {
 

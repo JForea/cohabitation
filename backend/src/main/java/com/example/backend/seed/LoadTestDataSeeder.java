@@ -251,8 +251,8 @@ public class LoadTestDataSeeder implements CommandLineRunner {
                         randomEnum(Room.class),
                         randomEnum(TaskPriority.class),
                         (short) randomInt(1, 15),
-                        randomBoolean(25) ? (short) randomInt(1, 14) : null,
-                        LocalDate.now().plusDays(randomInt(-10, 30))
+                        LocalDate.now().plusDays(randomInt(-10, 30)),
+                        null
                 );
 
                 if (randomBoolean(40)) {

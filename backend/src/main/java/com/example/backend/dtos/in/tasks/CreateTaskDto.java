@@ -1,5 +1,6 @@
 package com.example.backend.dtos.in.tasks;
 
+import com.example.backend.entities.TaskRepeatRule;
 import com.example.backend.types.Room;
 import com.example.backend.types.TaskPriority;
 import jakarta.validation.constraints.*;
@@ -19,9 +20,7 @@ public record CreateTaskDto(
         @Min(0)
         @Max(100)
         Short points,
-        @Min(1)
-        @Max(365)
-        Short repeatTime,
         @FutureOrPresent
-        LocalDate dueDate
+        LocalDate dueDate,
+        CreateRepeatRuleDto repeatRule
 ) {}

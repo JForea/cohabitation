@@ -28,4 +28,5 @@ public interface ProfileRepository extends ListCrudRepository<Profile, Long> {
             @Param("id") Long id,
             @Param("leftAt") Instant leftAt
     );
+    List<Profile> findAllByIdInAndLeftAtNull(List<Long> ids);
 }

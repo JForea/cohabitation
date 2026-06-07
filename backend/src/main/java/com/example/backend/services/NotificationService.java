@@ -229,21 +229,22 @@ public class NotificationService implements
     @Override
     public void handleManyTasksDelete(User user, List<Task> tasks) {
         Profile profile = user.getCurrentProfile();
-        for (Task task : tasks) {
-            notificationRepository.save(
-                    new Notification(
-                            profile,
-                            NotificationType.TASK_DELETED,
-                            EntityType.TASK,
-                            Map.of(
-                                    "taskId", task.getId(),
-                                    "taskName", task.getName(),
-                                    "userName", profile.getName(),
-                                    "points", task.getPoints()
-                            )
-                    )
-            );
-        }
+
+        List<Notification> notifications = tasks.stream().map(
+                t -> new Notification(
+                        profile,
+                        NotificationType.TASK_DELETED,
+                        EntityType.TASK,
+                        Map.of(
+                                "taskId", t.getId(),
+                                "taskName", t.getName(),
+                                "userName", profile.getName(),
+                                "points", t.getPoints()
+                        )
+                )
+        ).toList();
+
+        notificationRepository.saveAll(notifications);
     }
 
     @Override

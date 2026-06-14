@@ -1,21 +1,21 @@
 package com.example.backend.schedulers;
 
-import com.example.backend.services.TaskRepeatGenerationService;
+import com.example.backend.intefaces.ITaskRepeatGenerationService;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 @Component
 public class TaskRepeatScheduler {
 
-    private final TaskRepeatGenerationService taskRepeatGenerationService;
+    private final ITaskRepeatGenerationService iTaskRepeatGenerationService;
 
-    public TaskRepeatScheduler(TaskRepeatGenerationService taskRepeatGenerationService) {
-        this.taskRepeatGenerationService = taskRepeatGenerationService;
+    public TaskRepeatScheduler(ITaskRepeatGenerationService iTaskRepeatGenerationService) {
+        this.iTaskRepeatGenerationService = iTaskRepeatGenerationService;
     }
 
     @Scheduled(cron = "0 1 0 * * *")
 //    @Scheduled(fixedRate = 10000)
     public void generateRepeatedTasks() {
-        taskRepeatGenerationService.ensureNextTasksExist();
+        iTaskRepeatGenerationService.ensureNextTasksExist();
     }
 }

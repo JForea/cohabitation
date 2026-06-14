@@ -81,4 +81,27 @@ public interface TaskRepository extends ListCrudRepository<Task, Long>, JpaSpeci
     Optional<Task> findTopByRepeatRule_IdOrderByDueTimeDesc(
             Long repeatRuleId
     );
+    @Query(value = """
+        SELECT COALESCE(SUM(
+            t.points * GREATEST(
+                CAST(DATE(t.completed_at) - t.due_date AS int),
+                0
+            )
+        ), 0)
+        FROM task t
+        JOIN profile creator ON creator.id = t.created_by
+        WHERE creator.apartment_id = :apartmentId
+            AND t.completed_by = :profileId
+            AND t.completed_at >= :calculationStart
+            AND t.completed_at < :calculationEnd
+            AND t.due_date IS NOT NULL
+            AND t.completed_at IS NOT NULL
+            AND DATE(t.completed_at) > t.due_date
+    """, nativeQuery = true)
+    int calculateLateCompletedPenaltyForProfile(
+            Integer apartmentId,
+            Long profileId,
+            Instant calculationStart,
+            Instant calculationEnd
+    );
 }

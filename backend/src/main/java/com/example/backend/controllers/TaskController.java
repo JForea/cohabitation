@@ -1,8 +1,8 @@
 package com.example.backend.controllers;
 
 import com.example.backend.dtos.in.tasks.CreateTaskDto;
-import com.example.backend.dtos.out.common.IdResponse;
 import com.example.backend.dtos.out.common.StatusResponse;
+import com.example.backend.dtos.out.tasks.CreateTaskResponse;
 import com.example.backend.dtos.out.tasks.TaskDto;
 import com.example.backend.entities.User;
 import com.example.backend.security.CustomUserDetails;
@@ -28,7 +28,7 @@ public class TaskController {
     }
 
     @PostMapping
-    public ResponseEntity<IdResponse<Long>> create(
+    public ResponseEntity<CreateTaskResponse> create(
             @RequestBody @Valid CreateTaskDto dto,
             @AuthenticationPrincipal CustomUserDetails details
     ) {

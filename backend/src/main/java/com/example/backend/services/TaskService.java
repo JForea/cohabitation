@@ -3,12 +3,14 @@ package com.example.backend.services;
 import com.example.backend.dtos.in.tasks.CreateTaskDto;
 import com.example.backend.dtos.out.common.IdResponse;
 import com.example.backend.dtos.out.common.StatusResponse;
+import com.example.backend.dtos.out.tasks.CreateTaskResponse;
 import com.example.backend.dtos.out.tasks.TaskDto;
 import com.example.backend.entities.*;
 import com.example.backend.exceptions.AccessForbiddenException;
 import com.example.backend.exceptions.BadRequestException;
 import com.example.backend.exceptions.ResourceNotFoundException;
 import com.example.backend.exceptions.StateConflictException;
+import com.example.backend.intefaces.ITaskLoadService;
 import com.example.backend.intefaces.TaskNotificationHandler;
 import com.example.backend.repositories.*;
 import com.example.backend.specifications.TaskSpecifications;
@@ -20,9 +22,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 @Service
 public class TaskService {
@@ -34,38 +34,72 @@ public class TaskService {
 
     private final TaskRepeatRuleRepository taskRepeatRuleRepository;
 
+    private final ITaskLoadService iTaskLoadService;
+
     public TaskService(
             TaskRepository taskRepository,
             ProfileRepository profileRepository,
             TaskNotificationHandler taskNotificationHandler,
-            TaskRepeatRuleRepository taskRepeatRuleRepository) {
+            TaskRepeatRuleRepository taskRepeatRuleRepository,
+            ITaskLoadService iTaskLoadService) {
         this.taskRepository = taskRepository;
         this.profileRepository = profileRepository;
         this.taskNotificationHandler = taskNotificationHandler;
         this.taskRepeatRuleRepository = taskRepeatRuleRepository;
+        this.iTaskLoadService = iTaskLoadService;
     }
 
     @Transactional
-    public IdResponse<Long> create(User user, CreateTaskDto dto) {
+    public CreateTaskResponse create(User user, CreateTaskDto dto) {
         Profile creatorProfile = user.getCurrentProfile();
 
         Profile assignedProfile = null;
-        if (dto.assignedTo() != null)
+
+        if (dto.assignedTo() != null) {
             assignedProfile = profileRepository.findById(dto.assignedTo()).orElseThrow(
                     () -> new ResourceNotFoundException("Assigned user not found.")
             );
 
-        if (assignedProfile != null && assignedProfile.getLeftAt() != null)
-            throw new StateConflictException("Can't assign task for user, who left the apartment.");
+            if (assignedProfile.getLeftAt() != null)
+                throw new StateConflictException(
+                        "Can't assign task for user, who left the apartment."
+                );
+        } else if (Boolean.TRUE.equals(dto.autoAssign())) {
+            List<Profile> candidates = profileRepository.findAllByApartment_IdAndLeftAtNull(
+                    creatorProfile.getApartment().getId()
+            );
+
+            if (candidates.isEmpty())
+                throw new StateConflictException(
+                        "No available users for automatic assignment."
+                );
+
+            Map<Long, Double> loads = iTaskLoadService.calculateProfileLoad(
+                    creatorProfile.getApartment().getId(),
+                    candidates,
+                    dto.dueDate().minusDays(30),
+                    dto.dueDate().plusDays(30)
+            );
+
+            assignedProfile = candidates.stream()
+                    .min(Comparator.comparingDouble(
+                            profile -> loads.getOrDefault(profile.getId(), 0.0)
+                    ))
+                    .orElseThrow();
+        }
 
         TaskRepeatRule repeatRule = null;
 
         if (dto.repeatRule() != null) {
             List<Profile> assignedProfiles =
-                    profileRepository.findAllByIdInAndLeftAtNull(dto.repeatRule().assignedIds());
+                    profileRepository.findAllByIdInAndLeftAtNull(
+                            dto.repeatRule().assignedIds()
+                    );
 
             if (assignedProfiles.size() != dto.repeatRule().assignedIds().size())
-                throw new BadRequestException("Request contains invalid assigned ids.");
+                throw new BadRequestException(
+                        "Request contains invalid assigned ids."
+                );
 
             repeatRule = new TaskRepeatRule(
                     creatorProfile,
@@ -95,9 +129,13 @@ public class TaskService {
                 repeatRule
         ));
 
-        taskNotificationHandler.handleTaskCreate(user, assignedProfile, task);
+        taskNotificationHandler.handleTaskCreate(
+                user,
+                assignedProfile,
+                task
+        );
 
-        return new IdResponse<>(task.getId());
+        return new CreateTaskResponse(task);
     }
 
     public List<TaskDto> getTasks(

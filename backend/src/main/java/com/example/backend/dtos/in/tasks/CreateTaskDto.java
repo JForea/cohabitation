@@ -1,6 +1,5 @@
 package com.example.backend.dtos.in.tasks;
 
-import com.example.backend.entities.TaskRepeatRule;
 import com.example.backend.types.Room;
 import com.example.backend.types.TaskPriority;
 import jakarta.validation.constraints.*;
@@ -15,6 +14,7 @@ public record CreateTaskDto(
         String description,
         @Min(1)
         Long assignedTo,
+        Boolean autoAssign,
         Room room,
         TaskPriority priority,
         @Min(0)
@@ -23,4 +23,9 @@ public record CreateTaskDto(
         @FutureOrPresent
         LocalDate dueDate,
         CreateRepeatRuleDto repeatRule
-) {}
+) {
+        @AssertTrue
+        public boolean isAssignmentValid() {
+                return assignedTo == null || !Boolean.TRUE.equals(autoAssign);
+        }
+}

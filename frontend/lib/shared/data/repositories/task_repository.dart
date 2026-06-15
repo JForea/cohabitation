@@ -97,9 +97,9 @@ class TaskRepository {
           "repeatRule": repeatable
               ? {
                   "intervalDays": repeatRule.intervalDays,
-                  "endDate": UtilFunctions.dateToStringRequest(
-                    repeatRule.endDate,
-                  ),
+                  "endDate": repeatRule.endDate == null
+                      ? null
+                      : UtilFunctions.dateToStringRequest(repeatRule.endDate!),
                   "assignedIds": assignedTo.map((p) => p.id).toList(),
                 }
               : null,

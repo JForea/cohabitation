@@ -103,11 +103,10 @@ class _CreateTaskPageState extends ConsumerState<CreateTaskPage> {
       if (repeatRule != null) {
         repeatRule = null;
       } else {
-        repeatRule = RepeatRuleDto(
-          beginDate: .now().add(Duration(days: dueDateOffset ?? 0)),
-        );
+        repeatRule = RepeatRuleDto(beginDate: repeatBeginDate);
         dueDateOffset ??= 0;
       }
+
       autoAssign = false;
       assignedTo = [];
     });
@@ -122,12 +121,36 @@ class _CreateTaskPageState extends ConsumerState<CreateTaskPage> {
   void changeDueDateOffset(int? offset) {
     setState(() {
       dueDateOffset = offset;
+
+      if (repeatRule != null) {
+        dueDateOffset ??= 0;
+        repeatRule!.setEndOption(
+          repeatRule!.endOption,
+          beginDate: repeatBeginDate,
+        );
+      }
     });
   }
 
   void changePoints(int p) {
     setState(() {
       points = p;
+    });
+  }
+
+  DateTime get repeatBeginDate {
+    return DateTime.now().add(Duration(days: dueDateOffset ?? 0));
+  }
+
+  void changeRepeatEndOption(RepeatEndOption option) {
+    setState(() {
+      repeatRule?.setEndOption(option, beginDate: repeatBeginDate);
+    });
+  }
+
+  void changeRepeatInterval(RepeatIntervalOption option) {
+    setState(() {
+      repeatRule?.setIntervalOption(option);
     });
   }
 
@@ -259,6 +282,103 @@ class _CreateTaskPageState extends ConsumerState<CreateTaskPage> {
                 ),
             ],
           ),
+          if (repeatRule != null)
+            ChoiceWrapper(
+              name: "Повторять",
+              children: [
+                CustomChoiceChip(
+                  name: "Каждый день",
+                  selected:
+                      repeatRule!.intervalOption == RepeatIntervalOption.daily,
+                  checkMark: true,
+                  onSelect: () =>
+                      changeRepeatInterval(RepeatIntervalOption.daily),
+                ),
+                CustomChoiceChip(
+                  name: "Каждые 2 дня",
+                  selected:
+                      repeatRule!.intervalOption ==
+                      RepeatIntervalOption.everyTwoDays,
+                  checkMark: true,
+                  onSelect: () =>
+                      changeRepeatInterval(RepeatIntervalOption.everyTwoDays),
+                ),
+                CustomChoiceChip(
+                  name: "Каждые 3 дня",
+                  selected:
+                      repeatRule!.intervalOption ==
+                      RepeatIntervalOption.everyThreeDays,
+                  checkMark: true,
+                  onSelect: () =>
+                      changeRepeatInterval(RepeatIntervalOption.everyThreeDays),
+                ),
+                CustomChoiceChip(
+                  name: "Каждую неделю",
+                  selected:
+                      repeatRule!.intervalOption == RepeatIntervalOption.weekly,
+                  checkMark: true,
+                  onSelect: () =>
+                      changeRepeatInterval(RepeatIntervalOption.weekly),
+                ),
+                CustomChoiceChip(
+                  name: "Каждые 2 недели",
+                  selected:
+                      repeatRule!.intervalOption ==
+                      RepeatIntervalOption.biweekly,
+                  checkMark: true,
+                  onSelect: () =>
+                      changeRepeatInterval(RepeatIntervalOption.biweekly),
+                ),
+                CustomChoiceChip(
+                  name: "Каждый месяц",
+                  selected:
+                      repeatRule!.intervalOption ==
+                      RepeatIntervalOption.monthly,
+                  checkMark: true,
+                  onSelect: () =>
+                      changeRepeatInterval(RepeatIntervalOption.monthly),
+                ),
+              ],
+            ),
+          if (repeatRule != null)
+            ChoiceWrapper(
+              name: "Закончить повторение",
+              children: [
+                CustomChoiceChip(
+                  name: "Через неделю",
+                  selected: repeatRule!.endOption == RepeatEndOption.week,
+                  checkMark: true,
+                  onSelect: () => changeRepeatEndOption(RepeatEndOption.week),
+                ),
+                CustomChoiceChip(
+                  name: "Через месяц",
+                  selected: repeatRule!.endOption == RepeatEndOption.month,
+                  checkMark: true,
+                  onSelect: () => changeRepeatEndOption(RepeatEndOption.month),
+                ),
+                CustomChoiceChip(
+                  name: "Через 3 месяца",
+                  selected:
+                      repeatRule!.endOption == RepeatEndOption.threeMonths,
+                  checkMark: true,
+                  onSelect: () =>
+                      changeRepeatEndOption(RepeatEndOption.threeMonths),
+                ),
+                CustomChoiceChip(
+                  name: "Через полгода",
+                  selected: repeatRule!.endOption == RepeatEndOption.sixMonths,
+                  checkMark: true,
+                  onSelect: () =>
+                      changeRepeatEndOption(RepeatEndOption.sixMonths),
+                ),
+                CustomChoiceChip(
+                  name: "Без срока",
+                  selected: repeatRule!.endOption == RepeatEndOption.never,
+                  checkMark: true,
+                  onSelect: () => changeRepeatEndOption(RepeatEndOption.never),
+                ),
+              ],
+            ),
           ChoiceWrapper(
             name: "Очки за выполнение",
             children: List.generate(6, (i) {

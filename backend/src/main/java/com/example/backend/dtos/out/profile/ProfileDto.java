@@ -10,16 +10,18 @@ public record ProfileDto(
     Integer points,
     Integer apartmentId,
     Role role,
-    Color avatarColor
+    Color avatarColor,
+    Integer monthlyExpensesAmount
 ) {
-    public ProfileDto(Profile profile) {
+    public ProfileDto(Profile profile, Integer monthlyExpensesAmount) {
         this(
                 profile.getId(),
                 profile.getName(),
                 profile.getPoints(),
                 profile.getApartment().getId(),
                 profile.getRole(),
-                profile.getAvatarColor()
+                profile.getAvatarColor(),
+                monthlyExpensesAmount
         );
     }
 }

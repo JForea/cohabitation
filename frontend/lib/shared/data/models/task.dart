@@ -1,4 +1,4 @@
-import 'package:frontend/shared/data/models/profile.dart';
+import 'package:frontend/shared/data/models/profile/profile_brief.dart';
 import 'package:frontend/shared/data/types/room.dart';
 import 'package:frontend/shared/data/types/task_priority.dart';
 import 'package:frontend/shared/utils/util_functions.dart';
@@ -20,12 +20,12 @@ class Task {
   factory Task.fromJson(Map<String, dynamic> json) {
     return Task(
       id: json["id"] as int,
-      createdBy: Profile.fromJson(json["createdBy"]),
+      createdBy: ProfileBrief.fromJson(json["createdBy"]),
       assignedTo: json["assignedTo"] != null
-          ? Profile.fromJson(json["assignedTo"])
+          ? ProfileBrief.fromJson(json["assignedTo"])
           : null,
       completedBy: json["completedBy"] != null
-          ? Profile.fromJson(json["completedBy"])
+          ? ProfileBrief.fromJson(json["completedBy"])
           : null,
       name: json["name"] as String,
       description: json["description"] as String?,
@@ -41,9 +41,9 @@ class Task {
   }
 
   final int id;
-  final Profile createdBy;
-  final Profile? assignedTo;
-  final Profile? completedBy;
+  final ProfileBrief createdBy;
+  final ProfileBrief? assignedTo;
+  final ProfileBrief? completedBy;
   final String name;
   final String? description;
   final Room room;
@@ -53,9 +53,9 @@ class Task {
 
   Task copyWith({
     int? id,
-    Profile? createdBy,
-    Profile? assignedTo,
-    Profile? completedBy,
+    ProfileBrief? createdBy,
+    ProfileBrief? assignedTo,
+    ProfileBrief? completedBy,
     String? name,
     String? description,
     Room? room,

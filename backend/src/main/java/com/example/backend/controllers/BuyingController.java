@@ -11,12 +11,14 @@ import com.example.backend.services.BuyingService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
+@PreAuthorize("@apartmentSecurity.hasAccess(#apartmentId, authentication)")
 @RequestMapping("/api/apartments/{apartmentId}/buyings")
 public class BuyingController {
 
@@ -28,25 +30,23 @@ public class BuyingController {
 
     @PostMapping
     public ResponseEntity<IdResponse<Long>> create(
-            @PathVariable Integer apartmentId,
             @RequestBody @Valid CreateBuyingDto dto,
             @AuthenticationPrincipal CustomUserDetails details
     ) {
         User user = details.getUser();
         return ResponseEntity.status(HttpStatus.CREATED).body(
-                buyingService.create(apartmentId, user, dto)
+                buyingService.create(user, dto)
         );
     }
 
     @PostMapping("/bulk")
     public ResponseEntity<List<IdResponse<Long>>> createMany(
-            @PathVariable Integer apartmentId,
             @RequestBody @Valid CreateManyBuyingsDto dto,
             @AuthenticationPrincipal CustomUserDetails details
     ) {
         User user = details.getUser();
         return ResponseEntity.status(HttpStatus.CREATED).body(
-                buyingService.createMany(apartmentId, user, dto)
+                buyingService.createMany(user, dto)
         );
     }
 
@@ -76,13 +76,24 @@ public class BuyingController {
     }
 
     @DeleteMapping("/{buyingId}")
-    public ResponseEntity<Void> delete(
+    public ResponseEntity<Void> deleteOne(
             @PathVariable Integer apartmentId,
             @PathVariable Long buyingId,
             @AuthenticationPrincipal CustomUserDetails details
     ) {
         User user = details.getUser();
         buyingService.deleteOne(apartmentId, user, buyingId);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
+    @DeleteMapping
+    public ResponseEntity<Void> deleteMany(
+            @PathVariable Integer apartmentId,
+            @RequestBody List<Long> ids,
+            @AuthenticationPrincipal CustomUserDetails details
+    ) {
+        User user = details.getUser();
+        buyingService.deleteMany(user, apartmentId, ids);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 }

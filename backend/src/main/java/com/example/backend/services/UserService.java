@@ -2,7 +2,6 @@ package com.example.backend.services;
 
 import com.example.backend.dtos.in.user.AuthenticationDto;
 import com.example.backend.dtos.in.user.RegisterDto;
-import com.example.backend.dtos.out.profile.ProfileDto;
 import com.example.backend.dtos.out.user.UserDto;
 import com.example.backend.entities.Apartment;
 import com.example.backend.entities.Profile;
@@ -10,37 +9,36 @@ import com.example.backend.entities.User;
 import com.example.backend.exceptions.ResourceNotFoundException;
 import com.example.backend.exceptions.StateConflictException;
 import com.example.backend.repositories.ApartmentRepository;
-import com.example.backend.repositories.ProfileRepository;
+import com.example.backend.repositories.ExpenseRepository;
 import com.example.backend.repositories.UserRepository;
 import com.example.backend.types.Color;
-import com.example.backend.types.Role;
-import org.springframework.security.core.parameters.P;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
+import java.time.*;
 import java.util.Random;
 
 @Service
 public class UserService {
     private final Random random;
     private final UserRepository userRepository;
-    private final ProfileRepository profileRepository;
-    private final ApartmentRepository apartmentRepository;
     private final PasswordEncoder passwordEncoder;
+
+    private final ExpenseRepository expenseRepository;
+
+    private final ApartmentRepository apartmentRepository;
 
     public UserService(
             UserRepository userRepository,
-            ProfileRepository profileRepository,
-            ApartmentRepository apartmentRepository,
-            PasswordEncoder passwordEncoder
-    ) {
+            PasswordEncoder passwordEncoder,
+            ExpenseRepository expenseRepository,
+            ApartmentRepository apartmentRepository) {
         this.random = new Random();
         this.userRepository = userRepository;
-        this.profileRepository = profileRepository;
-        this.apartmentRepository = apartmentRepository;
         this.passwordEncoder = passwordEncoder;
+        this.expenseRepository = expenseRepository;
+        this.apartmentRepository = apartmentRepository;
     }
 
     private Color getRandomColor() {
@@ -48,21 +46,10 @@ public class UserService {
         return colors[random.nextInt(colors.length)];
     }
 
-    public Role getCurrentUserRoleInApartment(User user, Integer apartmentId) {
-        Optional<Profile> profileOptional = profileRepository.findByUserAndApartment_id(user, apartmentId);
-
-        if (profileOptional.isEmpty())
-            return null;
-
-        Profile profile = profileOptional.get();
-
-        if (profile.getLeftAt() != null)
-            return null;
-
-        return profile.getRole();
-    }
-
     public UserDto create(RegisterDto dto) {
+        if (userRepository.existsByEmail(dto.email()))
+            throw new StateConflictException("Email is occupied.");
+
         User user = userRepository.save(new User(
                 dto.email(),
                 passwordEncoder.encode(dto.password()),
@@ -71,16 +58,59 @@ public class UserService {
                 getRandomColor()
         ));
 
-        return new UserDto(user);
+        return new UserDto(user, 0);
+    }
+
+    private Integer getMonthlyExpensesByProfile(Profile profile) {
+        if (profile == null) {
+            return 0;
+        }
+
+        Apartment apartment = apartmentRepository.findById(profile.getApartment().getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Apartment not found."));
+
+        ZoneOffset offset = ZoneOffset.ofTotalSeconds(
+                apartment.getMinutesOffset() * 60
+        );
+
+        YearMonth currentMonth = YearMonth.now(offset);
+
+        Instant start = currentMonth
+                .atDay(1)
+                .atStartOfDay(offset)
+                .toInstant();
+
+        Instant end = currentMonth
+                .plusMonths(1)
+                .atDay(1)
+                .atStartOfDay(offset)
+                .toInstant();
+
+        Integer amount = expenseRepository.getAmountSumByProfileAndCreatedAtInPeriod(
+                profile,
+                start,
+                end
+        );
+
+        return amount != null ? amount : 0;
     }
 
     public UserDto authenticate(AuthenticationDto dto) throws UsernameNotFoundException {
         User user = userRepository.findByEmail(dto.email()).orElseThrow(() ->
                 new UsernameNotFoundException("User not found."));
 
-        if (passwordEncoder.matches(dto.password(), user.getPassword()))
-            return new UserDto(user);
+        if (!passwordEncoder.matches(dto.password(), user.getPassword())) {
+            throw new UsernameNotFoundException("User not found.");
+        }
 
-        throw new UsernameNotFoundException("User not found.");
+        Integer monthlyExpense = getMonthlyExpensesByProfile(user.getCurrentProfile());
+
+        return new UserDto(user, monthlyExpense);
+    }
+
+    public UserDto getCurrentInfo(User user) {
+        Integer monthlyExpense = getMonthlyExpensesByProfile(user.getCurrentProfile());
+
+        return new UserDto(user, monthlyExpense);
     }
 }

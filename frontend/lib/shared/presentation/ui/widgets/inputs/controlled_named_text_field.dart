@@ -1,6 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:frontend/shared/formatters/price_input_formatter.dart';
+import 'package:frontend/shared/formatters/time_input_formatter.dart';
+import 'package:frontend/shared/presentation/theme/app_colors.dart';
 import 'package:frontend/shared/presentation/theme/app_shadows.dart';
+import 'package:frontend/shared/presentation/ui/widgets/texts/field_name.dart';
+
+enum InputType { text, password, price, time }
 
 class ControlledNamedTextField extends StatefulWidget {
   const ControlledNamedTextField({
@@ -10,9 +16,11 @@ class ControlledNamedTextField extends StatefulWidget {
     required this.hintText,
     required this.onChange,
     required this.secondaryColor,
-    required this.password,
+    required this.type,
     required this.require,
     this.maxLines,
+    this.highlightError,
+    this.errorMessage,
   });
 
   final String text;
@@ -20,9 +28,11 @@ class ControlledNamedTextField extends StatefulWidget {
   final String hintText;
   final void Function(String) onChange;
   final bool secondaryColor;
-  final bool password;
+  final InputType type;
   final bool require;
   final int? maxLines;
+  final bool? highlightError;
+  final String? errorMessage;
 
   @override
   State<StatefulWidget> createState() => _ControlledNamedTextFieldState();
@@ -67,32 +77,11 @@ class _ControlledNamedTextFieldState extends State<ControlledNamedTextField> {
 
   @override
   Widget build(BuildContext context) {
-    final textColor = Theme.of(context).colorScheme.onSurfaceVariant;
-
     return Column(
+      crossAxisAlignment: .start,
       spacing: 8,
       children: [
-        Row(
-          children: [
-            Text(
-              "${widget.title.toUpperCase()} ${widget.require ? "*" : ""}",
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: .w700,
-                color: textColor,
-              ),
-            ),
-            if (!widget.require)
-              Text(
-                "(необязательно)",
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: .w500,
-                  color: textColor,
-                ),
-              ),
-          ],
-        ),
+        FieldName(title: widget.title, require: widget.require),
         Container(
           padding: .symmetric(vertical: 4, horizontal: 16),
           decoration: BoxDecoration(
@@ -100,6 +89,11 @@ class _ControlledNamedTextFieldState extends State<ControlledNamedTextField> {
                 ? Theme.of(context).colorScheme.surface
                 : Colors.white,
             borderRadius: .all(.circular(16)),
+            border: .all(
+              color: widget.highlightError != null && widget.highlightError!
+                  ? AppColors.red
+                  : Colors.transparent,
+            ),
             boxShadow: [AppShadows.standard()],
           ),
           child: Row(
@@ -111,9 +105,11 @@ class _ControlledNamedTextFieldState extends State<ControlledNamedTextField> {
                   onChanged: widget.onChange,
                   minLines: widget.maxLines ?? 1,
                   maxLines: widget.maxLines ?? 1,
-                  keyboardType: widget.maxLines != null && widget.maxLines! > 1
-                      ? .multiline
-                      : .text,
+                  keyboardType: widget.type == .price
+                      ? .number
+                      : (widget.maxLines != null && widget.maxLines! > 1
+                            ? .multiline
+                            : .text),
                   decoration: InputDecoration(
                     border: .none,
                     hintText: widget.hintText,
@@ -123,10 +119,14 @@ class _ControlledNamedTextFieldState extends State<ControlledNamedTextField> {
                     ),
                   ),
                   style: TextStyle(fontSize: 14),
-                  obscureText: widget.password && !_showPassword,
+                  obscureText: widget.type == .password && !_showPassword,
+                  inputFormatters: [
+                    if (widget.type == .price) PriceInputFormatter(),
+                    if (widget.type == .time) TimeInputFormatter(),
+                  ],
                 ),
               ),
-              if (widget.password)
+              if (widget.type == .password)
                 IconButton(
                   onPressed: switchShow,
                   icon: SvgPicture.asset(
@@ -138,6 +138,20 @@ class _ControlledNamedTextFieldState extends State<ControlledNamedTextField> {
             ],
           ),
         ),
+        if (widget.errorMessage != null)
+          SizedBox(
+            height: 14,
+            child: Text(
+              widget.errorMessage!,
+              maxLines: 1,
+              overflow: .ellipsis,
+              style: TextStyle(
+                color: AppColors.red,
+                fontSize: 11,
+                fontWeight: .w500,
+              ),
+            ),
+          ),
       ],
     );
   }

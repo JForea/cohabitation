@@ -8,60 +8,120 @@ class WelcomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final mediaQuery = MediaQuery.of(context);
+    final size = MediaQuery.sizeOf(context);
+    final isDesktop = size.width >= 1024;
 
     return Scaffold(
       backgroundColor: Colors.white,
-      body: Container(
-        padding: EdgeInsets.symmetric(
-          vertical: mediaQuery.size.height * 0.1,
-          horizontal: mediaQuery.size.width * 0.1,
-        ),
-        child: Column(
-          children: [
-            const Text(
-              'Добро пожаловать',
-              style: TextStyle(fontSize: 24, fontWeight: .w600),
+      body: Center(
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            maxWidth: isDesktop ? 500 : double.infinity,
+          ),
+          child: Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: isDesktop ? 32 : size.width * 0.1,
+              vertical: isDesktop ? 48 : size.height * 0.1,
             ),
-            const Text(
-              'в Flatly',
-              style: TextStyle(fontSize: 24, fontWeight: .w600),
-            ),
-            Spacer(),
-            SvgPicture.asset('assets/icons/welcome.svg'),
-            Spacer(),
-            CustomTextButton(
-              onPressed: () => context.push("/auth/login"),
-              text: "Войти в аккаунт",
-            ),
-            SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: .center,
-              children: [
-                const Text(
-                  "Нет аккаунта? ",
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: .w600,
-                    color: Color(0xFF707070),
+            child: isDesktop
+                ? Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      ConstrainedBox(
+                        constraints: BoxConstraints(
+                          maxWidth: 340,
+                          maxHeight: 340,
+                        ),
+                        child: SvgPicture.asset('assets/icons/welcome.svg'),
+                      ),
+                      SizedBox(height: 40),
+                      Text(
+                        'Добро пожаловать',
+                        style: TextStyle(
+                          fontSize: 32,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      Text(
+                        'в Flatly',
+                        style: TextStyle(
+                          fontSize: 32,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      SizedBox(height: 40),
+                      CustomTextButton(
+                        onPressed: () => context.push("/auth/login"),
+                        text: "Войти в аккаунт",
+                      ),
+                      SizedBox(height: 20),
+                      _RegisterText(),
+                    ],
+                  )
+                : Column(
+                    children: [
+                      Text(
+                        'Добро пожаловать',
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      Text(
+                        'в Flatly',
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      Spacer(),
+                      SvgPicture.asset('assets/icons/welcome.svg'),
+                      Spacer(),
+                      CustomTextButton(
+                        onPressed: () => context.push("/auth/login"),
+                        text: "Войти в аккаунт",
+                      ),
+                      SizedBox(height: 20),
+                      _RegisterText(),
+                    ],
                   ),
-                ),
-                GestureDetector(
-                  onTap: () => context.push("/auth/register"),
-                  child: Text(
-                    "Зарегистрироваться",
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: .w700,
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ],
+          ),
         ),
       ),
+    );
+  }
+}
+
+class _RegisterText extends StatelessWidget {
+  const _RegisterText();
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text(
+          "Нет аккаунта? ",
+          style: TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+            color: Color(0xFF707070),
+          ),
+        ),
+        GestureDetector(
+          onTap: () => context.push("/auth/register"),
+          child: Text(
+            "Зарегистрироваться",
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w700,
+              color: Theme.of(context).colorScheme.primary,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

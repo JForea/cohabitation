@@ -23,7 +23,7 @@ class CustomSwitch extends StatelessWidget {
         curve: Curves.easeInOut,
         padding: .all(3),
         width: 44,
-        decoration: AppDecorations.choiceChipBox(
+        decoration: AppDecorations.cardDecoration(
           context: context,
           selected: turnedOn,
           borderRadius: 20,

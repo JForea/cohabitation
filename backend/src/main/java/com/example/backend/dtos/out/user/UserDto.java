@@ -9,12 +9,12 @@ public record UserDto(
     String name,
     ProfileDto profile
 ) {
-    public UserDto(User user) {
+    public UserDto(User user, Integer monthlyExpensesAmount) {
         this(
                 user.getId(),
                 user.getEmail(),
                 user.getName(),
-                user.getCurrentProfile() != null ? new ProfileDto(user.getCurrentProfile()) : null
+                user.getCurrentProfile() != null ? new ProfileDto(user.getCurrentProfile(), monthlyExpensesAmount) : null
         );
     }
 }

@@ -1,38 +1,45 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/features/apartment_enter/presentation/ui/widgets/pages/join_apartment_page.dart';
 import 'package:frontend/features/auth/login/presentation/ui/widgets/pages/login_page.dart';
 import 'package:frontend/features/buyings/presentation/ui/widgets/pages/create_buying_page.dart';
+import 'package:frontend/features/events/presentation/ui/widgets/pages/events_page.dart';
+import 'package:frontend/features/expenses/presentation/ui/widgets/pages/create_expense_page.dart';
+import 'package:frontend/features/expenses/presentation/ui/widgets/pages/expenses_details_by_month_page.dart';
+import 'package:frontend/features/expenses/presentation/ui/widgets/pages/expenses_details_by_profile_page.dart';
+import 'package:frontend/features/notifications/ui/presentation/widgets/pages/notifications_page.dart';
 import 'package:frontend/features/settings/presentation/ui/widgets/pages/settings_page.dart';
 import 'package:frontend/features/tasks/presentation/ui/widgets/pages/create_task_page.dart';
-import 'package:frontend/shared/data/providers/auth_provider.dart';
 import 'package:frontend/features/onboarding/presentation/ui/widgets/pages/onboarding_page.dart';
-import 'package:frontend/features/auth/register/presentation/ui/widgets/pages/registration_first_page.dart';
 import 'package:frontend/features/auth/register/presentation/ui/widgets/pages/registration_second_page.dart';
 import 'package:frontend/features/auth/presentation/ui/widgets/pages/welcome_page.dart';
 import 'package:frontend/features/home/presentation/ui/widgets/pages/home_page.dart';
 import 'package:frontend/features/apartment_enter/presentation/ui/widgets/pages/create_apartment_page.dart';
 import 'package:frontend/features/apartment_enter/presentation/ui/widgets/pages/option_page.dart';
+import 'package:frontend/shared/router/auth_flags_provider.dart';
 import 'package:go_router/go_router.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
-  final authState = ref.watch(authProvider);
+  final notifier = ValueNotifier(0);
+
+  ref.listen(authFlagsProvider, (_, _) {
+    notifier.value++;
+  });
 
   return GoRouter(
     initialLocation: '/',
+    refreshListenable: notifier,
     redirect: (context, state) {
-      if (authState.isLoading) return null;
+      final flags = ref.read(authFlagsProvider);
 
-      print(state.uri.path);
+      if (flags.isLoading || flags.isApartmentLoading) return null;
 
       final path = state.uri.path;
 
-      final bool isLoggedIn = authState.value?.token != null;
-      final bool isInApartment = authState.value?.user?.profile != null;
+      final isAtAuth = path.startsWith('/auth');
+      final isAtEnter = path.startsWith('/enter');
 
-      final bool isAtAuth = path.startsWith('/auth');
-      final bool isAtEnter = path.startsWith('/enter');
-
-      if (!isLoggedIn) {
+      if (!flags.isLoggedIn) {
         if (!isAtAuth) return '/auth/onboarding';
 
         if (path.startsWith('/auth/register')) {
@@ -45,7 +52,7 @@ final routerProvider = Provider<GoRouter>((ref) {
         return null;
       }
 
-      if (!isInApartment) {
+      if (!flags.isInApartment) {
         if (!isAtEnter) return '/enter';
         return null;
       }
@@ -59,14 +66,17 @@ final routerProvider = Provider<GoRouter>((ref) {
     routes: [
       GoRoute(path: '/', builder: (context, state) => HomePage()),
       GoRoute(path: '/auth', builder: (context, state) => WelcomePage()),
-      GoRoute(path: '/auth/login', builder: (context, state) => LoginPage()),
+      GoRoute(
+        path: '/auth/login',
+        builder: (context, state) => LoginPage(register: false),
+      ),
       GoRoute(
         path: '/auth/onboarding',
         builder: (context, state) => OnboardingPage(),
       ),
       GoRoute(
         path: '/auth/register/1',
-        builder: (context, state) => RegistrationFirstPage(),
+        builder: (context, state) => LoginPage(register: true),
       ),
       GoRoute(
         path: '/auth/register/2',
@@ -82,12 +92,38 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => JoinApartmentPage(),
       ),
       GoRoute(
+        path: "/notifications",
+        builder: (context, state) => NotificationsPage(),
+      ),
+      GoRoute(
+        path: "/events/day/:date",
+        builder: (context, state) {
+          final dateString = state.pathParameters["date"];
+
+          final date = DateTime.tryParse(dateString ?? '') ?? DateTime.now();
+
+          return EventsPage(date: date);
+        },
+      ),
+      GoRoute(
         path: '/tasks/create',
         builder: (context, state) => CreateTaskPage(),
       ),
       GoRoute(
         path: '/buyings/create',
         builder: (context, state) => CreateBuyingPage(),
+      ),
+      GoRoute(
+        path: "/expenses/create",
+        builder: (context, state) => CreateExpensePage(),
+      ),
+      GoRoute(
+        path: "/expenses/details/by-profile",
+        builder: (context, state) => ExpensesDetailsByProfilePage(),
+      ),
+      GoRoute(
+        path: "/expenses/details/by-month",
+        builder: (context, state) => ExpensesDetailsByMonthPage(),
       ),
       GoRoute(path: "/settings", builder: (context, state) => SettingsPage()),
     ],

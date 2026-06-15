@@ -3,16 +3,16 @@ package com.example.backend.services;
 import com.example.backend.dtos.in.tasks.CreateTaskDto;
 import com.example.backend.dtos.out.common.IdResponse;
 import com.example.backend.dtos.out.common.StatusResponse;
+import com.example.backend.dtos.out.tasks.CreateTaskResponse;
 import com.example.backend.dtos.out.tasks.TaskDto;
-import com.example.backend.entities.Apartment;
-import com.example.backend.entities.Profile;
-import com.example.backend.entities.Task;
-import com.example.backend.entities.User;
+import com.example.backend.entities.*;
 import com.example.backend.exceptions.AccessForbiddenException;
+import com.example.backend.exceptions.BadRequestException;
 import com.example.backend.exceptions.ResourceNotFoundException;
-import com.example.backend.repositories.ApartmentRepository;
-import com.example.backend.repositories.ProfileRepository;
-import com.example.backend.repositories.TaskRepository;
+import com.example.backend.exceptions.StateConflictException;
+import com.example.backend.intefaces.ITaskLoadService;
+import com.example.backend.intefaces.TaskNotificationHandler;
+import com.example.backend.repositories.*;
 import com.example.backend.specifications.TaskSpecifications;
 import com.example.backend.types.Role;
 import jakarta.transaction.Transactional;
@@ -21,46 +21,135 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
-import java.util.List;
-import java.util.Objects;
+import java.time.LocalDate;
+import java.util.*;
 
 @Service
 public class TaskService {
     private final TaskRepository taskRepository;
+
     private final ProfileRepository profileRepository;
-    private final ApartmentRepository apartmentRepository;
-    private final UserService userService;
+
+    private final TaskNotificationHandler taskNotificationHandler;
+
+    private final TaskRepeatRuleRepository taskRepeatRuleRepository;
+
+    private final ITaskLoadService iTaskLoadService;
 
     public TaskService(
             TaskRepository taskRepository,
             ProfileRepository profileRepository,
-            ApartmentRepository apartmentRepository,
-            UserService userService) {
+            TaskNotificationHandler taskNotificationHandler,
+            TaskRepeatRuleRepository taskRepeatRuleRepository,
+            ITaskLoadService iTaskLoadService) {
         this.taskRepository = taskRepository;
         this.profileRepository = profileRepository;
-        this.apartmentRepository = apartmentRepository;
-        this.userService = userService;
+        this.taskNotificationHandler = taskNotificationHandler;
+        this.taskRepeatRuleRepository = taskRepeatRuleRepository;
+        this.iTaskLoadService = iTaskLoadService;
     }
 
-    public IdResponse<Long> create(User user, Integer apartmentId, CreateTaskDto dto) {
-        Profile creatorProfile = profileRepository.findByUserAndApartment_id(user, apartmentId).orElseThrow(
-                () -> new AccessForbiddenException("You can't create tasks in this apartment.")
+    private Profile chooseAssignedProfile(
+            Integer apartmentId,
+            List<Profile> candidates,
+            LocalDate dueDate
+    ) {
+        if (candidates.isEmpty())
+            throw new StateConflictException(
+                    "No available users for automatic assignment."
+            );
+
+        LocalDate calculationDate = dueDate != null ? dueDate : LocalDate.now();
+
+        Map<Long, Double> loads = iTaskLoadService.calculateProfileLoad(
+                apartmentId,
+                candidates,
+                calculationDate.minusDays(30),
+                calculationDate.plusDays(30)
         );
 
-        if (creatorProfile.getLeftAt() != null)
-            throw new AccessForbiddenException("You can't create tasks in this apartment.");
+        return candidates.stream()
+                .min(Comparator.comparingDouble(
+                        profile -> loads.getOrDefault(profile.getId(), 0.0)
+                ))
+                .orElseThrow();
+    }
 
-        Apartment apartment = apartmentRepository.findById(apartmentId).orElseThrow(
-                () -> new ResourceNotFoundException("Apartment not found.")
-        );
-        Profile assignedProfile = null;
-        if (dto.assignedTo() != null)
+    @Transactional
+    public CreateTaskResponse create(User user, CreateTaskDto dto) {
+        Profile creatorProfile = user.getCurrentProfile();
+
+        TaskRepeatRule repeatRule = null;
+        List<Profile> repeatCandidates = List.of();
+        boolean repeatHasCandidates = false;
+
+        if (dto.repeatRule() != null) {
+            List<Long> assignedIds = dto.repeatRule().assignedIds();
+
+            if (assignedIds != null && !assignedIds.isEmpty()) {
+                repeatCandidates = profileRepository.findAllByIdInAndLeftAtNull(assignedIds);
+
+                if (repeatCandidates.size() != assignedIds.size())
+                    throw new BadRequestException("Request contains invalid assigned ids.");
+
+                repeatHasCandidates = true;
+            }
+
+            repeatRule = new TaskRepeatRule(
+                    creatorProfile,
+                    repeatCandidates,
+                    dto.name(),
+                    dto.description(),
+                    dto.room(),
+                    dto.priority(),
+                    dto.points(),
+                    dto.repeatRule().intervalDays(),
+                    dto.dueDate(),
+                    dto.repeatRule().endDate()
+            );
+
+            taskRepeatRuleRepository.save(repeatRule);
+        }
+
+        Profile assignedProfile;
+
+        if (dto.assignedTo() != null) {
             assignedProfile = profileRepository.findById(dto.assignedTo()).orElseThrow(
                     () -> new ResourceNotFoundException("Assigned user not found.")
             );
 
+            if (assignedProfile.getLeftAt() != null)
+                throw new StateConflictException(
+                        "Can't assign task for user, who left the apartment."
+                );
+
+            if (repeatHasCandidates && repeatCandidates.stream()
+                    .noneMatch(profile -> profile.getId().equals(assignedProfile.getId()))) {
+                throw new BadRequestException(
+                        "Assigned user must be included in repeat rule assigned ids."
+                );
+            }
+        } else if (repeatHasCandidates) {
+            assignedProfile = chooseAssignedProfile(
+                    creatorProfile.getApartment().getId(),
+                    repeatCandidates,
+                    dto.dueDate()
+            );
+        } else if (dto.repeatRule() == null && Boolean.TRUE.equals(dto.autoAssign())) {
+            List<Profile> candidates = profileRepository.findAllByApartment_IdAndLeftAtNull(
+                    creatorProfile.getApartment().getId()
+            );
+
+            assignedProfile = chooseAssignedProfile(
+                    creatorProfile.getApartment().getId(),
+                    candidates,
+                    dto.dueDate()
+            );
+        } else {
+            assignedProfile = null;
+        }
+
         Task task = taskRepository.save(new Task(
-                apartment,
                 creatorProfile,
                 assignedProfile,
                 dto.name(),
@@ -68,26 +157,26 @@ public class TaskService {
                 dto.room(),
                 dto.priority(),
                 dto.points(),
-                dto.repeatTime(),
-                dto.dueDate()
+                dto.dueDate(),
+                repeatRule
         ));
 
-        return new IdResponse<>(task.getId());
+        taskNotificationHandler.handleTaskCreate(
+                user,
+                assignedProfile,
+                task
+        );
+
+        return new CreateTaskResponse(task);
     }
 
     public List<TaskDto> getTasks(
             Integer apartmentId,
-            User user,
             Short cntPerPage,
             Short page,
             Integer assignedTo,
             Boolean done
     ) {
-        Role role = userService.getCurrentUserRoleInApartment(user, apartmentId);
-
-        if (role == null)
-            throw new AccessForbiddenException("You can't view tasks in this apartment.");
-
         Specification<Task> spec = Specification
                 .where(TaskSpecifications.byApartment(apartmentId))
                 .and(TaskSpecifications.assignedToUser(assignedTo))
@@ -100,17 +189,17 @@ public class TaskService {
     }
 
     @Transactional
-    public StatusResponse switchTaskStatus(Integer apartmentId, User user, Long taskId) {
-        Role role = userService.getCurrentUserRoleInApartment(user, apartmentId);
-
-        if (role == null)
-            throw new AccessForbiddenException("You can't change task status in this apartment.");
-
+    public StatusResponse switchTaskStatus(User user, Long taskId) {
         Task task = taskRepository.findById(taskId).orElseThrow(
                 () -> new ResourceNotFoundException("Task not found.")
         );
 
-        if (task.getCompletedAt() != null && role == Role.INHABITANT)
+        Profile userProfile = user.getCurrentProfile();
+        if (
+                task.getCompletedAt() != null &&
+                !Objects.equals(task.getCompletedBy().getId(), userProfile.getId()) &&
+                userProfile.getRole() == Role.INHABITANT
+        )
             throw new AccessForbiddenException("You can't change status of this task, because you are not the " +
                     "one who completed it.");
 
@@ -132,23 +221,70 @@ public class TaskService {
         profileRepository.save(profile);
         taskRepository.save(task);
 
+        taskNotificationHandler.handleTaskSwitchStatus(user, task);
+
         return new StatusResponse(task.getCompletedAt() != null);
     }
 
+    @Transactional
     public void deleteOne(Integer apartmentId, User user, Long taskId) {
-        Role role = userService.getCurrentUserRoleInApartment(user, apartmentId);
-
-        if (role == null)
-            throw new AccessForbiddenException("You can't change task status in this apartment.");
-
-        Task task = taskRepository.findById(taskId).orElseThrow(
+        Task task = taskRepository.findByCreatedBy_Apartment_IdAndId(apartmentId, taskId).orElseThrow(
                 () -> new ResourceNotFoundException("Task not found.")
         );
 
-        if (!Objects.equals(task.getCreatedBy().getId(), user.getCurrentProfile().getId()) && role == Role.INHABITANT) {
+        Profile profile = user.getCurrentProfile();
+
+        if ((!Objects.equals(task.getCreatedBy().getId(), profile.getId()) || task.getCompletedAt() != null) &&
+                profile.getRole() == Role.INHABITANT) {
             throw new AccessForbiddenException("You can't delete this task.");
         }
 
-        taskRepository.delete(task);
+        taskNotificationHandler.handleManyTasksDelete(user, List.of(task));
+
+        if (task.getCompletedAt() != null)
+            task.setDeletedAt(Instant.now());
+        else
+            taskRepository.delete(task);
+    }
+
+    @Transactional
+    public void deleteMany(User user, Integer apartmentId, List<Long> taskIds) {
+        List<Task> tasks = taskRepository.findAllByCreatedBy_Apartment_IdAndIdIn(
+                apartmentId,
+                taskIds
+        );
+
+        if (tasks.size() != new HashSet<>(taskIds).size()) {
+            throw new BadRequestException("Invalid task id.");
+        }
+
+        Profile profile = user.getCurrentProfile();
+
+        for (Task task : tasks) {
+            boolean isOwner = Objects.equals(task.getCreatedBy().getId(), profile.getId());
+            boolean isAdmin = profile.getRole() != Role.INHABITANT;
+
+            if (!isOwner && !isAdmin) {
+                throw new AccessForbiddenException("You can't delete some tasks.");
+            }
+        }
+
+        List<Task> completedTasks = tasks.stream()
+                .filter(task -> task.getCompletedAt() != null)
+                .toList();
+
+        List<Task> notCompletedTasks = tasks.stream()
+                .filter(task -> task.getCompletedAt() == null)
+                .toList();
+
+        Instant now = Instant.now();
+
+        for (Task task : completedTasks) {
+            task.setDeletedAt(now);
+        }
+
+        taskNotificationHandler.handleManyTasksDelete(user, tasks);
+
+        taskRepository.deleteAll(notCompletedTasks);
     }
 }

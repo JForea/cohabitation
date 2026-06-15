@@ -9,16 +9,17 @@ import java.time.Instant;
 import java.time.LocalDate;
 
 @Entity
-@Table(name = "task")
+@Table(
+        name = "task",
+        check = {
+                @CheckConstraint(name = "CK_task_points", constraint = "points >= 0")
+        }
+)
 public class Task {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     private Long id;
-
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "apartment_id", nullable = false)
-    private Apartment apartment;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "created_by", nullable = false)
@@ -47,10 +48,7 @@ public class Task {
     private TaskPriority priority = TaskPriority.MEDIUM;
 
     @Column(name = "points", nullable = false)
-    private Short points = 5;
-
-    @Column(name = "repeat_time")
-    private Short repeatTime;
+    private Short points = 0;
 
     @Column(name = "due_date")
     private LocalDate dueTime;
@@ -62,10 +60,19 @@ public class Task {
     @Column(name = "completed_at")
     private Instant completedAt;
 
+    @Column(name = "deleted_at")
+    private Instant deletedAt;
+
+    @Column(name = "last_reminder_date")
+    private LocalDate lastReminderDate;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "repeat_rule_id")
+    private TaskRepeatRule repeatRule;
+
     public Task() {}
 
     public Task(
-            Apartment apartment,
             Profile createdBy,
             Profile assignedTo,
             String name,
@@ -73,10 +80,9 @@ public class Task {
             Room room,
             TaskPriority priority,
             Short points,
-            Short repeatTime,
-            LocalDate dueTime
+            LocalDate dueTime,
+            TaskRepeatRule repeatRule
     ) {
-        this.apartment = apartment;
         this.createdBy = createdBy;
         this.assignedTo = assignedTo;
         this.name = name;
@@ -87,8 +93,8 @@ public class Task {
             this.priority = priority;
         if (points != null)
             this.points = points;
-        this.repeatTime = repeatTime;
         this.dueTime = dueTime;
+        this.repeatRule = repeatRule;
     }
 
     public LocalDate getDueTime() {
@@ -103,20 +109,20 @@ public class Task {
         return completedAt;
     }
 
+    public void setDeletedAt(Instant deletedAt) {
+        this.deletedAt = deletedAt;
+    }
+
+    public Instant getDeletedAt() {
+        return deletedAt;
+    }
+
     public void setCompletedAt(Instant completedAt) {
         this.completedAt = completedAt;
     }
 
     public Instant getCreatedAt() {
         return createdAt;
-    }
-
-    public Short getRepeatTime() {
-        return repeatTime;
-    }
-
-    public void setRepeatTime(Short repeatTime) {
-        this.repeatTime = repeatTime;
     }
 
     public Short getPoints() {
@@ -179,14 +185,6 @@ public class Task {
         return createdBy;
     }
 
-    public Apartment getApartment() {
-        return apartment;
-    }
-
-    public void setApartment(Apartment apartment) {
-        this.apartment = apartment;
-    }
-
     public Long getId() {
         return id;
     }
@@ -195,4 +193,19 @@ public class Task {
         this.id = id;
     }
 
+    public LocalDate getLastReminderDate() {
+        return lastReminderDate;
+    }
+
+    public void setLastReminderDate(LocalDate lastReminderDate) {
+        this.lastReminderDate = lastReminderDate;
+    }
+
+    public TaskRepeatRule getRepeatRule() {
+        return repeatRule;
+    }
+
+    public void setRepeatRule(TaskRepeatRule repeatRule) {
+        this.repeatRule = repeatRule;
+    }
 }

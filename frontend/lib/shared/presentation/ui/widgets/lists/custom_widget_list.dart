@@ -16,44 +16,58 @@ class CustomWidgetList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = danger ? AppColors.red : Color(0xFFE9E9E9);
+    final color = danger ? AppColors.red : const Color(0xFFE9E9E9);
+
+    final itemsCount = children.length * 2 - 1 + (title != null ? 2 : 0);
 
     return Container(
-      width: .infinity,
-      clipBehavior: .antiAlias,
+      width: double.infinity,
+      clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surfaceContainer,
-        borderRadius: .all(.circular(20)),
-        border: danger ? .all(color: color) : null,
+        borderRadius: const BorderRadius.all(Radius.circular(20)),
+        border: danger ? Border.all(color: color) : null,
         boxShadow: [AppShadows.standard()],
       ),
-      child: Column(
-        crossAxisAlignment: .start,
-        children: [
-          if (title != null) ...[
-            Container(
-              margin: .symmetric(horizontal: 20, vertical: 10),
-              child: Text(
-                title!.toUpperCase(),
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: .w700,
-                  color: danger
-                      ? color
-                      : Theme.of(context).colorScheme.onSurfaceVariant,
+      child: ListView.builder(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        itemCount: itemsCount,
+        itemBuilder: (context, index) {
+          if (title != null) {
+            if (index == 0) {
+              return Container(
+                width: double.infinity,
+                margin: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 10,
                 ),
-              ),
-            ),
-            Divider(height: 1, color: color),
-          ],
-          for (int i = 0; i < children.length; i++)
-            Column(
-              children: [
-                children[i],
-                if (i != children.length - 1) Divider(height: 1, color: color),
-              ],
-            ),
-        ],
+                child: Text(
+                  title!.toUpperCase(),
+                  style: TextStyle(
+                    color: danger
+                        ? AppColors.red
+                        : Theme.of(context).colorScheme.onSurfaceVariant,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              );
+            }
+
+            if (index == 1) {
+              return Divider(height: 1, color: color);
+            }
+
+            index -= 2;
+          }
+
+          if (index.isOdd) {
+            return Divider(height: 1, color: color);
+          }
+
+          return children[index ~/ 2];
+        },
       ),
     );
   }

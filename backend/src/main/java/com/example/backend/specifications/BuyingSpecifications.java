@@ -7,7 +7,7 @@ public class BuyingSpecifications {
     public static Specification<Buying> byApartment(Integer id) {
         return (root, query, cb) -> {
             if (id == null) return null;
-            return cb.equal(root.get("apartment").get("id"), id);
+            return cb.equal(root.get("createdBy").get("apartment").get("id"), id);
         };
     }
 

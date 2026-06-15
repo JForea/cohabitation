@@ -7,21 +7,29 @@ class AuthPageWrapper extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final mediaQuery = MediaQuery.of(context);
+    final size = MediaQuery.sizeOf(context);
+    final isDesktop = size.width >= 1024;
 
     return CustomScrollView(
       slivers: [
         SliverFillRemaining(
           hasScrollBody: false,
-          child: Container(
-            padding: .symmetric(
-              horizontal: mediaQuery.size.width * 0.1,
-              vertical: mediaQuery.size.height * 0.1,
-            ),
-            child: Column(
-              crossAxisAlignment: .start,
-              spacing: 20,
-              children: children,
+          child: Center(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                maxWidth: isDesktop ? 480 : double.infinity,
+              ),
+              child: Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: isDesktop ? 0 : size.width * 0.1,
+                  vertical: isDesktop ? 48 : size.height * 0.1,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  spacing: 20,
+                  children: children,
+                ),
+              ),
             ),
           ),
         ),

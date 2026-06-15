@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/features/profile/presentation/ui/widgets/badges/role_badge.dart';
-import 'package:frontend/shared/data/models/profile.dart';
+import 'package:frontend/shared/presentation/ui/widgets/badges/role_badge.dart';
+import 'package:frontend/shared/data/models/profile/profile.dart';
 import 'package:frontend/shared/presentation/types/bubble.dart';
 import 'package:frontend/shared/presentation/ui/widgets/avatars/avatar.dart';
 import 'package:frontend/shared/presentation/ui/widgets/buttons/custom_icon_button.dart';
@@ -54,22 +54,25 @@ class ProfileAppBar extends StatelessWidget {
               children: [
                 Avatar(name: profile.name, size: 64, color: profile.color),
                 SizedBox(width: 15),
-                Column(
-                  crossAxisAlignment: .start,
-                  children: [
-                    Text(
-                      profile.name,
-                      style: TextStyle(
-                        fontSize: 18,
-                        color: Colors.white,
-                        fontWeight: .w600,
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: .start,
+                    children: [
+                      Text(
+                        profile.name,
+                        maxLines: 1,
+                        overflow: .ellipsis,
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: Colors.white,
+                          fontWeight: .w600,
+                        ),
                       ),
-                    ),
-                    SizedBox(height: 12),
-                    RoleBadge(role: profile.role),
-                  ],
+                      SizedBox(height: 12),
+                      RoleBadge(role: profile.role),
+                    ],
+                  ),
                 ),
-                Spacer(),
                 CustomIconButton(
                   color: Color(0xFF464566),
                   icon: Icons.settings_outlined,

@@ -1,6 +1,7 @@
 package com.example.backend.controllers;
 
 import com.example.backend.dtos.in.apartment.CreateApartmentDto;
+import com.example.backend.dtos.in.apartment.SetBudgetRequest;
 import com.example.backend.dtos.out.apartment.ApartmentDto;
 import com.example.backend.dtos.out.apartment.CreateApartmentResponse;
 import com.example.backend.dtos.out.apartment.InviteCodeResponse;
@@ -14,6 +15,7 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -56,6 +58,20 @@ public class ApartmentController {
         return ResponseEntity.ok(response);
     }
 
+    @PreAuthorize("@apartmentSecurity.hasAccess(#apartmentId, authentication)")
+    @PostMapping("/leave")
+    public ResponseEntity<Void> leave(
+        @AuthenticationPrincipal CustomUserDetails details,
+        HttpServletResponse servletResponse
+    ) {
+        User user = details.getUser();
+        apartmentService.leave(user);
+        String token = jwtService.generateToken(user);
+        servletResponse.addHeader(HttpHeaders.AUTHORIZATION, "Bearer " + token);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
+    @PreAuthorize("@apartmentSecurity.hasAccess(#apartmentId, authentication)")
     @GetMapping("/{apartmentId}")
     public ResponseEntity<ApartmentDto> get(
             @PathVariable Integer apartmentId,
@@ -66,13 +82,31 @@ public class ApartmentController {
         return ResponseEntity.ok(dto);
     }
 
+    @PreAuthorize("@apartmentSecurity.hasAccess(#apartmentId, authentication)")
     @PatchMapping("/{apartmentId}/code")
     public ResponseEntity<InviteCodeResponse> generateCode(
-            @PathVariable Integer apartmentId,
-            @AuthenticationPrincipal CustomUserDetails details
+            @PathVariable Integer apartmentId
     ) {
-        User user = details.getUser();
-        InviteCodeResponse response = apartmentService.generateCode(user, apartmentId);
+        InviteCodeResponse response = apartmentService.generateCode(apartmentId);
         return ResponseEntity.ok(response);
+    }
+
+    @PreAuthorize("@apartmentSecurity.hasAccess(#apartmentId, authentication)")
+    @PatchMapping("/{apartmentId}/budget")
+    public ResponseEntity<Void> patchBudget(
+        @PathVariable Integer apartmentId,
+        @RequestBody @Valid SetBudgetRequest dto
+    ) {
+        apartmentService.setBudget(apartmentId, dto.budget());
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
+    @PreAuthorize("@apartmentSecurity.hasAccess(#apartmentId, authentication)")
+    @DeleteMapping("/{apartmentId}")
+    public ResponseEntity<Void> deleteApartment(
+            @PathVariable Integer apartmentId
+    ) {
+        apartmentService.deleteApartment(apartmentId);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 }

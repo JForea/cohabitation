@@ -1,0 +1,10 @@
+app:
+  load-test:
+    seed:
+      apartments: 100
+      users-per-apartment: 4
+      tasks-per-apartment: 30
+      buyings-per-apartment: 60
+      expenses-per-apartment: 150
+      events-per-apartment: 20
+      notifications-per-apartment: 50

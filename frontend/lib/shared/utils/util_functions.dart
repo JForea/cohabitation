@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/shared/data/types/buying_category.dart';
+import 'package:frontend/shared/data/types/expense_category.dart';
+import 'package:frontend/shared/data/types/notification_type.dart';
 import 'package:frontend/shared/data/types/role.dart';
 import 'package:frontend/shared/data/types/room.dart';
 import 'package:frontend/shared/data/types/task_priority.dart';
 import 'package:frontend/shared/presentation/theme/app_colors.dart';
 
 class UtilFunctions {
+  UtilFunctions._internal();
+
   static String getDateDisplayFromDateTime(DateTime date) {
     final now = DateTime.now();
 
@@ -81,6 +85,17 @@ class UtilFunctions {
         };
         break;
 
+      case const (ExpenseCategory):
+        result = switch (value as ExpenseCategory) {
+          ExpenseCategory.householdGoods => "Хоз. товары",
+          ExpenseCategory.housinAndCommunalServices => "ЖКХ",
+          ExpenseCategory.other => "Другое",
+          ExpenseCategory.products => "Продукты",
+          ExpenseCategory.rent => "Аренда",
+          ExpenseCategory.services => "Услуги",
+        };
+        break;
+
       default:
         throw UnsupportedError("Provided type $T is not supported.");
     }
@@ -149,6 +164,31 @@ class UtilFunctions {
         };
         break;
 
+      case const (ExpenseCategory):
+        res = switch (name) {
+          "products" => ExpenseCategory.products,
+          "housing_and_communal_services" =>
+            ExpenseCategory.housinAndCommunalServices,
+          "services" => ExpenseCategory.services,
+          "household_goods" => ExpenseCategory.householdGoods,
+          "rent" => ExpenseCategory.rent,
+          "other" => ExpenseCategory.other,
+          _ => null,
+        };
+        break;
+
+      case const (NotificationType):
+        res = switch (name) {
+          "task" => NotificationType.task,
+          "buying" => NotificationType.buying,
+          "event" => NotificationType.event,
+          "expense" => NotificationType.expense,
+          "rule" => NotificationType.rule,
+          "user" => NotificationType.user,
+          _ => null,
+        };
+        break;
+
       default:
         throw UnsupportedError("Provided type $T is not supported.");
     }
@@ -199,10 +239,108 @@ class UtilFunctions {
         };
         break;
 
+      case const (ExpenseCategory):
+        result = switch (value as ExpenseCategory) {
+          ExpenseCategory.householdGoods => "HOUSEHOLD_GOODS",
+          ExpenseCategory.housinAndCommunalServices =>
+            "HOUSING_AND_COMMUNAL_SERVICES",
+          ExpenseCategory.services => "SERVICES",
+          ExpenseCategory.other => "OTHER",
+          ExpenseCategory.products => "PRODUCTS",
+          ExpenseCategory.rent => "RENT",
+        };
+        break;
+
       default:
         throw UnsupportedError("Provided type $T is not supported.");
     }
 
     return result;
+  }
+
+  static String toHomeDateString(DateTime date) {
+    const weekdays = [
+      'Понедельник',
+      'Вторник',
+      'Среда',
+      'Четверг',
+      'Пятница',
+      'Суббота',
+      'Воскресенье',
+    ];
+
+    const months = [
+      'января',
+      'февраля',
+      'марта',
+      'апреля',
+      'мая',
+      'июня',
+      'июля',
+      'августа',
+      'сентября',
+      'октября',
+      'ноября',
+      'декабря',
+    ];
+
+    final weekday = weekdays[date.weekday - 1];
+    final month = months[date.month - 1];
+
+    return '$weekday, ${date.day} $month ${date.year}';
+  }
+
+  static String toExpensesPageDateString(DateTime date) {
+    const months = [
+      'Январь',
+      'Февраль',
+      'Март',
+      'Апрель',
+      'Май',
+      'Июнь',
+      'Июль',
+      'Август',
+      'Сентябрь',
+      'Октябрь',
+      'Ноябрь',
+      'Декабрь',
+    ];
+
+    return '${months[date.month - 1]} ${date.year}';
+  }
+
+  static int parsePrice(String price) {
+    return int.tryParse(price.replaceAll(RegExp(r'\D'), '')) ?? -1;
+  }
+
+  static String timeAgo(DateTime date) {
+    final now = DateTime.now();
+    final diff = now.difference(date);
+
+    if (diff.inSeconds < 60) {
+      return 'Только что';
+    }
+
+    if (diff.inMinutes < 60) {
+      return '${diff.inMinutes} мин назад';
+    }
+
+    if (diff.inHours < 24) {
+      return '${diff.inHours} ч назад';
+    }
+
+    if (diff.inDays == 1) {
+      return 'Вчера';
+    }
+
+    if (diff.inDays == 2) {
+      return 'Позавчера';
+    }
+
+    if (diff.inDays < 7) {
+      return '${diff.inDays} дн назад';
+    }
+
+    return '${date.day.toString().padLeft(2, '0')}.${date.month.toString().padLeft(2, '0')}.${date.year}';
   }
 }

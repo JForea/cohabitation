@@ -14,17 +14,17 @@ public class User {
     @Column(name = "id", nullable = false)
     private Integer id;
 
-    @Column(name = "email", nullable = false, unique = true, length = 255)
+    @Column(name = "email", nullable = false, unique = true)
     private String email;
 
-    @Column(name = "password", nullable = false, length = 255)
+    @Column(name = "password", nullable = false)
     private String password;
 
     @Column(name = "name", nullable = false, length = 64)
     private String name;
 
     @Column(name = "male", nullable = false)
-    private Boolean male = false;
+    private Boolean male;
 
     @Enumerated
     @Column(name = "avatar_color", nullable = false)
@@ -33,7 +33,10 @@ public class User {
     @OneToMany(mappedBy = "user", orphanRemoval = true)
     private Set<Profile> profiles = new LinkedHashSet<>();
 
-    @OneToOne(fetch = FetchType.LAZY, orphanRemoval = true)
+    @OneToMany(mappedBy = "user", orphanRemoval = true)
+    private Set<DeviceToken> deviceTokens = new LinkedHashSet<>();
+
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "current_profile_id")
     private Profile currentProfile;
 
@@ -105,4 +108,7 @@ public class User {
         return id;
     }
 
+    public Set<DeviceToken> getDeviceTokens() {
+        return deviceTokens;
+    }
 }

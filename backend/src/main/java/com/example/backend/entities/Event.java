@@ -16,8 +16,8 @@ public class Event {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "apartment_id", nullable = false)
-    private Apartment apartment;
+    @JoinColumn(name = "profile_id", nullable = false)
+    private Profile createdBy;
 
     @Column(name = "name", nullable = false, length = 64)
     private String name;
@@ -25,7 +25,7 @@ public class Event {
     @Column(name = "date", nullable = false)
     private LocalDate date;
 
-    @Column(name = "time", nullable = false)
+    @Column(name = "time")
     private LocalTime time;
 
     @Column(name = "description", length = 256)
@@ -34,6 +34,26 @@ public class Event {
     @CreationTimestamp
     @Column(name = "created_at", nullable = false)
     private Instant createdAt;
+
+    public Event() {}
+
+    public Event(
+            Profile createdBy,
+            String name,
+            LocalDate date,
+            LocalTime time,
+            String description
+    ) {
+        this.createdBy = createdBy;
+        this.name = name;
+        this.date = date;
+        this.time = time;
+        this.description = description;
+    }
+
+    public Profile getCreatedBy() {
+        return createdBy;
+    }
 
     public Instant getCreatedAt() {
         return createdAt;
@@ -69,14 +89,6 @@ public class Event {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public Apartment getApartment() {
-        return apartment;
-    }
-
-    public void setApartment(Apartment apartment) {
-        this.apartment = apartment;
     }
 
     public Long getId() {

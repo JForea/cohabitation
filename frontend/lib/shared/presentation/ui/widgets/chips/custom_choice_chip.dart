@@ -26,7 +26,7 @@ class CustomChoiceChip extends StatelessWidget {
       onTap: onSelect,
       child: Container(
         padding: .symmetric(horizontal: wPadding, vertical: 6),
-        decoration: AppDecorations.choiceChipBox(
+        decoration: AppDecorations.cardDecoration(
           context: context,
           selected: selected,
         ),

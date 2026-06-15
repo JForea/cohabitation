@@ -1,15 +1,18 @@
 package com.example.backend.controllers;
 
 import com.example.backend.dtos.in.user.AuthenticationDto;
+import com.example.backend.dtos.in.user.LogoutRequest;
 import com.example.backend.dtos.in.user.RegisterDto;
 import com.example.backend.dtos.out.user.UserDto;
 import com.example.backend.entities.User;
 import com.example.backend.security.CustomUserDetails;
+import com.example.backend.services.DeviceTokenService;
 import com.example.backend.services.JwtService;
 import com.example.backend.services.UserService;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -22,10 +25,14 @@ public class UserController {
 
     private final JwtService jwtService;
 
+    private final DeviceTokenService deviceTokenService;
+
     public UserController(UserService userService,
-                          JwtService jwtService) {
+                          JwtService jwtService,
+                          DeviceTokenService deviceTokenService) {
         this.userService = userService;
         this.jwtService = jwtService;
+        this.deviceTokenService = deviceTokenService;
     }
 
     @PostMapping("/auth/registry")
@@ -34,6 +41,7 @@ public class UserController {
             HttpServletResponse servletResponse
     ) {
         UserDto userDto = userService.create(dto);
+        deviceTokenService.save(userDto, dto.deviceToken());
         String token = jwtService.generateToken(userDto);
         servletResponse.addHeader(HttpHeaders.AUTHORIZATION, "Bearer " + token);
         return ResponseEntity.ok(userDto);
@@ -45,14 +53,26 @@ public class UserController {
             HttpServletResponse servletResponse
     ) {
         UserDto userDto = userService.authenticate(dto);
+        deviceTokenService.save(userDto, dto.deviceToken());
         String token = jwtService.generateToken(userDto);
         servletResponse.addHeader(HttpHeaders.AUTHORIZATION, "Bearer " + token);
         return ResponseEntity.ok(userDto);
     }
 
+    @PostMapping("/auth/logout")
+    public ResponseEntity<Void> logout(
+            @RequestBody @Valid LogoutRequest request,
+            @AuthenticationPrincipal CustomUserDetails details
+    ) {
+        User user = details.getUser();
+        deviceTokenService.delete(user, request.deviceId());
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
     @GetMapping("/me")
     public ResponseEntity<UserDto> me(@AuthenticationPrincipal CustomUserDetails details) {
         User user = details.getUser();
-        return ResponseEntity.ok(new UserDto(user));
+        UserDto dto = userService.getCurrentInfo(user);
+        return ResponseEntity.ok(dto);
     }
 }

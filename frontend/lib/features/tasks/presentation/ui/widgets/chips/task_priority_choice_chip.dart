@@ -35,7 +35,7 @@ class TaskPriorityChoiceChip extends StatelessWidget {
         padding: .symmetric(vertical: 10),
         height: 80,
         width: width,
-        decoration: AppDecorations.choiceChipBox(
+        decoration: AppDecorations.cardDecoration(
           context: context,
           selected: selected,
           borderRadius: 15,

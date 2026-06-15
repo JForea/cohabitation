@@ -1,0 +1,22 @@
+package com.example.backend.types;
+
+public enum NotificationType {
+    TASK_CREATED,
+    TASK_DONE,
+    TASK_REOPENED,
+    TASK_DELETED,
+    BUYING_UPDATED,
+    EXPENSE_CREATED,
+    EXPENSE_DELETED,
+    RULE_CREATED,
+    RULE_DELETED,
+    USER_JOINED,
+    USER_REJOINED,
+    USER_CREATOR,
+    USER_ADMIN,
+    USER_INHABITANT,
+    USER_LEFT,
+    USER_KICK,
+    EVENT_CREATED,
+    EVENT_DELETED
+}

@@ -10,14 +10,19 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 @Entity
-@Table(name = "profile")
+@Table(
+        name = "profile",
+        check = {
+                @CheckConstraint(name = "CK_profile_points", constraint = "points >= 0")
+        }
+)
 public class Profile {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @Column(name = "name", length = 63)
+    @Column(name = "name", length = 64)
     private String name;
 
     @Column(name = "points", nullable = false)
@@ -62,6 +67,12 @@ public class Profile {
 
     @OneToMany(mappedBy = "completedBy", orphanRemoval = true)
     private Set<Task> completedTasks = new LinkedHashSet<>();
+
+    @OneToMany(mappedBy = "key.profile", orphanRemoval = true)
+    private Set<ProfileNotification> profileNotifications = new LinkedHashSet<>();
+
+    @OneToMany(mappedBy = "actor", orphanRemoval = true)
+    private Set<Notification> notifications = new LinkedHashSet<>();
 
     @Enumerated
     @Column(name = "role", nullable = false)
@@ -199,5 +210,13 @@ public class Profile {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public Set<ProfileNotification> getProfileNotifications() {
+        return profileNotifications;
+    }
+
+    public Set<Notification> getNotifications() {
+        return notifications;
     }
 }

@@ -49,4 +49,9 @@ public class GlobalExceptionHandler {
         return createErrorResponse(e, "BadRequestException", HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<ErrorDetails> handleRuntimeException(Exception e) {
+        return createErrorResponse(e, "InternalServerException", HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
 }

@@ -5,24 +5,16 @@ import com.example.backend.dtos.out.apartment.ApartmentDto;
 import com.example.backend.dtos.out.apartment.CreateApartmentResponse;
 import com.example.backend.dtos.out.apartment.InviteCodeResponse;
 import com.example.backend.dtos.out.apartment.JoinApartmentResponse;
-import com.example.backend.dtos.out.profile.ProfileDto;
-import com.example.backend.entities.Apartment;
-import com.example.backend.entities.MonthlyExpense;
-import com.example.backend.entities.Profile;
-import com.example.backend.entities.User;
-import com.example.backend.entities.keys.MonthlyExpenseKey;
-import com.example.backend.exceptions.AccessForbiddenException;
+import com.example.backend.entities.*;
 import com.example.backend.exceptions.ResourceNotFoundException;
 import com.example.backend.exceptions.StateConflictException;
-import com.example.backend.repositories.ApartmentRepository;
-import com.example.backend.repositories.MonthlyExpenseRepository;
-import com.example.backend.repositories.ProfileRepository;
-import com.example.backend.repositories.UserRepository;
+import com.example.backend.intefaces.ApartmentNotificationHandler;
+import com.example.backend.repositories.*;
 import com.example.backend.types.Role;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
-import java.time.Month;
+import java.time.*;
 import java.util.Calendar;
 import java.util.Optional;
 import java.util.Random;
@@ -36,9 +28,9 @@ public class ApartmentService {
 
     private final UserRepository userRepository;
 
-    private final UserService userService;
+    private final ApartmentNotificationHandler apartmentNotificationHandler;
 
-    private final MonthlyExpenseRepository monthlyExpenseRepository;
+    private final ExpenseRepository expenseRepository;
 
     private final Random random;
 
@@ -46,35 +38,49 @@ public class ApartmentService {
             ApartmentRepository apartmentRepository,
             ProfileRepository profileRepository,
             UserRepository userRepository,
-            UserService userService,
-            MonthlyExpenseRepository monthlyExpenseRepository) {
+            ApartmentNotificationHandler apartmentNotificationHandler,
+            ExpenseRepository expenseRepository) {
         this.apartmentRepository = apartmentRepository;
         this. profileRepository = profileRepository;
         this.userRepository = userRepository;
-        this.userService = userService;
-        this.monthlyExpenseRepository = monthlyExpenseRepository;
         random = new Random();
+        this.apartmentNotificationHandler = apartmentNotificationHandler;
+        this.expenseRepository = expenseRepository;
     }
 
-    private Optional<MonthlyExpense> getMonthlyExpense(Apartment apartment) {
-        Month month = Month.of(Calendar.getInstance().get(Calendar.MONTH));
+    private Integer getMonthlyExpensesInApartment(Apartment apartment) {
+        YearMonth currentMonth = YearMonth.now();
 
-        return monthlyExpenseRepository.findById(
-                new MonthlyExpenseKey(
-                        apartment,
-                        month
-                )
+        ZoneOffset offset = ZoneOffset.ofTotalSeconds(
+                apartment.getMinutesOffset() * 60
         );
+
+        Instant start = currentMonth
+                .atDay(1)
+                .atStartOfDay(offset)
+                .toInstant();
+
+        Instant end = currentMonth
+                .plusMonths(1)
+                .atDay(1)
+                .atStartOfDay(offset)
+                .toInstant();
+
+        Integer amount = expenseRepository.getAmountSumByApartmentIdAndCreatedAtInPeriod(
+                apartment.getId(),
+                start,
+                end
+        );
+
+        return amount != null ? amount : 0;
     }
 
     @Transactional
     public CreateApartmentResponse create(User user, CreateApartmentDto dto) {
-        if (user.getCurrentProfile() != null)
-            throw new StateConflictException("You already have an apartment");
-
         Apartment apartment = apartmentRepository.save(new Apartment(
                 dto.name(),
-                dto.address()
+                dto.address(),
+                dto.minutesOffset()
         ));
 
         Profile profile = profileRepository.save(new Profile(user, apartment, true));
@@ -83,71 +89,58 @@ public class ApartmentService {
         userRepository.save(user);
 
         return new CreateApartmentResponse(
-                apartment.getId(),
-                apartment.getBudget(),
-                new ProfileDto(profile)
+                apartment,
+                profile
         );
     }
 
     public ApartmentDto get(User user, Integer apartmentId) {
-        Role role = userService.getCurrentUserRoleInApartment(user, apartmentId);
-
-        if (role == null)
-            throw new AccessForbiddenException("You can't get information about this apartment.");
+        Role role = user.getCurrentProfile().getRole();
 
         Apartment apartment = apartmentRepository.findById(apartmentId).orElseThrow(() ->
                 new ResourceNotFoundException("Apartment not found.")
         );
 
-        Optional<MonthlyExpense> monthlyExpense = getMonthlyExpense(apartment);
+        Integer monthlyExpenses = getMonthlyExpensesInApartment(apartment);
 
         return new ApartmentDto(
                 apartment,
-                monthlyExpense.isPresent() ? monthlyExpense.get().getSum() : 0,
+                monthlyExpenses,
                 role == Role.INHABITANT ? null : apartment.getInviteCode()
         );
     }
 
-    public InviteCodeResponse generateCode(User user, Integer apartmentId) {
-        Role role = userService.getCurrentUserRoleInApartment(user, apartmentId);
+    private Integer getMonthlyExpensesByProfile(Profile profile) {
+        Apartment apartment = profile.getApartment();
 
-        if (role == null || role == Role.INHABITANT)
-            throw new AccessForbiddenException("You can't generate invite code in this apartment.");
-
-        int inviteCodeLength = 8;
-        String charset = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-
-        Apartment apartment = apartmentRepository.findById(apartmentId).orElseThrow(
-                () -> new ResourceNotFoundException("Apartment not found.")
+        ZoneOffset offset = ZoneOffset.ofTotalSeconds(
+                apartment.getMinutesOffset() * 60
         );
 
-        boolean generated = false;
-        StringBuilder inviteCodeBuilder = new StringBuilder();
-        while (!generated) {
-            for (int i = 0; i < inviteCodeLength; i++) {
-                inviteCodeBuilder.append(charset.charAt(random.nextInt(charset.length())));
-            }
+        YearMonth currentMonth = YearMonth.now(offset);
 
-            Optional<Apartment> conflictingApartment = apartmentRepository.findByInviteCode(inviteCodeBuilder.toString());
+        Instant start = currentMonth
+                .atDay(1)
+                .atStartOfDay(offset)
+                .toInstant();
 
-            if (conflictingApartment.isEmpty())
-                generated = true;
-            else
-                inviteCodeBuilder.delete(0, inviteCodeLength);
-        }
+        Instant end = currentMonth
+                .plusMonths(1)
+                .atDay(1)
+                .atStartOfDay(offset)
+                .toInstant();
 
-        String inviteCode = inviteCodeBuilder.toString();
-        apartment.setInviteCode(inviteCode);
+        Integer amount = expenseRepository.getAmountSumByProfileAndCreatedAtInPeriod(
+                profile,
+                start,
+                end
+        );
 
-        apartmentRepository.save(apartment);
-
-        return new InviteCodeResponse(inviteCode);
+        return amount != null ? amount : 0;
     }
 
+    @Transactional
     public JoinApartmentResponse join(User user, String code) throws StateConflictException {
-        if (user.getCurrentProfile() != null)
-            throw new StateConflictException("You already have an apartment");
-
         Apartment apartment = apartmentRepository.findByInviteCode(code).orElseThrow(() ->
                 new ResourceNotFoundException("Apartment with such invite code wasn't found.")
         );
@@ -158,19 +151,23 @@ public class ApartmentService {
 
             profile.setLeftAt(null);
             profile.setName(user.getName());
-            profile.setAvatarColor(user.getAvatarColor());
             profile.setRole(Role.INHABITANT);
             profileRepository.save(profile);
 
             user.setCurrentProfile(profile);
             userRepository.save(user);
 
-            Optional<MonthlyExpense> monthlyExpense = getMonthlyExpense(apartment);
+            Integer monthlyExpenses = getMonthlyExpensesInApartment(apartment);
+
+            Integer profileMonthlyExpense = getMonthlyExpensesByProfile(profile);
+
+            apartmentNotificationHandler.handleJoinNotification(profile, true);
 
             return new JoinApartmentResponse(
                     apartment,
-                    monthlyExpense.isPresent() ? monthlyExpense.get().getSum() : 0,
-                    profile
+                    monthlyExpenses,
+                    profile,
+                    profileMonthlyExpense != null ? profileMonthlyExpense : 0
             );
         }
 
@@ -185,12 +182,63 @@ public class ApartmentService {
         user.setCurrentProfile(profile);
         userRepository.save(user);
 
-        Optional<MonthlyExpense> monthlyExpense = getMonthlyExpense(apartment);
+        Integer monthlyExpenses = getMonthlyExpensesInApartment(apartment);
+
+        apartmentNotificationHandler.handleJoinNotification(profile, false);
 
         return new JoinApartmentResponse(
                 apartment,
-                monthlyExpense.isPresent() ? monthlyExpense.get().getSum() : 0,
-                profile
+                monthlyExpenses,
+                profile,
+                0
         );
+    }
+
+    @Transactional
+    public InviteCodeResponse generateCode(Integer apartmentId) {
+        int inviteCodeLength = 8;
+        String charset = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+
+        boolean generated = false;
+        StringBuilder inviteCodeBuilder = new StringBuilder();
+        while (!generated) {
+            inviteCodeBuilder = new StringBuilder();
+
+            for (int i = 0; i < inviteCodeLength; i++) {
+                inviteCodeBuilder.append(charset.charAt(random.nextInt(charset.length())));
+            }
+
+            Optional<Apartment> conflictingApartment = apartmentRepository.findByInviteCode(inviteCodeBuilder.toString());
+
+            if (conflictingApartment.isEmpty())
+                generated = true;
+            else
+                inviteCodeBuilder.delete(0, inviteCodeLength);
+        }
+
+        String inviteCode = inviteCodeBuilder.toString();
+
+        apartmentRepository.updateInviteCodeById(apartmentId, inviteCode);
+
+        return new InviteCodeResponse(inviteCode);
+    }
+
+    @Transactional
+    public void setBudget(Integer apartmentId, Integer budget) {
+        apartmentRepository.updateBudgetById(apartmentId, budget);
+    }
+
+    @Transactional
+    public void deleteApartment(Integer apartmentId) {
+        apartmentRepository.deleteById(apartmentId);
+    }
+
+    @Transactional
+    public void leave(User user) {
+        Profile profile = user.getCurrentProfile();
+        profileRepository.updateLeftAtById(profile.getId(), Instant.now());
+        userRepository.setCurrentProfileNullWhereId(user.getId());
+
+        apartmentNotificationHandler.handleLeaveNotification(profile);
     }
 }

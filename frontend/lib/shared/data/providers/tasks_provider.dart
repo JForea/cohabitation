@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:frontend/shared/data/dtos/repeat_rule_dto.dart';
 import 'package:frontend/shared/data/failures/failures.dart';
 import 'package:frontend/shared/data/models/profile/profile.dart';
 import 'package:frontend/shared/data/models/profile/profile_brief.dart';
@@ -124,11 +125,13 @@ class _TasksNotifier extends AsyncNotifier<List<Task>> {
     required Profile userProfile,
     required String name,
     String? description,
-    Profile? assignedTo,
+    required List<Profile> assignedTo,
+    required bool autoAssign,
     required Room room,
     required TaskPriority priority,
     int? dueDateOffset,
     required int points,
+    RepeatRuleDto? repeatRule,
   }) async {
     if (_apartmentId == null) throw NotInApartmentFailure();
 
@@ -141,10 +144,12 @@ class _TasksNotifier extends AsyncNotifier<List<Task>> {
         name: name,
         description: description,
         assignedTo: assignedTo,
+        autoAssign: autoAssign,
         room: room,
         priority: priority,
         dueDateOffset: dueDateOffset,
         points: points,
+        repeatRule: repeatRule,
       );
 
       state = AsyncData([task, ...?state.value]);

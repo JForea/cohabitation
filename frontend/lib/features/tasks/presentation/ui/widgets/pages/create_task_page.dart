@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/features/tasks/presentation/ui/widgets/chips/task_priority_choice_chip.dart';
+import 'package:frontend/shared/data/dtos/repeat_rule_dto.dart';
 import 'package:frontend/shared/data/failures/failures.dart';
 import 'package:frontend/shared/data/models/profile/profile.dart';
 import 'package:frontend/shared/data/providers/async_user_provider.dart';
@@ -8,10 +9,12 @@ import 'package:frontend/shared/data/providers/neighbours_provider.dart';
 import 'package:frontend/shared/data/providers/tasks_provider.dart';
 import 'package:frontend/shared/data/types/room.dart';
 import 'package:frontend/shared/data/types/task_priority.dart';
+import 'package:frontend/shared/presentation/theme/app_styles.dart';
 import 'package:frontend/shared/presentation/ui/widgets/buttons/custom_text_button.dart';
 import 'package:frontend/shared/presentation/ui/widgets/chips/custom_choice_chip.dart';
 import 'package:frontend/shared/presentation/ui/widgets/dialogs/error_dialog.dart';
 import 'package:frontend/shared/presentation/ui/widgets/inputs/controlled_named_text_field.dart';
+import 'package:frontend/shared/presentation/ui/widgets/switches/custom_switch.dart';
 import 'package:frontend/shared/presentation/ui/widgets/wrappers/choice_wrapper.dart';
 import 'package:frontend/shared/presentation/ui/widgets/wrappers/page_wrapper.dart';
 import 'package:frontend/shared/presentation/ui/widgets/wrappers/user_choice_wrapper.dart';
@@ -28,9 +31,11 @@ class CreateTaskPage extends ConsumerStatefulWidget {
 class _CreateTaskPageState extends ConsumerState<CreateTaskPage> {
   late String name;
   late String description;
-  Profile? assignedTo;
+  late List<Profile> assignedTo;
+  late bool autoAssign;
   late Room room;
   late TaskPriority priority;
+  RepeatRuleDto? repeatRule;
   int? dueDateOffset;
   late int points;
 
@@ -40,6 +45,8 @@ class _CreateTaskPageState extends ConsumerState<CreateTaskPage> {
   void initState() {
     name = "";
     description = "";
+    assignedTo = [];
+    autoAssign = false;
     room = Room.common;
     priority = TaskPriority.medium;
     dueDateOffset = 0;
@@ -64,9 +71,44 @@ class _CreateTaskPageState extends ConsumerState<CreateTaskPage> {
     });
   }
 
-  void changeAssigned(Profile? p) {
+  void changeAssigned(Profile? p, {bool autoAssign = false}) {
     setState(() {
-      assignedTo = p;
+      if (autoAssign) {
+        this.autoAssign = true;
+        assignedTo.clear();
+        return;
+      }
+
+      this.autoAssign = false;
+
+      if (p == null) {
+        assignedTo.clear();
+        return;
+      }
+
+      if (repeatRule != null) {
+        if (assignedTo.contains(p) && assignedTo.length > 1) {
+          assignedTo.remove(p);
+        } else if (!assignedTo.contains(p)) {
+          assignedTo.add(p);
+        }
+      } else {
+        assignedTo = [p];
+      }
+    });
+  }
+
+  void switchRepeatable() {
+    setState(() {
+      if (repeatRule != null) {
+        repeatRule = null;
+      } else {
+        repeatRule = RepeatRuleDto(
+          beginDate: .now().add(Duration(days: dueDateOffset ?? 0)),
+        );
+      }
+      autoAssign = false;
+      assignedTo = [];
     });
   }
 
@@ -103,13 +145,17 @@ class _CreateTaskPageState extends ConsumerState<CreateTaskPage> {
             priority: priority,
             dueDateOffset: dueDateOffset,
             points: points,
+            autoAssign: autoAssign,
+            repeatRule: repeatRule,
           );
 
       if (context.mounted) {
         context.go("/");
       }
     } on Failure catch (e) {
-      showErrorDialog(context, e.message);
+      if (context.mounted) {
+        showErrorDialog(context, e.message);
+      }
     }
   }
 
@@ -150,7 +196,9 @@ class _CreateTaskPageState extends ConsumerState<CreateTaskPage> {
           UserChoiceWrapper(
             name: "Назначить",
             profiles: profiles,
-            selected: assignedTo?.id,
+            selected: assignedTo.map((p) => p.id).toList(),
+            multipleSelect: repeatRule != null,
+            autoAssign: autoAssign,
             select: changeAssigned,
           ),
           ChoiceWrapper(
@@ -177,6 +225,16 @@ class _CreateTaskPageState extends ConsumerState<CreateTaskPage> {
                   ),
                 )
                 .toList(),
+          ),
+          Row(
+            spacing: 12,
+            children: [
+              CustomSwitch(
+                turnedOn: repeatRule != null,
+                onSwitch: switchRepeatable,
+              ),
+              Text("ПОВТОРЯЕМАЯ ЗАДАЧА", style: AppStyles.surfaceTitle()),
+            ],
           ),
           ChoiceWrapper(
             name: "Срок",

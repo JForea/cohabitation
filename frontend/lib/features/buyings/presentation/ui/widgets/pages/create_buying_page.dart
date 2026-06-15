@@ -68,7 +68,7 @@ class _CreateBuyingPageState extends ConsumerState<CreateBuyingPage> {
     });
   }
 
-  void changeAssigned(Profile? p) {
+  void changeAssigned(Profile? p, {bool? autoAssign}) {
     setState(() {
       assignedTo = p;
     });
@@ -241,8 +241,9 @@ class _CreateBuyingPageState extends ConsumerState<CreateBuyingPage> {
           UserChoiceWrapper(
             name: "Назначить",
             profiles: profiles,
-            selected: assignedTo?.id,
+            selected: [?assignedTo?.id],
             select: changeAssigned,
+            multipleSelect: false,
           ),
           CustomTextButton(
             onPressed: () async => await create(context),

@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:frontend/shared/data/dtos/repeat_rule_dto.dart';
 import 'package:frontend/shared/data/failures/failures.dart';
 import 'package:frontend/shared/data/failures/map_dio_exception.dart';
 import 'package:frontend/shared/data/models/profile/profile.dart';
@@ -63,41 +64,61 @@ class TaskRepository {
     required Profile craeatedBy,
     required String name,
     String? description,
-    Profile? assignedTo,
+    required List<Profile> assignedTo,
+    required bool autoAssign,
     required Room room,
     required TaskPriority priority,
     int? dueDateOffset,
     required int points,
+    RepeatRuleDto? repeatRule,
   }) async {
     try {
       final date = dueDateOffset == null
           ? null
           : DateTime.now().add(Duration(days: dueDateOffset));
 
+      final repeatable = repeatRule != null;
+
       final response = await _apiClient.post(
         _baseUrl(apartmentId),
         data: {
           "name": name,
           "description": description,
-          "assignedTo": assignedTo?.id,
+          "assignedTo": repeatable || autoAssign || assignedTo.isEmpty
+              ? null
+              : assignedTo[0].id,
+          "autoAssign": repeatable ? false : autoAssign,
           "room": UtilFunctions.tValueToStringRequest(room),
           "priority": UtilFunctions.tValueToStringRequest(priority),
           "dueDate": date == null
               ? null
               : UtilFunctions.dateToStringRequest(date),
           "points": points,
+          "repeatRule": repeatable
+              ? {
+                  "intervalDays": repeatRule.intervalDays,
+                  "endDate": UtilFunctions.dateToStringRequest(
+                    repeatRule.endDate,
+                  ),
+                  "assignedIds": assignedTo.map((p) => p.id).toList(),
+                }
+              : null,
         },
       );
 
       try {
+        final assignedProfile = response["assignedTo"] != null
+            ? ProfileBrief.fromJson(response["assignedTo"])
+            : (!autoAssign && assignedTo.isNotEmpty && !repeatable
+                  ? ProfileBrief.fromFullProfile(assignedTo[0])
+                  : null);
+
         return Task(
           id: response["id"] as int,
           createdBy: ProfileBrief.fromFullProfile(craeatedBy),
           name: name,
           description: description,
-          assignedTo: assignedTo != null
-              ? ProfileBrief.fromFullProfile(assignedTo)
-              : null,
+          assignedTo: assignedProfile,
           room: room,
           priority: priority,
           dueDate: date,

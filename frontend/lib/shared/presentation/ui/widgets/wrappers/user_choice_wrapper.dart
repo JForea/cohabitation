@@ -11,13 +11,17 @@ class UserChoiceWrapper extends StatelessWidget {
     required this.name,
     required this.profiles,
     required this.selected,
+    this.autoAssign,
+    required this.multipleSelect,
     required this.select,
   });
 
   final String name;
   final List<Profile> profiles;
-  final int? selected;
-  final void Function(Profile?) select;
+  final List<int> selected;
+  final bool? autoAssign;
+  final bool multipleSelect;
+  final void Function(Profile?, {bool autoAssign}) select;
 
   @override
   Widget build(BuildContext context) {
@@ -27,17 +31,25 @@ class UserChoiceWrapper extends StatelessWidget {
         CustomChoiceChip(
           name: "Общий",
           icon: Avatar(name: "Общий", size: 24, color: AppColors.greyBlue),
-          selected: selected == null,
+          selected: selected.isEmpty && !(autoAssign ?? false),
           checkMark: true,
-          onSelect: () => select(null),
+          onSelect: () => select(null, autoAssign: false),
         ),
+        if (autoAssign != null && !multipleSelect)
+          CustomChoiceChip(
+            name: "Авто",
+            icon: Icon(Icons.settings, size: 24, color: AppColors.greyBlue),
+            selected: autoAssign != null && autoAssign!,
+            checkMark: true,
+            onSelect: () => select(null, autoAssign: true),
+          ),
         ...profiles.map(
           (p) => CustomChoiceChip(
             name: p.name,
             icon: Avatar(name: p.name, size: 24, color: p.color),
-            selected: p.id == selected,
+            selected: selected.contains(p.id) && !(autoAssign ?? false),
             checkMark: true,
-            onSelect: () => select(p),
+            onSelect: () => select(p, autoAssign: false),
           ),
         ),
       ],

@@ -49,61 +49,55 @@ public class TaskService {
         this.iTaskLoadService = iTaskLoadService;
     }
 
+    private Profile chooseAssignedProfile(
+            Integer apartmentId,
+            List<Profile> candidates,
+            LocalDate dueDate
+    ) {
+        if (candidates.isEmpty())
+            throw new StateConflictException(
+                    "No available users for automatic assignment."
+            );
+
+        LocalDate calculationDate = dueDate != null ? dueDate : LocalDate.now();
+
+        Map<Long, Double> loads = iTaskLoadService.calculateProfileLoad(
+                apartmentId,
+                candidates,
+                calculationDate.minusDays(30),
+                calculationDate.plusDays(30)
+        );
+
+        return candidates.stream()
+                .min(Comparator.comparingDouble(
+                        profile -> loads.getOrDefault(profile.getId(), 0.0)
+                ))
+                .orElseThrow();
+    }
+
     @Transactional
     public CreateTaskResponse create(User user, CreateTaskDto dto) {
         Profile creatorProfile = user.getCurrentProfile();
 
-        Profile assignedProfile = null;
-
-        if (dto.assignedTo() != null) {
-            assignedProfile = profileRepository.findById(dto.assignedTo()).orElseThrow(
-                    () -> new ResourceNotFoundException("Assigned user not found.")
-            );
-
-            if (assignedProfile.getLeftAt() != null)
-                throw new StateConflictException(
-                        "Can't assign task for user, who left the apartment."
-                );
-        } else if (Boolean.TRUE.equals(dto.autoAssign())) {
-            List<Profile> candidates = profileRepository.findAllByApartment_IdAndLeftAtNull(
-                    creatorProfile.getApartment().getId()
-            );
-
-            if (candidates.isEmpty())
-                throw new StateConflictException(
-                        "No available users for automatic assignment."
-                );
-
-            Map<Long, Double> loads = iTaskLoadService.calculateProfileLoad(
-                    creatorProfile.getApartment().getId(),
-                    candidates,
-                    dto.dueDate().minusDays(30),
-                    dto.dueDate().plusDays(30)
-            );
-
-            assignedProfile = candidates.stream()
-                    .min(Comparator.comparingDouble(
-                            profile -> loads.getOrDefault(profile.getId(), 0.0)
-                    ))
-                    .orElseThrow();
-        }
-
         TaskRepeatRule repeatRule = null;
+        List<Profile> repeatCandidates = List.of();
+        boolean repeatHasCandidates = false;
 
         if (dto.repeatRule() != null) {
-            List<Profile> assignedProfiles =
-                    profileRepository.findAllByIdInAndLeftAtNull(
-                            dto.repeatRule().assignedIds()
-                    );
+            List<Long> assignedIds = dto.repeatRule().assignedIds();
 
-            if (assignedProfiles.size() != dto.repeatRule().assignedIds().size())
-                throw new BadRequestException(
-                        "Request contains invalid assigned ids."
-                );
+            if (assignedIds != null && !assignedIds.isEmpty()) {
+                repeatCandidates = profileRepository.findAllByIdInAndLeftAtNull(assignedIds);
+
+                if (repeatCandidates.size() != assignedIds.size())
+                    throw new BadRequestException("Request contains invalid assigned ids.");
+
+                repeatHasCandidates = true;
+            }
 
             repeatRule = new TaskRepeatRule(
                     creatorProfile,
-                    assignedProfiles,
+                    repeatCandidates,
                     dto.name(),
                     dto.description(),
                     dto.room(),
@@ -115,6 +109,44 @@ public class TaskService {
             );
 
             taskRepeatRuleRepository.save(repeatRule);
+        }
+
+        Profile assignedProfile;
+
+        if (dto.assignedTo() != null) {
+            assignedProfile = profileRepository.findById(dto.assignedTo()).orElseThrow(
+                    () -> new ResourceNotFoundException("Assigned user not found.")
+            );
+
+            if (assignedProfile.getLeftAt() != null)
+                throw new StateConflictException(
+                        "Can't assign task for user, who left the apartment."
+                );
+
+            if (repeatHasCandidates && repeatCandidates.stream()
+                    .noneMatch(profile -> profile.getId().equals(assignedProfile.getId()))) {
+                throw new BadRequestException(
+                        "Assigned user must be included in repeat rule assigned ids."
+                );
+            }
+        } else if (repeatHasCandidates) {
+            assignedProfile = chooseAssignedProfile(
+                    creatorProfile.getApartment().getId(),
+                    repeatCandidates,
+                    dto.dueDate()
+            );
+        } else if (dto.repeatRule() == null && Boolean.TRUE.equals(dto.autoAssign())) {
+            List<Profile> candidates = profileRepository.findAllByApartment_IdAndLeftAtNull(
+                    creatorProfile.getApartment().getId()
+            );
+
+            assignedProfile = chooseAssignedProfile(
+                    creatorProfile.getApartment().getId(),
+                    candidates,
+                    dto.dueDate()
+            );
+        } else {
+            assignedProfile = null;
         }
 
         Task task = taskRepository.save(new Task(

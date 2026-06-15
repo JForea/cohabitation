@@ -78,18 +78,18 @@ public class TaskRepeatGenerationService implements ITaskRepeatGenerationService
     private void createTaskForDate(TaskRepeatRule rule, LocalDate dueDate) {
         List<Profile> candidates = getAvailableCandidates(rule);
 
-        if (candidates.isEmpty()) {
-            return;
+        Profile assignedProfile = null;
+
+        if (!candidates.isEmpty()) {
+            Map<Long, Double> loads = iTaskLoadService.calculateProfileLoad(
+                    rule,
+                    candidates,
+                    dueDate.minusDays(LOAD_WINDOW_DAYS),
+                    dueDate.plusDays(LOAD_WINDOW_DAYS)
+            );
+
+            assignedProfile = chooseAssignedProfile(candidates, loads);
         }
-
-        Map<Long, Double> loads = iTaskLoadService.calculateProfileLoad(
-                rule,
-                candidates,
-                dueDate.minusDays(LOAD_WINDOW_DAYS),
-                dueDate.plusDays(LOAD_WINDOW_DAYS)
-        );
-
-        Profile assignedProfile = chooseAssignedProfile(candidates, loads);
 
         Task task = new Task(
                 rule.getCreatedBy(),

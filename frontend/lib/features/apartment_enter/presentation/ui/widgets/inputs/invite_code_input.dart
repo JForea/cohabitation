@@ -66,7 +66,7 @@ class _InviteCodeInputState extends State<InviteCodeInput> {
         Container(
           padding: .symmetric(vertical: 4, horizontal: 16),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: Theme.of(context).colorScheme.surface,
             borderRadius: .all(.circular(16)),
             boxShadow: [AppShadows.standard()],
           ),

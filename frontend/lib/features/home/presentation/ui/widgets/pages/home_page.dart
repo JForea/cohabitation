@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/features/buyings/presentation/ui/widgets/tabs/buyings_tab.dart';
 import 'package:frontend/features/expenses/presentation/ui/widgets/tabs/expenses_tab.dart';
-import 'package:frontend/features/home/presentation/ui/widgets/navigation/custom_bottom_nav_bar.dart';
 import 'package:frontend/features/home/data/providers/page_provider.dart';
+import 'package:frontend/features/home/presentation/ui/widgets/navigation/custom_bottom_nav_bar.dart';
+import 'package:frontend/features/home/presentation/ui/widgets/navigation/custom_side_nav_bar.dart';
 import 'package:frontend/features/home/presentation/ui/widgets/tabs/home_tab.dart';
 import 'package:frontend/features/profile/presentation/ui/widgets/tabs/profile_tab.dart';
 import 'package:frontend/features/tasks/presentation/ui/widgets/tabs/tasks_tab.dart';
@@ -26,7 +27,6 @@ class HomePage extends ConsumerStatefulWidget {
 
 class _HomePageState extends ConsumerState<HomePage> {
   late final PageController controller;
-
   late final DateTime month;
 
   Widget? _buildFloatingActionButton(
@@ -88,6 +88,7 @@ class _HomePageState extends ConsumerState<HomePage> {
   void initState() {
     super.initState();
     controller = PageController();
+
     final now = DateTime.now();
     month = DateTime(now.year, now.month);
   }
@@ -98,45 +99,68 @@ class _HomePageState extends ConsumerState<HomePage> {
     super.dispose();
   }
 
+  void _setPage(int index) {
+    ref.read(pageProvider.notifier).setIndex(index);
+  }
+
   @override
   Widget build(BuildContext context) {
     final currentlyActive = ref.watch(pageProvider);
     final role = ref.watch(userProvider.select((u) => u!.profile!.role));
+
+    final size = MediaQuery.sizeOf(context);
+    final isDesktop = size.width >= 1024;
 
     ref.listen(pageProvider, (prev, next) {
       if (!controller.position.isScrollingNotifier.value &&
           controller.page?.round() != next) {
         controller.animateToPage(
           next,
-          duration: const Duration(milliseconds: 300),
+          duration: Duration(milliseconds: 300),
           curve: Curves.easeOut,
         );
       }
     });
 
+    final pageView = PageView(
+      controller: controller,
+      onPageChanged: (i) => ref.read(pageProvider.notifier).setIndex(i),
+      physics: isDesktop
+          ? NeverScrollableScrollPhysics()
+          : BouncingScrollPhysics(),
+      children: [
+        HomeTab(),
+        TasksTab(),
+        BuyingsTab(),
+        ExpensesTab(),
+        ProfileTab(),
+      ],
+    );
+
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
-      body: PageView(
-        controller: controller,
-        onPageChanged: (i) => ref.read(pageProvider.notifier).setIndex(i),
-        physics: const BouncingScrollPhysics(),
-        children: const [
-          HomeTab(),
-          TasksTab(),
-          BuyingsTab(),
-          ExpensesTab(),
-          ProfileTab(),
-        ],
-      ),
+      body: isDesktop
+          ? Row(
+              children: [
+                CustomSideNavBar(
+                  currentlyActive: currentlyActive,
+                  setIndex: _setPage,
+                ),
+                Expanded(child: pageView),
+              ],
+            )
+          : pageView,
       floatingActionButton: _buildFloatingActionButton(
         currentlyActive,
         role,
         context,
       ),
-      bottomNavigationBar: CustomBottomNavBar(
-        currentlyActive: currentlyActive,
-        setIndex: (i) => ref.read(pageProvider.notifier).setIndex(i),
-      ),
+      bottomNavigationBar: isDesktop
+          ? null
+          : CustomBottomNavBar(
+              currentlyActive: currentlyActive,
+              setIndex: _setPage,
+            ),
     );
   }
 }

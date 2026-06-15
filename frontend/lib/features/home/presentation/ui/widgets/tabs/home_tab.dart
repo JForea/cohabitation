@@ -4,6 +4,7 @@ import 'package:frontend/features/home/data/providers/unread_notifications_count
 import 'package:frontend/features/home/presentation/ui/widgets/app_bars/home_app_bar.dart';
 import 'package:frontend/features/home/presentation/ui/widgets/calendars/calendar.dart';
 import 'package:frontend/features/home/presentation/ui/widgets/previews/neighbours_preview.dart';
+import 'package:frontend/shared/data/models/profile/profile.dart';
 import 'package:frontend/shared/data/providers/apartment_provider.dart';
 import 'package:frontend/shared/data/providers/calendar_provider.dart';
 import 'package:frontend/shared/data/providers/neighbours_provider.dart';
@@ -16,7 +17,7 @@ class HomeTab extends ConsumerStatefulWidget {
   const HomeTab({super.key});
 
   @override
-  ConsumerState<ConsumerStatefulWidget> createState() => _HomeTabState();
+  ConsumerState<HomeTab> createState() => _HomeTabState();
 }
 
 class _HomeTabState extends ConsumerState<HomeTab> {
@@ -31,8 +32,8 @@ class _HomeTabState extends ConsumerState<HomeTab> {
   }
 
   Future<void> updateMonth(WidgetRef ref, DateTime month) async {
-    print(month);
     ref.read(calendarProvider.notifier).changeMonth(month);
+
     setState(() {
       focusedDay = month;
     });
@@ -66,48 +67,103 @@ class _HomeTabState extends ConsumerState<HomeTab> {
             unreadNotificationsCount: unreadNotificationsCount ?? 0,
           ),
           Expanded(
-            child: TabWrapper(
-              floatingButtonExists: false,
-              appBarExists: true,
-              children: [
-                Calendar(
-                  dates: calendarDates,
-                  focusedDay: focusedDay,
-                  firstDay: firstDay,
-                  lastDay: lastDay,
-                  onDaySelected: (day) =>
-                      context.push("/events/day/${day.toIso8601String()}"),
-                  onPageChanged: (month) => updateMonth(ref, month),
-                ),
-                Text(
-                  "Соседи",
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.onSurface,
-                    fontSize: 18,
-                    fontWeight: .w500,
-                  ),
-                ),
-                neighboursState.when(
-                  data: (neighbours) => neighbours.isEmpty
-                      ? Center(
-                          child: EmptyMessageWidget(
-                            iconSize: 70,
-                            fontSize: 16,
-                            assetPath: "assets/icons/user.svg",
-                            message: "У вас пока нет соседей",
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final isWide = constraints.maxWidth >= 900;
+
+                return TabWrapper(
+                  floatingButtonExists: false,
+                  appBarExists: true,
+                  children: [
+                    if (isWide)
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          SizedBox(
+                            width: 520,
+                            child: Calendar(
+                              dates: calendarDates,
+                              focusedDay: focusedDay,
+                              firstDay: firstDay,
+                              lastDay: lastDay,
+                              onDaySelected: (day) => context.push(
+                                "/events/day/${day.toIso8601String()}",
+                              ),
+                              onPageChanged: (month) => updateMonth(ref, month),
+                            ),
                           ),
-                        )
-                      : NeighboursPreview(
-                          neighbours: neighbours.take(3).toList(),
+                          SizedBox(width: 32),
+                          Expanded(
+                            child: Align(
+                              alignment: Alignment.topLeft,
+                              child: ConstrainedBox(
+                                constraints: BoxConstraints(maxWidth: 620),
+                                child: _NeighboursBlock(
+                                  neighboursState: neighboursState,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      )
+                    else ...[
+                      Calendar(
+                        dates: calendarDates,
+                        focusedDay: focusedDay,
+                        firstDay: firstDay,
+                        lastDay: lastDay,
+                        onDaySelected: (day) => context.push(
+                          "/events/day/${day.toIso8601String()}",
                         ),
-                  error: (e, _) => Text("Произошла ошибка при загрузке."),
-                  loading: () => Center(child: CircularProgressIndicator()),
-                ),
-              ],
+                        onPageChanged: (month) => updateMonth(ref, month),
+                      ),
+                      _NeighboursBlock(neighboursState: neighboursState),
+                    ],
+                  ],
+                );
+              },
             ),
           ),
         ],
       ),
+    );
+  }
+}
+
+class _NeighboursBlock extends StatelessWidget {
+  const _NeighboursBlock({required this.neighboursState});
+
+  final AsyncValue<List<Profile>> neighboursState;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          "Соседи",
+          style: TextStyle(
+            color: Theme.of(context).colorScheme.onSurface,
+            fontSize: 18,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        SizedBox(height: 12),
+        neighboursState.when(
+          data: (neighbours) => neighbours.isEmpty
+              ? Center(
+                  child: EmptyMessageWidget(
+                    iconSize: 70,
+                    fontSize: 16,
+                    assetPath: "assets/icons/user.svg",
+                    message: "У вас пока нет соседей",
+                  ),
+                )
+              : NeighboursPreview(neighbours: neighbours.take(3).toList()),
+          error: (e, _) => Text("Произошла ошибка при загрузке."),
+          loading: () => Center(child: CircularProgressIndicator()),
+        ),
+      ],
     );
   }
 }

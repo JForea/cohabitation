@@ -54,9 +54,10 @@ class _JoinApartmentPageState extends ConsumerState<JoinApartmentPage> {
     final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
+      backgroundColor: Colors.white,
       body: AuthPageWrapper(
         children: [
-          CustomBackButton(mainColor: false, pathIfCantPop: "/enter"),
+          CustomBackButton(mainColor: true, pathIfCantPop: "/enter"),
           Text(
             "Войти в квартиру",
             style: TextStyle(

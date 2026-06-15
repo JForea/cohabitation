@@ -106,6 +106,7 @@ class _CreateTaskPageState extends ConsumerState<CreateTaskPage> {
         repeatRule = RepeatRuleDto(
           beginDate: .now().add(Duration(days: dueDateOffset ?? 0)),
         );
+        dueDateOffset ??= 0;
       }
       autoAssign = false;
       assignedTo = [];
@@ -193,14 +194,6 @@ class _CreateTaskPageState extends ConsumerState<CreateTaskPage> {
             require: false,
             maxLines: 5,
           ),
-          UserChoiceWrapper(
-            name: "Назначить",
-            profiles: profiles,
-            selected: assignedTo.map((p) => p.id).toList(),
-            multipleSelect: repeatRule != null,
-            autoAssign: autoAssign,
-            select: changeAssigned,
-          ),
           ChoiceWrapper(
             name: "Комната",
             children: Room.values
@@ -236,6 +229,14 @@ class _CreateTaskPageState extends ConsumerState<CreateTaskPage> {
               Text("ПОВТОРЯЕМАЯ ЗАДАЧА", style: AppStyles.surfaceTitle()),
             ],
           ),
+          UserChoiceWrapper(
+            name: "Назначить",
+            profiles: profiles,
+            selected: assignedTo.map((p) => p.id).toList(),
+            multipleSelect: repeatRule != null,
+            autoAssign: autoAssign,
+            select: changeAssigned,
+          ),
           ChoiceWrapper(
             name: "Срок",
             children: [
@@ -249,12 +250,13 @@ class _CreateTaskPageState extends ConsumerState<CreateTaskPage> {
                   onSelect: () => changeDueDateOffset(i),
                 );
               }),
-              CustomChoiceChip(
-                name: "Без срока",
-                selected: dueDateOffset == null,
-                checkMark: true,
-                onSelect: () => changeDueDateOffset(null),
-              ),
+              if (repeatRule == null)
+                CustomChoiceChip(
+                  name: "Без срока",
+                  selected: dueDateOffset == null,
+                  checkMark: true,
+                  onSelect: () => changeDueDateOffset(null),
+                ),
             ],
           ),
           ChoiceWrapper(

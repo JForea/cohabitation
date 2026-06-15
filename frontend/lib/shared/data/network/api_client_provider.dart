@@ -50,7 +50,7 @@ final apiClientProvider = Provider<ApiClient>((ref) {
     ),
   );
 
-  dio.interceptors.add(LogInterceptor(requestBody: false, responseBody: true));
+  dio.interceptors.add(LogInterceptor(requestBody: true, responseBody: true));
 
   return DioApiClient(dio);
 });

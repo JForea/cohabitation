@@ -161,4 +161,15 @@ class ExpenseRepository {
       throw mapDioException(e);
     }
   }
+
+  Future<int> getCount(int apartmentId, DateTime month) async {
+    try {
+      return await _apiClient.get(
+        "${_baseUrl(apartmentId)}/count",
+        queryParameters: {"period": DateFormat("yyyy-MM").format(month)},
+      );
+    } on DioException catch (e) {
+      throw mapDioException(e);
+    }
+  }
 }

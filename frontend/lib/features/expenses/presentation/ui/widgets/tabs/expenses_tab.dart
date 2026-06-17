@@ -125,6 +125,9 @@ class _ExpensesTabState extends ConsumerState<ExpensesTab> {
     final currentExpenseAmount = ref.watch(
       expensesProvider.select((s) => s.value?.currentExpenseAmount),
     );
+    final currentExpenseQuantity = ref.watch(
+      expensesProvider.select((s) => s.value?.currentExpenseQuantity),
+    );
     final role = ref.watch(userProvider.select((u) => u?.profile?.role));
     final selected = ref.watch(selectedProvider(key));
     final profile = ref.watch(userProvider.select((u) => u?.profile));
@@ -161,14 +164,14 @@ class _ExpensesTabState extends ConsumerState<ExpensesTab> {
               ),
             ],
           ),
-          if (budget != null && currentExpenseAmount != null)
-            MonthlyExpensesCard(
-              budget: budget,
-              currentExpenses: currentExpenseAmount,
-              onSettingsClick: role != null && role != .inhabitant
-                  ? () => onSettingsClick(context)
-                  : null,
-            ),
+          MonthlyExpensesCard(
+            budget: budget ?? 50000,
+            currentExpensesAmount: currentExpenseAmount ?? 0,
+            currentExpenseQuantity: currentExpenseQuantity ?? 0,
+            onSettingsClick: role != null && role != .inhabitant
+                ? () => onSettingsClick(context)
+                : null,
+          ),
           Column(
             children: [
               Row(

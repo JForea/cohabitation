@@ -9,11 +9,13 @@ class MonthlyExpensesCard extends StatelessWidget {
   const MonthlyExpensesCard({
     super.key,
     required this.budget,
-    required this.currentExpenses,
+    required this.currentExpensesAmount,
+    required this.currentExpenseQuantity,
     required this.onSettingsClick,
   });
 
-  final int currentExpenses;
+  final int currentExpensesAmount;
+  final int currentExpenseQuantity;
   final int budget;
   final VoidCallback? onSettingsClick;
 
@@ -54,7 +56,7 @@ class MonthlyExpensesCard extends StatelessWidget {
               Text("Потрачено в этом месяце", style: minorTextStyle),
               SizedBox(height: 8),
               Text(
-                "${formatter.format(currentExpenses)} ₽ / ${formatter.format(budget)} ₽",
+                "${formatter.format(currentExpensesAmount)} ₽ / ${formatter.format(budget)} ₽",
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 16,
@@ -72,7 +74,7 @@ class MonthlyExpensesCard extends StatelessWidget {
                         Text("баланс", style: minorTextStyle),
                         SizedBox(height: 8),
                         Text(
-                          "${budget < currentExpenses ? "-" : "+"} ${formatter.format((budget - currentExpenses).abs())} ₽",
+                          "${budget < currentExpensesAmount ? "-" : "+"} ${formatter.format((budget - currentExpensesAmount).abs())} ₽",
                           style: statsTextStyle,
                         ),
                       ],
@@ -85,7 +87,7 @@ class MonthlyExpensesCard extends StatelessWidget {
                       children: [
                         Text("записей", style: minorTextStyle),
                         Text("о расходах", style: minorTextStyle),
-                        Text("2", style: statsTextStyle),
+                        Text("$currentExpenseQuantity", style: statsTextStyle),
                       ],
                     ),
                   ],

@@ -40,6 +40,10 @@ class ExpensesNotifier extends AsyncNotifier<ExpensesInfo> {
       currentExpenseAmount: await _expenseRepository.getExpenseAmount(
         _apartmentId!,
       ),
+      currentExpenseQuantity: await _expenseRepository.getCount(
+        _apartmentId!,
+        .now(),
+      ),
       expenses: await _expenseRepository.getPage(
         apartmentId: _apartmentId!,
         page: _page,
@@ -103,28 +107,23 @@ class ExpensesNotifier extends AsyncNotifier<ExpensesInfo> {
       );
 
       final previousValue =
-          state.value ?? ExpensesInfo(currentExpenseAmount: 0, expenses: []);
+          state.value ??
+          ExpensesInfo(
+            currentExpenseAmount: 0,
+            currentExpenseQuantity: 0,
+            expenses: [],
+          );
 
       state = AsyncData(
-        previousValue.copyWith(expenses: [expense, ...previousValue.expenses]),
+        previousValue.copyWith(
+          expenses: [expense, ...previousValue.expenses],
+          currentExpenseAmount: previousValue.currentExpenseAmount + amount,
+          currentExpenseQuantity: previousValue.currentExpenseQuantity + 1,
+        ),
       );
     } finally {
       _isLoading = false;
     }
-  }
-
-  void addExpenseAmount(int amount) {
-    final current = state.value;
-
-    if (current == null) {
-      return;
-    }
-
-    state = AsyncData(
-      current.copyWith(
-        currentExpenseAmount: current.currentExpenseAmount + amount,
-      ),
-    );
   }
 
   Future<void> deleteMany(List<int> ids) async {
@@ -140,7 +139,18 @@ class ExpensesNotifier extends AsyncNotifier<ExpensesInfo> {
         .where((e) => !ids.contains(e.id))
         .toList();
 
-    state = AsyncData(previous.copyWith(expenses: current));
+    int sum = 0;
+    previous.expenses
+        .where((e) => ids.contains(e.id))
+        .forEach((e) => sum += e.amount);
+
+    state = AsyncData(
+      previous.copyWith(
+        expenses: current,
+        currentExpenseAmount: previous.currentExpenseAmount - sum,
+        currentExpenseQuantity: previous.currentExpenseQuantity - ids.length,
+      ),
+    );
 
     try {
       await _expenseRepository.deleteMany(_apartmentId!, ids);
@@ -178,11 +188,17 @@ class ExpensesNotifier extends AsyncNotifier<ExpensesInfo> {
 
       final amount = await _expenseRepository.getExpenseAmount(_apartmentId!);
 
+      final quantity = await _expenseRepository.getCount(_apartmentId!, .now());
+
       _page = 0;
       _hasMore = expenses.length >= _pageSize;
 
       state = AsyncData(
-        ExpensesInfo(currentExpenseAmount: amount, expenses: expenses),
+        ExpensesInfo(
+          currentExpenseAmount: amount,
+          currentExpenseQuantity: quantity,
+          expenses: expenses,
+        ),
       );
     } catch (e) {
       _page = previousPage;

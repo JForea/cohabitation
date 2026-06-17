@@ -84,7 +84,6 @@ class _CreateApartmentPageState extends ConsumerState<CreateExpensePage> {
 
     if (!ok) return;
 
-    ref.read(expensesProvider.notifier).addExpenseAmount(price!);
     ref.read(asyncUserProvider.notifier).addExpenseAmount(price!);
     ref
         .read(expensesAmountByCategoryProvider(month).notifier)
@@ -108,7 +107,6 @@ class _CreateApartmentPageState extends ConsumerState<CreateExpensePage> {
       if (context.mounted) {
         showErrorDialog(context, e.message);
       }
-      ref.read(expensesProvider.notifier).addExpenseAmount(-price!);
       ref.read(asyncUserProvider.notifier).addExpenseAmount(-price!);
       ref
           .read(expensesAmountByCategoryProvider(month).notifier)

@@ -343,4 +343,12 @@ class UtilFunctions {
 
     return '${date.day.toString().padLeft(2, '0')}.${date.month.toString().padLeft(2, '0')}.${date.year}';
   }
+
+  static Color getColorFromPriotiry(TaskPriority priority) {
+    return switch (priority) {
+      .low => AppColors.green,
+      .medium => AppColors.yellow,
+      .high => AppColors.orange,
+    };
+  }
 }

@@ -7,6 +7,7 @@ import 'package:frontend/shared/data/providers/rules_provider.dart';
 import 'package:frontend/shared/data/providers/user_provider.dart';
 import 'package:frontend/shared/presentation/ui/widgets/lists/rule_list.dart';
 import 'package:frontend/shared/presentation/ui/widgets/other/empty_message_widget.dart';
+import 'package:frontend/shared/presentation/ui/widgets/texts/default_load_error_text.dart';
 import 'package:frontend/shared/presentation/ui/widgets/wrappers/tab_wrapper.dart';
 
 class ProfileTab extends ConsumerWidget {
@@ -38,7 +39,7 @@ class ProfileTab extends ConsumerWidget {
                     userProfile: profile,
                     neighbours: neighbours,
                   ),
-                  error: (e, _) => Text("Произошла ошибка."),
+                  error: (e, _) => defaultLoadErrorText,
                   loading: () => Center(child: CircularProgressIndicator()),
                 ),
                 Column(
@@ -64,7 +65,7 @@ class ProfileTab extends ConsumerWidget {
                               ),
                             )
                           : RuleList(titleNeeded: false, rules: rules),
-                      error: (e, _) => Text("Произошла ошибка при загрузке."),
+                      error: (e, _) => defaultLoadErrorText,
                       loading: () => Center(child: CircularProgressIndicator()),
                     ),
                   ],

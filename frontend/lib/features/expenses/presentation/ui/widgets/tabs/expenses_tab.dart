@@ -18,6 +18,7 @@ import 'package:frontend/shared/presentation/ui/widgets/buttons/details_text_but
 import 'package:frontend/shared/presentation/ui/widgets/inputs/controlled_named_text_field.dart';
 import 'package:frontend/shared/presentation/ui/widgets/modals/app_modal.dart';
 import 'package:frontend/shared/presentation/ui/widgets/other/empty_message_widget.dart';
+import 'package:frontend/shared/presentation/ui/widgets/texts/default_load_error_text.dart';
 import 'package:frontend/shared/presentation/ui/widgets/wrappers/tab_wrapper.dart';
 import 'package:frontend/shared/utils/util_functions.dart';
 import 'package:go_router/go_router.dart';
@@ -244,7 +245,7 @@ class _ExpensesTabState extends ConsumerState<ExpensesTab> {
                         onSelectCancel: onSelectCancel,
                       ),
 
-                error: (e, _) => Text("Произошла ошибка при загрузке."),
+                error: (e, _) => defaultLoadErrorText,
                 loading: () => Center(child: CircularProgressIndicator()),
               ),
             ],

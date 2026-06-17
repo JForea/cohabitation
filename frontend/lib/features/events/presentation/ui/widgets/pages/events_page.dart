@@ -12,6 +12,7 @@ import 'package:frontend/shared/presentation/ui/widgets/dialogs/error_dialog.dar
 import 'package:frontend/shared/presentation/ui/widgets/inputs/controlled_named_text_field.dart';
 import 'package:frontend/shared/presentation/ui/widgets/modals/app_modal.dart';
 import 'package:frontend/shared/presentation/ui/widgets/other/empty_message_widget.dart';
+import 'package:frontend/shared/presentation/ui/widgets/texts/default_load_error_text.dart';
 import 'package:frontend/shared/presentation/ui/widgets/wrappers/page_wrapper.dart';
 import 'package:intl/intl.dart';
 
@@ -223,7 +224,7 @@ class _EventsPageState extends ConsumerState<EventsPage> {
                         ...events.map((e) => EventCard(event: e)),
                       ],
                     ),
-              error: (e, _) => Text("Произошла ошибка при загрузке."),
+              error: (e, _) => defaultLoadErrorText,
               loading: () => Center(child: CircularProgressIndicator()),
             ),
           ],

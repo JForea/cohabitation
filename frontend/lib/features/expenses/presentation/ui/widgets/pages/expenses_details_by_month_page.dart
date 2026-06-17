@@ -8,6 +8,7 @@ import 'package:frontend/shared/data/providers/apartment_provider.dart';
 import 'package:frontend/shared/data/providers/expenses_provider.dart';
 import 'package:frontend/shared/presentation/ui/widgets/buttons/page_control_button.dart';
 import 'package:frontend/shared/presentation/ui/widgets/other/empty_message_widget.dart';
+import 'package:frontend/shared/presentation/ui/widgets/texts/default_load_error_text.dart';
 import 'package:frontend/shared/presentation/ui/widgets/wrappers/page_wrapper.dart';
 import 'package:intl/intl.dart';
 
@@ -158,7 +159,7 @@ class _ExpensesDetailsByMonthPageState
                     ),
                   )
                 : ExpenseList(expenses: expensesInfo.expenses),
-            error: (_, _) => Text("Произошла ошибка при загрузке"),
+            error: (_, _) => defaultLoadErrorText,
             loading: () => Center(child: CircularProgressIndicator()),
           ),
         ],

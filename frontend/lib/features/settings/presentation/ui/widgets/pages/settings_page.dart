@@ -14,6 +14,7 @@ import 'package:frontend/shared/presentation/ui/widgets/dialogs/error_dialog.dar
 import 'package:frontend/shared/presentation/ui/widgets/lists/custom_widget_list.dart';
 import 'package:frontend/shared/presentation/ui/widgets/lists/rule_list.dart';
 import 'package:frontend/shared/presentation/ui/widgets/snack_bars/message_snack_bar.dart';
+import 'package:frontend/shared/presentation/ui/widgets/texts/default_load_error_text.dart';
 import 'package:frontend/shared/presentation/ui/widgets/wrappers/page_wrapper.dart';
 import 'package:frontend/shared/utils/fcm_helper.dart';
 import 'package:go_router/go_router.dart';
@@ -159,7 +160,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                           await _createRule(context, ref, text),
                       onRuleRemove: (id) async => await _deleteRule(ref, id),
                     ),
-                    error: (e, _) => Text("Произошла ошибка при загрузке."),
+                    error: (e, _) => defaultLoadErrorText,
                     loading: () => Center(child: CircularProgressIndicator()),
                   ),
                 CustomWidgetList(

@@ -11,6 +11,7 @@ import 'package:frontend/shared/data/network/api_client_provider.dart';
 import 'package:frontend/shared/data/types/room.dart';
 import 'package:frontend/shared/data/types/task_priority.dart';
 import 'package:frontend/shared/utils/util_functions.dart';
+import 'package:intl/intl.dart';
 
 final taskRepositoryProvider = Provider<TaskRepository>((ref) {
   final apiClient = ref.read(apiClientProvider);
@@ -33,6 +34,7 @@ class TaskRepository {
     required int pageSize,
     int? assignedTo,
     bool? done,
+    DateTime? dueTime,
   }) async {
     try {
       final query = {
@@ -40,6 +42,8 @@ class TaskRepository {
         'size': '$pageSize',
         if (assignedTo != null) 'assignedTo': '$assignedTo',
         if (done != null) 'done': '$done',
+        if (dueTime != null)
+          'dueTime': DateFormat("yyyy-MM-dd").format(dueTime),
       };
 
       final response = await _apiClient.get(

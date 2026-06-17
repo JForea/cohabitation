@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:frontend/shared/data/models/task.dart';
 import 'package:frontend/shared/data/providers/selected_provider.dart';
-import 'package:frontend/shared/data/types/task_priority.dart';
 import 'package:frontend/shared/presentation/theme/app_colors.dart';
 import 'package:frontend/shared/presentation/theme/app_decorations.dart';
 import 'package:frontend/shared/presentation/ui/widgets/avatars/avatar.dart';
@@ -27,21 +26,13 @@ class TaskCard extends ConsumerWidget {
   final void Function(int)? onSelectCancel;
   final bool? selectionMode;
 
-  Color _getTaskColor() {
-    return switch (task.priority) {
-      TaskPriority.low => AppColors.green,
-      TaskPriority.medium => AppColors.yellow,
-      TaskPriority.high => AppColors.orange,
-    };
-  }
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isSelected = ref.watch(
       selectedProvider("tasks").select((s) => s.contains(task.id)),
     );
 
-    final taskColor = _getTaskColor();
+    final taskColor = UtilFunctions.getColorFromPriotiry(task.priority);
     final overtimed = task.dueDate?.compareTo(DateTime.now()) == -1;
 
     void handleTap() {

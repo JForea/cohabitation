@@ -5,6 +5,7 @@ import 'package:frontend/shared/data/providers/notifications_provider.dart';
 import 'package:frontend/features/notifications/ui/presentation/widgets/lists/notification_list.dart';
 import 'package:frontend/shared/presentation/ui/widgets/buttons/custom_app_floating_action_button.dart';
 import 'package:frontend/shared/presentation/ui/widgets/snack_bars/message_snack_bar.dart';
+import 'package:frontend/shared/presentation/ui/widgets/texts/default_load_error_text.dart';
 import 'package:frontend/shared/presentation/ui/widgets/wrappers/page_wrapper.dart';
 
 class NotificationsPage extends ConsumerStatefulWidget {
@@ -112,7 +113,7 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
                 notifications: notifications,
                 onNotificationTap: (id) => _markAsRead(context, ref, id),
               ),
-              error: (_, _) => Text("Произошла ошибка при загрузке"),
+              error: (_, _) => defaultLoadErrorText,
               loading: () => Center(child: CircularProgressIndicator()),
             ),
           ],

@@ -13,6 +13,7 @@ import 'package:frontend/shared/data/providers/tasks_provider.dart';
 import 'package:frontend/shared/data/providers/user_provider.dart';
 import 'package:frontend/shared/presentation/ui/widgets/other/empty_message_widget.dart';
 import 'package:frontend/shared/presentation/ui/widgets/snack_bars/message_snack_bar.dart';
+import 'package:frontend/shared/presentation/ui/widgets/texts/default_load_error_text.dart';
 import 'package:frontend/shared/presentation/ui/widgets/wrappers/tab_wrapper.dart';
 
 class TasksTab extends ConsumerStatefulWidget {
@@ -162,7 +163,7 @@ class _TasksTabState extends ConsumerState<TasksTab> {
                     onSelect: (id) => onSelect(ref, id),
                     onSelectCancel: (id) => onSelectCancel(ref, id),
                   ),
-            error: (e, _) => Text("При загрузке произошла ошибка"),
+            error: (e, _) => defaultLoadErrorText,
             loading: () =>
                 Center(child: Center(child: CircularProgressIndicator())),
           ),

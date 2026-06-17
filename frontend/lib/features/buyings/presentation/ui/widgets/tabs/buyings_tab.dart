@@ -11,6 +11,7 @@ import 'package:frontend/shared/data/providers/selected_provider.dart';
 import 'package:frontend/shared/data/providers/user_provider.dart';
 import 'package:frontend/shared/presentation/theme/app_colors.dart';
 import 'package:frontend/shared/presentation/ui/widgets/other/empty_message_widget.dart';
+import 'package:frontend/shared/presentation/ui/widgets/texts/default_load_error_text.dart';
 import 'package:frontend/shared/presentation/ui/widgets/wrappers/tab_wrapper.dart';
 
 class BuyingsTab extends ConsumerStatefulWidget {
@@ -154,7 +155,7 @@ class _BuyingsTabstate extends ConsumerState<BuyingsTab> {
                       ),
                     ],
                   ),
-            error: (e, _) => Text("При загрузке данных произошла ошибка."),
+            error: (e, _) => defaultLoadErrorText,
             loading: () => Center(child: CircularProgressIndicator()),
           ),
         ],

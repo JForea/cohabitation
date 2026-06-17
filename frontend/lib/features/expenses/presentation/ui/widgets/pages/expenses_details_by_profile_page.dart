@@ -9,6 +9,7 @@ import 'package:frontend/shared/data/providers/neighbours_provider.dart';
 import 'package:frontend/shared/data/providers/user_provider.dart';
 import 'package:frontend/shared/presentation/ui/widgets/lists/profile_list.dart';
 import 'package:frontend/shared/presentation/ui/widgets/other/empty_message_widget.dart';
+import 'package:frontend/shared/presentation/ui/widgets/texts/default_load_error_text.dart';
 import 'package:frontend/shared/presentation/ui/widgets/wrappers/page_wrapper.dart';
 
 class ExpensesDetailsByProfilePage extends ConsumerStatefulWidget {
@@ -90,7 +91,7 @@ class _ExpensesDetailsByProfilePageState
               onSelect: selectProfile,
               profiles: [?userProfile, ...neighnours],
             ),
-            error: (_, _) => Text("Произошла ошибка при загрузке."),
+            error: (_, _) => defaultLoadErrorText,
             loading: () => Center(child: CircularProgressIndicator()),
           ),
           expensesState.when(
@@ -124,7 +125,7 @@ class _ExpensesDetailsByProfilePageState
                     : ExpenseList(expenses: expensesInfo.expenses),
               ],
             ),
-            error: (_, _) => Text("Произошла ошибка при загрузке"),
+            error: (_, _) => defaultLoadErrorText,
             loading: () => Center(child: CircularProgressIndicator()),
           ),
         ],

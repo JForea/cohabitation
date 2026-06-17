@@ -114,11 +114,13 @@ class _HomePageState extends ConsumerState<HomePage> {
     ref.listen(pageProvider, (prev, next) {
       if (!controller.position.isScrollingNotifier.value &&
           controller.page?.round() != next) {
-        controller.animateToPage(
-          next,
-          duration: Duration(milliseconds: 300),
-          curve: Curves.easeOut,
-        );
+        isDesktop
+            ? controller.jumpToPage(next)
+            : controller.animateToPage(
+                next,
+                duration: Duration(milliseconds: 300),
+                curve: Curves.easeOut,
+              );
       }
     });
 

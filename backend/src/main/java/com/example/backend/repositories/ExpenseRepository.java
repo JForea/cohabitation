@@ -2,7 +2,6 @@ package com.example.backend.repositories;
 
 import com.example.backend.entities.Expense;
 import com.example.backend.entities.Profile;
-import com.example.backend.types.BuyingCategory;
 import com.example.backend.types.ExpenseCategory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -33,50 +32,62 @@ public interface ExpenseRepository extends ListCrudRepository<Expense, Long>, Jp
             @Param("end") Instant end
     );
     @Query("""
-    SELECT SUM(e.amount)
-    FROM Expense e
-    WHERE e.createdBy = :profile
-      AND e.createdAt >= :start
-      AND e.createdAt < :end
-""")
+        SELECT SUM(e.amount)
+        FROM Expense e
+        WHERE e.createdBy = :profile
+            AND e.createdAt >= :start
+            AND e.createdAt < :end
+    """)
     Integer getMonthlyAmountByProfile(
             Profile profile,
             Instant start,
             Instant end
     );
     @Query("""
-    SELECT SUM(e.amount)
-    FROM Expense e
-    WHERE e.apartment.id = :apartmentId
-      AND e.createdAt >= :start
-      AND e.createdAt < :end
-""")
+        SELECT COALESCE(SUM(e.amount), 0)
+        FROM Expense e
+        WHERE e.apartment.id = :apartmentId
+            AND e.createdAt >= :start
+            AND e.createdAt < :end
+    """)
     Integer getAmountSumByApartmentIdAndCreatedAtInPeriod(
             @Param("apartmentId") Integer apartmentId,
             @Param("start") Instant start,
             @Param("end") Instant end
     );
     @Query("""
-    SELECT SUM(e.amount)
-    FROM Expense e
-    WHERE e.createdBy = :profile
-      AND e.createdAt >= :start
-      AND e.createdAt < :end
-""")
+        SELECT SUM(e.amount)
+        FROM Expense e
+        WHERE e.createdBy = :profile
+            AND e.createdAt >= :start
+            AND e.createdAt < :end
+    """)
     Integer getAmountSumByProfileAndCreatedAtInPeriod(
             @Param("profile") Profile profile,
             @Param("start") Instant start,
             @Param("end") Instant end
     );
     @Query("""
-    SELECT SUM(e.amount)
-    FROM Expense e
-    WHERE e.createdBy.id = :profileId
-      AND e.createdAt >= :start
-      AND e.createdAt < :end
-""")
+        SELECT SUM(e.amount)
+        FROM Expense e
+        WHERE e.createdBy.id = :profileId
+            AND e.createdAt >= :start
+            AND e.createdAt < :end
+    """)
     Integer getAmountSumByProfileIdAndCreatedAtInPeriod(
             @Param("profileId") Long profileId,
+            @Param("start") Instant start,
+            @Param("end") Instant end
+    );
+    @Query("""
+        SELECT COALESCE(COUNT(e), 0)
+        FROM Expense e
+        WHERE e.apartment.id = :apartmentId
+            AND e.createdAt >= :start
+            AND e.createdAt < :end
+    """)
+    Integer getCountByApartmentIdAndPeriod(
+            @Param("apartmentId") Integer apartmentId,
             @Param("start") Instant start,
             @Param("end") Instant end
     );

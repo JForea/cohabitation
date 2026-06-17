@@ -63,6 +63,14 @@ public class ExpenseController {
         return ResponseEntity.ok(expenses);
     }
 
+    @GetMapping("/count")
+    public ResponseEntity<Integer> getCount(
+            @PathVariable Integer apartmentId,
+            @RequestParam YearMonth period
+    ) {
+        return ResponseEntity.ok(expenseService.getCount(apartmentId, period));
+    }
+
     @GetMapping("/amount")
     public ResponseEntity<Integer> getAmount(
             @PathVariable Integer apartmentId

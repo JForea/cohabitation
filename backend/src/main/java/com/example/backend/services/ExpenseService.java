@@ -1,6 +1,7 @@
 package com.example.backend.services;
 
 import com.example.backend.dtos.in.expenses.CreateExpenseRequest;
+import com.example.backend.dtos.inner.TimePeriod;
 import com.example.backend.dtos.out.expenses.CreateExpenseResponse;
 import com.example.backend.dtos.out.expenses.ExpenseDto;
 import com.example.backend.entities.*;
@@ -8,6 +9,7 @@ import com.example.backend.exceptions.AccessForbiddenException;
 import com.example.backend.exceptions.ResourceNotFoundException;
 import com.example.backend.intefaces.ExpenseNotificationHandler;
 import com.example.backend.intefaces.FileStorage;
+import com.example.backend.intefaces.ITimePeriodService;
 import com.example.backend.repositories.ApartmentRepository;
 import com.example.backend.repositories.ExpenseRepository;
 import com.example.backend.specifications.ExpenseSpecifications;
@@ -37,16 +39,20 @@ public class ExpenseService {
 
     private final ApartmentRepository apartmentRepository;
 
+    private final ITimePeriodService iTimePeriodService;
+
     private final String bucketName = "checks";
 
     public ExpenseService(ExpenseRepository expenseRepository,
                           FileStorage fileStorage,
                           ExpenseNotificationHandler expenseNotificationHandler,
-                          ApartmentRepository apartmentRepository) {
+                          ApartmentRepository apartmentRepository,
+                          ITimePeriodService iTimePeriodService) {
         this.expenseRepository = expenseRepository;
         this.fileStorage = fileStorage;
         this.expenseNotificationHandler = expenseNotificationHandler;
         this.apartmentRepository = apartmentRepository;
+        this.iTimePeriodService = iTimePeriodService;
     }
 
     @Transactional
@@ -120,35 +126,40 @@ public class ExpenseService {
                 }).toList();
     }
 
+    public Integer getCount(
+            Integer apartmentId,
+            YearMonth yearMonth
+    ) {
+        Apartment apartment = apartmentRepository.findById(apartmentId).orElseThrow(() ->
+                new ResourceNotFoundException("Apartment not found.")
+        );
+
+        Short offset = apartment.getMinutesOffset();
+
+        TimePeriod timePeriod = iTimePeriodService.getTimePeriodByMonth(yearMonth, offset);
+
+        return expenseRepository.getCountByApartmentIdAndPeriod(
+                apartmentId,
+                timePeriod.start(),
+                timePeriod.end()
+        );
+    }
+
     public Integer getAmount(Integer apartmentId) {
         Apartment apartment = apartmentRepository.findById(apartmentId).orElseThrow(() ->
                 new ResourceNotFoundException("Apartment not found.")
         );
 
         YearMonth currentMonth = YearMonth.now();
+        Short offset = apartment.getMinutesOffset();
 
-        ZoneOffset offset = ZoneOffset.ofTotalSeconds(
-                apartment.getMinutesOffset() * 60
-        );
+        TimePeriod timePeriod = iTimePeriodService.getTimePeriodByMonth(currentMonth, offset);
 
-        Instant start = currentMonth
-                .atDay(1)
-                .atStartOfDay(offset)
-                .toInstant();
-
-        Instant end = currentMonth
-                .plusMonths(1)
-                .atDay(1)
-                .atStartOfDay(offset)
-                .toInstant();
-
-        Integer amount = expenseRepository.getAmountSumByApartmentIdAndCreatedAtInPeriod(
+        return expenseRepository.getAmountSumByApartmentIdAndCreatedAtInPeriod(
                 apartmentId,
-                start,
-                end
+                timePeriod.start(),
+                timePeriod.end()
         );
-
-        return amount != null ? amount : 0;
     }
 
     public Map<ExpenseCategory, Integer> getSumByCategory(

@@ -14,6 +14,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -42,10 +43,11 @@ public class TaskController {
             @RequestParam(defaultValue = "0") Short page,
             @RequestParam(defaultValue = "10") Short size,
             @RequestParam(required = false) Integer assignedTo,
-            @RequestParam(required = false) Boolean done
-    ) {
+            @RequestParam(required = false) Boolean done,
+            @RequestParam(required = false) LocalDate dueTime
+            ) {
         return ResponseEntity.ok(
-                taskService.getTasks(apartmentId, size, page, assignedTo, done)
+                taskService.getTasks(apartmentId, size, page, assignedTo, done, dueTime)
         );
     }
 

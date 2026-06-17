@@ -3,6 +3,8 @@ package com.example.backend.specifications;
 import com.example.backend.entities.Task;
 import org.springframework.data.jpa.domain.Specification;
 
+import java.time.LocalDate;
+
 public class TaskSpecifications {
     public static Specification<Task> byApartment(Integer id) {
         return (root, query, cb) -> {
@@ -23,5 +25,11 @@ public class TaskSpecifications {
                         : cb.isNull(root.get("completedBy"))
                 )
         );
+    }
+
+    public static Specification<Task> taskDueTimeIsBefore(LocalDate dueTime) {
+        return (((root, query, cb) ->
+                dueTime == null ? null : cb.lessThanOrEqualTo(root.get("dueTime"), dueTime)
+        ));
     }
 }

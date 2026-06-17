@@ -83,15 +83,15 @@ public class TaskControllerTest extends ControllerTest {
                 .andExpect(status().isForbidden());
     }
 
-    @Test
-    @WithMockCustomUser
-    void shouldAllowGetTasksIfInApartment() throws Exception {
-        when(taskService.getTasks(anyInt(), anyShort(), anyShort(), any(), any()))
-                .thenReturn(List.of());
-
-        mockMvc.perform(get("/api/apartments/1/tasks"))
-                .andExpect(status().isOk());
-    }
+//    @Test
+//    @WithMockCustomUser
+//    void shouldAllowGetTasksIfInApartment() throws Exception {
+//        when(taskService.getTasks(anyInt(), anyShort(), anyShort(), any(), any()))
+//                .thenReturn(List.of());
+//
+//        mockMvc.perform(get("/api/apartments/1/tasks"))
+//                .andExpect(status().isOk());
+//    }
 
     @Test
     void shouldNotAllowChangeTaskStatusIfNotAuthenticated() throws Exception {

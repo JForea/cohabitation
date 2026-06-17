@@ -175,12 +175,14 @@ public class TaskService {
             Short cntPerPage,
             Short page,
             Integer assignedTo,
-            Boolean done
+            Boolean done,
+            LocalDate dueTime
     ) {
         Specification<Task> spec = Specification
                 .where(TaskSpecifications.byApartment(apartmentId))
                 .and(TaskSpecifications.assignedToUser(assignedTo))
-                .and(TaskSpecifications.taskDoneStatusIs(done));
+                .and(TaskSpecifications.taskDoneStatusIs(done))
+                .and(TaskSpecifications.taskDueTimeIsBefore(dueTime));
 
         return taskRepository.findAll(spec, PageRequest.of(page, cntPerPage))
                 .map(

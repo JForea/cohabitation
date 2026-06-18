@@ -5,6 +5,9 @@ import com.example.backend.exceptions.AccessForbiddenException;
 import com.example.backend.exceptions.BadRequestException;
 import com.example.backend.exceptions.ResourceNotFoundException;
 import com.example.backend.exceptions.StateConflictException;
+import com.example.backend.security.ApartmentSecurity;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,6 +17,8 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+    private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+
     private ResponseEntity<ErrorDetails> createErrorResponse(Exception e, String type, HttpStatus status) {
         ErrorDetails details = new ErrorDetails(
                 type,
@@ -49,9 +54,15 @@ public class GlobalExceptionHandler {
         return createErrorResponse(e, "BadRequestException", HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(RuntimeException.class)
-    public ResponseEntity<ErrorDetails> handleRuntimeException(Exception e) {
-        return createErrorResponse(e, "InternalServerException", HttpStatus.INTERNAL_SERVER_ERROR);
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ErrorDetails> handleException(Exception e) {
+        log.error("Unhandled exception", e);
+
+        return createErrorResponse(
+                new RuntimeException("Internal server error."),
+                "InternalServerException",
+                HttpStatus.INTERNAL_SERVER_ERROR
+        );
     }
 
 }

@@ -1,5 +1,6 @@
 package com.example.backend.configurations;
 
+import org.jetbrains.annotations.NotNull;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
@@ -19,7 +20,7 @@ public class WebConfig implements WebMvcConfigurer {
                 .resourceChain(true)
                 .addResolver(new PathResourceResolver() {
                     @Override
-                    protected Resource getResource(String resourcePath, Resource location) throws IOException {
+                    protected Resource getResource(@NotNull String resourcePath, @NotNull Resource location) throws IOException {
                         Resource requestedResource = location.createRelative(resourcePath);
 
                         if (requestedResource.exists() && requestedResource.isReadable()) {

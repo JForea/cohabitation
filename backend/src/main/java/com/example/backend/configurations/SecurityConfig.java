@@ -1,5 +1,7 @@
 package com.example.backend.configurations;
 
+import com.example.backend.handlers.CustomAccessDeniedHandler;
+import com.example.backend.handlers.CustomAuthenticationEntryPoint;
 import com.example.backend.repositories.UserRepository;
 import com.example.backend.security.JwtAuthFilter;
 import com.example.backend.services.JwtService;
@@ -75,12 +77,18 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(
             HttpSecurity http,
             JwtService jwtService,
-            @Qualifier("userDetailsService") UserDetailsService userDetailsService
+            @Qualifier("userDetailsService") UserDetailsService userDetailsService,
+            CustomAuthenticationEntryPoint authenticationEntryPoint,
+            CustomAccessDeniedHandler accessDeniedHandler
     ) {
         JwtAuthFilter jwtAuthFilter = new JwtAuthFilter(jwtService, userDetailsService);
 
         http.csrf(AbstractHttpConfigurer::disable)
                 .cors(Customizer.withDefaults())
+                .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint(authenticationEntryPoint)
+                        .accessDeniedHandler(accessDeniedHandler)
+                )
                 .authorizeHttpRequests(
                         auth ->
                                 auth

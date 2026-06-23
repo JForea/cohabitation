@@ -191,6 +191,145 @@ public class TaskService {
     }
 
     @Transactional
+    public void redactTask(User user, Long taskId, CreateTaskDto dto) {
+        Task task = taskRepository.findById(taskId).orElseThrow(
+                () -> new ResourceNotFoundException("Task not found.")
+        );
+
+        if (task.getDeletedAt() != null) {
+            throw new ResourceNotFoundException("Task not found.");
+        }
+
+        Profile editorProfile = user.getCurrentProfile();
+
+        if (
+                !Objects.equals(task.getCreatedBy().getId(), editorProfile.getId()) &&
+                        editorProfile.getRole() == Role.INHABITANT
+        ) {
+            throw new AccessForbiddenException("You can't redact this task.");
+        }
+
+        if (task.getCompletedAt() != null) {
+            throw new BadRequestException("Completed tasks shouldn't be redacted.");
+        }
+
+        TaskRepeatRule repeatRule = task.getRepeatRule();
+
+        List<Profile> repeatCandidates = List.of();
+        boolean repeatHasCandidates = false;
+
+        if (dto.repeatRule() != null) {
+            List<Long> assignedIds = dto.repeatRule().assignedIds();
+
+            if (assignedIds != null && !assignedIds.isEmpty()) {
+                repeatCandidates = profileRepository.findAllByIdInAndLeftAtNull(assignedIds);
+
+                if (repeatCandidates.size() != assignedIds.size()) {
+                    throw new BadRequestException("Request contains invalid assigned ids.");
+                }
+
+                boolean hasForeignProfile = repeatCandidates.stream()
+                        .anyMatch(candidate -> !Objects.equals(
+                                candidate.getApartment().getId(),
+                                editorProfile.getApartment().getId()
+                        ));
+
+                if (hasForeignProfile) {
+                    throw new BadRequestException("Assigned ids contain users from another apartment.");
+                }
+
+                repeatHasCandidates = true;
+            }
+
+            if (repeatRule == null) {
+                repeatRule = new TaskRepeatRule(
+                        editorProfile,
+                        repeatCandidates,
+                        dto.name(),
+                        dto.description(),
+                        dto.room(),
+                        dto.priority(),
+                        dto.points(),
+                        dto.repeatRule().intervalDays(),
+                        dto.dueDate(),
+                        dto.repeatRule().endDate()
+                );
+
+                taskRepeatRuleRepository.save(repeatRule);
+                task.setRepeatRule(repeatRule);
+            } else {
+                repeatRule.setName(dto.name());
+                repeatRule.setDescription(dto.description());
+                repeatRule.setRoom(dto.room());
+                repeatRule.setPriority(dto.priority());
+                repeatRule.setPoints(dto.points());
+                repeatRule.setIntervalDays(dto.repeatRule().intervalDays());
+                repeatRule.setEndDate(dto.repeatRule().endDate());
+                repeatRule.setAssignedProfiles(new HashSet<>(repeatCandidates));
+            }
+        } else if (repeatRule != null) {
+            task.setRepeatRule(null);
+            taskRepeatRuleRepository.delete(repeatRule);
+        }
+
+        Profile assignedProfile;
+
+        if (dto.assignedTo() != null) {
+            assignedProfile = profileRepository.findById(dto.assignedTo()).orElseThrow(
+                    () -> new ResourceNotFoundException("Assigned user not found.")
+            );
+
+            if (assignedProfile.getLeftAt() != null) {
+                throw new StateConflictException(
+                        "Can't assign task for user, who left the apartment."
+                );
+            }
+
+            if (!Objects.equals(
+                    assignedProfile.getApartment().getId(),
+                    editorProfile.getApartment().getId()
+            )) {
+                throw new BadRequestException("Assigned user is not in your apartment.");
+            }
+
+            if (repeatHasCandidates && repeatCandidates.stream()
+                    .noneMatch(profile -> profile.getId().equals(assignedProfile.getId()))) {
+                throw new BadRequestException(
+                        "Assigned user must be included in repeat rule assigned ids."
+                );
+            }
+        } else if (repeatHasCandidates) {
+            assignedProfile = chooseAssignedProfile(
+                    editorProfile.getApartment().getId(),
+                    repeatCandidates,
+                    dto.dueDate()
+            );
+        } else if (dto.repeatRule() == null && Boolean.TRUE.equals(dto.autoAssign())) {
+            List<Profile> candidates = profileRepository.findAllByApartment_IdAndLeftAtNull(
+                    editorProfile.getApartment().getId()
+            );
+
+            assignedProfile = chooseAssignedProfile(
+                    editorProfile.getApartment().getId(),
+                    candidates,
+                    dto.dueDate()
+            );
+        } else {
+            assignedProfile = null;
+        }
+
+        task.setAssignedTo(assignedProfile);
+        task.setPoints(dto.points());
+        task.setDescription(dto.description());
+        task.setDueTime(dto.dueDate());
+        task.setName(dto.name());
+        task.setPriority(dto.priority());
+        task.setRoom(dto.room());
+
+        taskRepository.save(task);
+    }
+
+    @Transactional
     public StatusResponse switchTaskStatus(User user, Long taskId) {
         Task task = taskRepository.findById(taskId).orElseThrow(
                 () -> new ResourceNotFoundException("Task not found.")

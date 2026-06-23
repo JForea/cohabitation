@@ -9,7 +9,7 @@ import 'package:frontend/features/expenses/presentation/ui/widgets/pages/expense
 import 'package:frontend/features/expenses/presentation/ui/widgets/pages/expenses_details_by_profile_page.dart';
 import 'package:frontend/features/notifications/ui/presentation/widgets/pages/notifications_page.dart';
 import 'package:frontend/features/settings/presentation/ui/widgets/pages/settings_page.dart';
-import 'package:frontend/features/tasks/presentation/ui/widgets/pages/create_task_page.dart';
+import 'package:frontend/features/tasks/presentation/ui/widgets/pages/redact_task_page.dart';
 import 'package:frontend/features/onboarding/presentation/ui/widgets/pages/onboarding_page.dart';
 import 'package:frontend/features/auth/register/presentation/ui/widgets/pages/registration_second_page.dart';
 import 'package:frontend/features/auth/presentation/ui/widgets/pages/welcome_page.dart';
@@ -107,7 +107,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/tasks/create',
-        builder: (context, state) => CreateTaskPage(),
+        builder: (context, state) => RedactTaskPage(),
       ),
       GoRoute(
         path: '/buyings/create',

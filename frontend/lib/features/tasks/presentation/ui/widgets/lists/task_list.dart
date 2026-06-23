@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/shared/presentation/ui/widgets/cards/task_card.dart';
+import 'package:frontend/features/tasks/presentation/ui/widgets/cards/task_card.dart';
 import 'package:frontend/shared/data/models/task.dart';
 
 class TaskList extends StatelessWidget {

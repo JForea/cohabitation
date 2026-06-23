@@ -76,6 +76,8 @@ public class DemoDataSeeder implements CommandLineRunner {
         createTasks(profiles);
         createBuyings(profiles);
         createEvents(profiles);
+
+        System.out.println("Demo db created.");
     }
 
     private Apartment createApartment() {

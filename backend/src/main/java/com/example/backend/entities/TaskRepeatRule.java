@@ -157,4 +157,40 @@ public class TaskRepeatRule {
     public Set<Profile> getAssignedProfiles() {
         return assignedProfiles;
     }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public void setRoom(Room room) {
+        this.room = room;
+    }
+
+    public void setCreatedBy(Profile createdBy) {
+        this.createdBy = createdBy;
+    }
+
+    public void setIntervalDays(Short intervalDays) {
+        this.intervalDays = intervalDays;
+    }
+
+    public void setPoints(Short points) {
+        this.points = points;
+    }
+
+    public void setPriority(TaskPriority priority) {
+        this.priority = priority;
+    }
+
+    public void setEndDate(LocalDate endDate) {
+        this.endDate = endDate;
+    }
+
+    public void setAssignedProfiles(Set<Profile> assignedProfiles) {
+        this.assignedProfiles = assignedProfiles;
+    }
 }

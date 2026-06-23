@@ -51,6 +51,20 @@ public class TaskController {
         );
     }
 
+    @PutMapping("/{taskId}")
+    public ResponseEntity<Void> redactTask(
+            @PathVariable Long taskId,
+            @RequestBody @Valid CreateTaskDto dto,
+            @AuthenticationPrincipal CustomUserDetails details
+    ) {
+        taskService.redactTask(
+                details.getUser(),
+                taskId,
+                dto
+        );
+        return ResponseEntity.noContent().build();
+    }
+
     @PatchMapping("/{taskId}")
     public ResponseEntity<StatusResponse> changeTaskStatus(
             @PathVariable Long taskId,

@@ -11,7 +11,7 @@ final apiClientProvider = Provider<ApiClient>((ref) {
 
   String baseUrl;
 
-  if (kIsWeb && !kDebugMode) {
+  if (kIsWeb && kReleaseMode) {
     baseUrl = "/api";
   } else {
     baseUrl = "${dotenv.env["BASE_URL"]}/api";

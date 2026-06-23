@@ -4,6 +4,7 @@ import 'package:frontend/features/tasks/presentation/ui/widgets/chips/task_prior
 import 'package:frontend/shared/data/dtos/repeat_rule_dto.dart';
 import 'package:frontend/shared/data/failures/failures.dart';
 import 'package:frontend/shared/data/models/profile/profile.dart';
+import 'package:frontend/shared/data/models/task.dart';
 import 'package:frontend/shared/data/providers/async_user_provider.dart';
 import 'package:frontend/shared/data/providers/neighbours_provider.dart';
 import 'package:frontend/shared/data/providers/tasks_provider.dart';
@@ -21,14 +22,16 @@ import 'package:frontend/shared/presentation/ui/widgets/wrappers/user_choice_wra
 import 'package:frontend/shared/utils/util_functions.dart';
 import 'package:go_router/go_router.dart';
 
-class CreateTaskPage extends ConsumerStatefulWidget {
-  const CreateTaskPage({super.key});
+class RedactTaskPage extends ConsumerStatefulWidget {
+  const RedactTaskPage({super.key, this.task});
+
+  final Task? task;
 
   @override
-  ConsumerState<ConsumerStatefulWidget> createState() => _CreateTaskPageState();
+  ConsumerState<ConsumerStatefulWidget> createState() => _RedactTaskPageState();
 }
 
-class _CreateTaskPageState extends ConsumerState<CreateTaskPage> {
+class _RedactTaskPageState extends ConsumerState<RedactTaskPage> {
   late String name;
   late String description;
   late List<Profile> assignedTo;

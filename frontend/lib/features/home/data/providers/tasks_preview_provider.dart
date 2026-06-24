@@ -1,5 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:frontend/shared/data/failures/failures.dart';
+import 'package:frontend/core/failures/failures.dart';
 import 'package:frontend/shared/data/models/task.dart';
 import 'package:frontend/shared/data/providers/apartment_provider.dart';
 import 'package:frontend/shared/data/repositories/task_repository.dart';

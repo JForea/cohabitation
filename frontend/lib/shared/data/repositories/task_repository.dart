@@ -1,16 +1,16 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/shared/data/dtos/repeat_rule_dto.dart';
-import 'package:frontend/shared/data/failures/failures.dart';
-import 'package:frontend/shared/data/failures/map_dio_exception.dart';
+import 'package:frontend/core/failures/failures.dart';
+import 'package:frontend/core/failures/map_dio_exception.dart';
 import 'package:frontend/shared/data/models/profile/profile.dart';
 import 'package:frontend/shared/data/models/profile/profile_brief.dart';
 import 'package:frontend/shared/data/models/task.dart';
-import 'package:frontend/shared/data/network/api_client.dart';
-import 'package:frontend/shared/data/network/api_client_provider.dart';
+import 'package:frontend/core/network/api_client.dart';
+import 'package:frontend/core/network/api_client_provider.dart';
 import 'package:frontend/shared/data/types/room.dart';
 import 'package:frontend/shared/data/types/task_priority.dart';
-import 'package:frontend/shared/utils/util_functions.dart';
+import 'package:frontend/core/utils/util_functions.dart';
 import 'package:intl/intl.dart';
 
 final taskRepositoryProvider = Provider<TaskRepository>((ref) {

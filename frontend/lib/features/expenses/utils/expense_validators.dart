@@ -1,4 +1,4 @@
-import 'package:frontend/shared/utils/util_functions.dart';
+import 'package:frontend/core/utils/util_functions.dart';
 
 class ExpenseValidators {
   ExpenseValidators._internal();

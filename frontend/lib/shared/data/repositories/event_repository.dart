@@ -1,14 +1,14 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:frontend/shared/data/failures/failures.dart';
-import 'package:frontend/shared/data/failures/map_dio_exception.dart';
+import 'package:frontend/core/failures/failures.dart';
+import 'package:frontend/core/failures/map_dio_exception.dart';
 import 'package:frontend/shared/data/models/event.dart';
 import 'package:frontend/shared/data/models/profile/profile.dart';
 import 'package:frontend/shared/data/models/profile/profile_brief.dart';
-import 'package:frontend/shared/data/network/api_client.dart';
-import 'package:frontend/shared/data/network/api_client_provider.dart';
-import 'package:frontend/shared/utils/util_functions.dart';
+import 'package:frontend/core/network/api_client.dart';
+import 'package:frontend/core/network/api_client_provider.dart';
+import 'package:frontend/core/utils/util_functions.dart';
 import 'package:intl/intl.dart';
 
 final eventRepositoryProvider = Provider<EventRepository>((ref) {

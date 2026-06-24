@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/shared/domain/models/profile/profile_base.dart';
 import 'package:frontend/shared/domain/types/role.dart';
 import 'package:frontend/core/utils/util_functions.dart';
 
-class Profile {
+class Profile extends ProfileBase {
   Profile({
-    required this.id,
-    required this.name,
+    required super.id,
+    required super.name,
+    required super.color,
     required this.points,
     required this.apartmentId,
     required this.role,
-    required this.color,
     required this.monthlyExpensesAmount,
   });
 
@@ -17,24 +18,22 @@ class Profile {
     return Profile(
       id: json['id'] as int,
       name: json['name'] as String,
-      points: json['points'] as int,
-      apartmentId: json['apartmentId'] as int,
-      role: UtilFunctions.getTValueFromName<Role>(json['role'] as String),
       color: UtilFunctions.getTValueFromName<Color>(
         json['avatarColor'] as String,
       ),
+      points: json['points'] as int,
+      apartmentId: json['apartmentId'] as int,
+      role: UtilFunctions.getTValueFromName<Role>(json['role'] as String),
       monthlyExpensesAmount: json["monthlyExpensesAmount"] as int,
     );
   }
 
-  final int id;
-  final String name;
   final int points;
   final int apartmentId;
   final Role role;
-  final Color color;
   final int monthlyExpensesAmount;
 
+  @override
   Profile copyWith({
     int? id,
     String? name,

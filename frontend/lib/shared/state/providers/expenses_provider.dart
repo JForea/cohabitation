@@ -97,7 +97,7 @@ class ExpensesNotifier extends AsyncNotifier<ExpensesInfo> {
     try {
       _isLoading = true;
 
-      final expense = await _expenseRepository.create(
+      final expense = await _expenseRepository.save(
         apartmentId: _apartmentId!,
         name: name,
         amount: amount,

@@ -1,4 +1,4 @@
-import 'package:frontend/shared/domain/models/profile/profile_brief.dart';
+import 'package:frontend/shared/domain/models/profile/profile_base.dart';
 import 'package:frontend/shared/domain/types/buying_category.dart';
 import 'package:frontend/core/utils/util_functions.dart';
 
@@ -16,12 +16,12 @@ class Buying {
   factory Buying.fromJson(Map<String, dynamic> json) {
     return Buying(
       id: json["id"] as int,
-      createdBy: ProfileBrief.fromJson(json["createdBy"]),
+      createdBy: ProfileBase.fromJson(json["createdBy"]),
       assignedTo: json["assignedTo"] != null
-          ? ProfileBrief.fromJson(json["assignedTo"])
+          ? ProfileBase.fromJson(json["assignedTo"])
           : null,
       completedBy: json["completedBy"] != null
-          ? ProfileBrief.fromJson(json["completedBy"])
+          ? ProfileBase.fromJson(json["completedBy"])
           : null,
       name: json["name"] as String,
       quantity: json["quantity"] as String,
@@ -32,18 +32,18 @@ class Buying {
   }
 
   final int id;
-  final ProfileBrief createdBy;
-  final ProfileBrief? assignedTo;
-  final ProfileBrief? completedBy;
+  final ProfileBase createdBy;
+  final ProfileBase? assignedTo;
+  final ProfileBase? completedBy;
   final String name;
   final String quantity;
   final BuyingCategory category;
 
   Buying copyWith({
     int? id,
-    ProfileBrief? createdBy,
-    ProfileBrief? assignedTo,
-    ProfileBrief? completedBy,
+    ProfileBase? createdBy,
+    ProfileBase? assignedTo,
+    ProfileBase? completedBy,
     String? name,
     String? quantity,
     BuyingCategory? category,

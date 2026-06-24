@@ -4,7 +4,7 @@ import 'package:frontend/shared/data/dtos/repeat_rule_dto.dart';
 import 'package:frontend/core/failures/failures.dart';
 import 'package:frontend/core/failures/map_dio_exception.dart';
 import 'package:frontend/shared/domain/models/profile/profile.dart';
-import 'package:frontend/shared/domain/models/profile/profile_brief.dart';
+import 'package:frontend/shared/domain/models/profile/profile_base.dart';
 import 'package:frontend/shared/domain/models/task.dart';
 import 'package:frontend/core/network/api_client.dart';
 import 'package:frontend/core/network/api_client_provider.dart';
@@ -63,12 +63,13 @@ class TaskRepository {
     }
   }
 
-  Future<Task> create({
+  Future<Task> save({
     required int apartmentId,
-    required Profile craeatedBy,
+    int? taskId,
+    required Profile createdBy,
     required String name,
     String? description,
-    required List<Profile> assignedTo,
+    required List<ProfileBase> assignedTo,
     required bool autoAssign,
     required Room room,
     required TaskPriority priority,
@@ -83,117 +84,47 @@ class TaskRepository {
 
       final repeatable = repeatRule != null;
 
-      final response = await _apiClient.post(
-        _baseUrl(apartmentId),
-        data: {
-          "name": name,
-          "description": description,
-          "assignedTo": repeatable || autoAssign || assignedTo.isEmpty
-              ? null
-              : assignedTo[0].id,
-          "autoAssign": repeatable ? false : autoAssign,
-          "room": UtilFunctions.tValueToStringRequest(room),
-          "priority": UtilFunctions.tValueToStringRequest(priority),
-          "dueDate": date == null
-              ? null
-              : UtilFunctions.dateToStringRequest(date),
-          "points": points,
-          "repeatRule": repeatable
-              ? {
-                  "intervalDays": repeatRule.intervalDays,
-                  "endDate": repeatRule.endDate == null
-                      ? null
-                      : UtilFunctions.dateToStringRequest(repeatRule.endDate!),
-                  "assignedIds": assignedTo.map((p) => p.id).toList(),
-                }
-              : null,
-        },
-      );
+      final data = {
+        "name": name,
+        "description": description,
+        "assignedTo": repeatable || autoAssign || assignedTo.isEmpty
+            ? null
+            : assignedTo[0].id,
+        "autoAssign": repeatable ? false : autoAssign,
+        "room": UtilFunctions.tValueToStringRequest(room),
+        "priority": UtilFunctions.tValueToStringRequest(priority),
+        "dueDate": date == null
+            ? null
+            : UtilFunctions.dateToStringRequest(date),
+        "points": points,
+        "repeatRule": repeatable
+            ? {
+                "intervalDays": repeatRule.intervalDays,
+                "endDate": repeatRule.endDate == null
+                    ? null
+                    : UtilFunctions.dateToStringRequest(repeatRule.endDate!),
+                "assignedIds": assignedTo.map((p) => p.id).toList(),
+              }
+            : null,
+      };
+
+      dynamic response = taskId == null
+          ? await _apiClient.post(_baseUrl(apartmentId), data: data)
+          : await _apiClient.put(
+              "${_baseUrl(apartmentId)}/$taskId",
+              data: data,
+            );
 
       try {
-        final assignedProfile = response["assignedTo"] != null
-            ? ProfileBrief.fromJson(response["assignedTo"])
+        final assignedProfile = response != "" && response["assignedTo"] != null
+            ? ProfileBase.fromJson(response["assignedTo"])
             : (!autoAssign && assignedTo.isNotEmpty && !repeatable
-                  ? ProfileBrief.fromFullProfile(assignedTo[0])
+                  ? assignedTo[0]
                   : null);
 
         return Task(
-          id: response["id"] as int,
-          createdBy: ProfileBrief.fromFullProfile(craeatedBy),
-          name: name,
-          description: description,
-          assignedTo: assignedProfile,
-          room: room,
-          priority: priority,
-          dueDate: date,
-          points: points,
-        );
-      } catch (e) {
-        throw ResponseParsingFailure();
-      }
-    } on DioException catch (e) {
-      throw mapDioException(e);
-    }
-  }
-
-  Future<Task> redact({
-    required int apartmentId,
-    required int taskId,
-    required Profile craeatedBy,
-    required String name,
-    String? description,
-    required List<Profile> assignedTo,
-    required bool autoAssign,
-    required Room room,
-    required TaskPriority priority,
-    int? dueDateOffset,
-    required int points,
-    RepeatRuleDto? repeatRule,
-  }) async {
-    try {
-      final date = dueDateOffset == null
-          ? null
-          : DateTime.now().add(Duration(days: dueDateOffset));
-
-      final repeatable = repeatRule != null;
-
-      final response = await _apiClient.post(
-        _baseUrl(apartmentId),
-        data: {
-          "name": name,
-          "description": description,
-          "assignedTo": repeatable || autoAssign || assignedTo.isEmpty
-              ? null
-              : assignedTo[0].id,
-          "autoAssign": repeatable ? false : autoAssign,
-          "room": UtilFunctions.tValueToStringRequest(room),
-          "priority": UtilFunctions.tValueToStringRequest(priority),
-          "dueDate": date == null
-              ? null
-              : UtilFunctions.dateToStringRequest(date),
-          "points": points,
-          "repeatRule": repeatable
-              ? {
-                  "intervalDays": repeatRule.intervalDays,
-                  "endDate": repeatRule.endDate == null
-                      ? null
-                      : UtilFunctions.dateToStringRequest(repeatRule.endDate!),
-                  "assignedIds": assignedTo.map((p) => p.id).toList(),
-                }
-              : null,
-        },
-      );
-
-      try {
-        final assignedProfile = response["assignedTo"] != null
-            ? ProfileBrief.fromJson(response["assignedTo"])
-            : (!autoAssign && assignedTo.isNotEmpty && !repeatable
-                  ? ProfileBrief.fromFullProfile(assignedTo[0])
-                  : null);
-
-        return Task(
-          id: response["id"] as int,
-          createdBy: ProfileBrief.fromFullProfile(craeatedBy),
+          id: taskId ?? response["id"],
+          createdBy: createdBy,
           name: name,
           description: description,
           assignedTo: assignedProfile,

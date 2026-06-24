@@ -6,7 +6,6 @@ import 'package:frontend/features/buyings/data/models/buying_redacted.dart';
 import 'package:frontend/core/failures/failures.dart';
 import 'package:frontend/shared/domain/models/buying.dart';
 import 'package:frontend/shared/domain/models/profile/profile.dart';
-import 'package:frontend/shared/domain/models/profile/profile_brief.dart';
 import 'package:frontend/shared/state/providers/apartment_provider.dart';
 import 'package:frontend/shared/data/repositories/buying_repository.dart';
 import 'package:frontend/shared/domain/types/buying_category.dart';
@@ -75,7 +74,7 @@ class _BuyingNotifier extends AsyncNotifier<Map<BuyingCategory, List<Buying>>> {
     try {
       _isLoading = true;
 
-      final buying = await _buyingsRepository.create(
+      final buying = await _buyingsRepository.save(
         apartmentId: _apartmentId!,
         createdBy: userProfile,
         assignedTo: assignedTo,
@@ -153,9 +152,7 @@ class _BuyingNotifier extends AsyncNotifier<Map<BuyingCategory, List<Buying>>> {
                 ok = false;
               }
             } else if (b.completedBy == null) {
-              b = b.copyWith(
-                completedBy: ProfileBrief.fromFullProfile(userProfile),
-              );
+              b = b.copyWith(completedBy: userProfile);
             }
           }
 

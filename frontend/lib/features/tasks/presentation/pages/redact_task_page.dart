@@ -4,6 +4,7 @@ import 'package:frontend/features/tasks/presentation/widgets/chips/task_priority
 import 'package:frontend/shared/data/dtos/repeat_rule_dto.dart';
 import 'package:frontend/core/failures/failures.dart';
 import 'package:frontend/shared/domain/models/profile/profile.dart';
+import 'package:frontend/shared/domain/models/profile/profile_base.dart';
 import 'package:frontend/shared/domain/models/task.dart';
 import 'package:frontend/shared/state/providers/async_user_provider.dart';
 import 'package:frontend/shared/state/providers/neighbours_provider.dart';
@@ -32,9 +33,11 @@ class RedactTaskPage extends ConsumerStatefulWidget {
 }
 
 class _RedactTaskPageState extends ConsumerState<RedactTaskPage> {
+  late final List<Profile> profiles;
+
   late String name;
   late String description;
-  late List<Profile> assignedTo;
+  late List<ProfileBase> assignedTo;
   late bool autoAssign;
   late Room room;
   late TaskPriority priority;
@@ -44,16 +47,40 @@ class _RedactTaskPageState extends ConsumerState<RedactTaskPage> {
 
   late bool isLoading;
 
+  bool _isProfilePresentInProfiles(
+    List<Profile> profiles,
+    ProfileBase profile,
+  ) {
+    for (final curr in profiles) {
+      if (profile.id == curr.id) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   @override
   void initState() {
-    name = "";
-    description = "";
-    assignedTo = [];
+    profiles = [
+      ref.read(asyncUserProvider).value!.profile!,
+      ...ref.read(neighboursProvider).value!,
+    ];
+
+    name = widget.task?.name ?? "";
+    description = widget.task?.description ?? "";
     autoAssign = false;
-    room = Room.common;
-    priority = TaskPriority.medium;
-    dueDateOffset = 0;
-    points = 5;
+    room = widget.task?.room ?? Room.common;
+    priority = widget.task?.priority ?? TaskPriority.medium;
+    dueDateOffset = 0; // Надо добавить выбор своей даты
+    points = widget.task?.points ?? 5;
+
+    final assignedProfile = widget.task?.assignedTo;
+    if (assignedProfile != null &&
+        _isProfilePresentInProfiles(profiles, assignedProfile)) {
+      assignedTo = [assignedProfile];
+    } else {
+      assignedTo = [];
+    }
 
     isLoading = false;
 
@@ -157,13 +184,14 @@ class _RedactTaskPageState extends ConsumerState<RedactTaskPage> {
     });
   }
 
-  Future<void> create(BuildContext context) async {
+  Future<void> save(BuildContext context) async {
     final userProfile = ref.read(asyncUserProvider).value!.profile!;
 
     try {
       await ref
           .read(tasksProvider.notifier)
-          .create(
+          .save(
+            taskId: widget.task?.id,
             userProfile: userProfile,
             name: name,
             description: description,
@@ -188,11 +216,6 @@ class _RedactTaskPageState extends ConsumerState<RedactTaskPage> {
 
   @override
   Widget build(BuildContext context) {
-    final profiles = [
-      ref.read(asyncUserProvider).value!.profile!,
-      ...ref.read(neighboursProvider).value!,
-    ];
-
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
       body: PageWrapper(
@@ -397,8 +420,8 @@ class _RedactTaskPageState extends ConsumerState<RedactTaskPage> {
             }),
           ),
           CustomTextButton(
-            onPressed: () async => await create(context),
-            text: "Создать",
+            onPressed: () async => await save(context),
+            text: widget.task == null ? "Создать" : "Изменить",
           ),
         ],
       ),

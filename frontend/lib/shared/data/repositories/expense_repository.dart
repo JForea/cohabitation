@@ -6,7 +6,6 @@ import 'package:frontend/core/failures/map_dio_exception.dart';
 import 'package:frontend/shared/data/filters/expenses_filter.dart';
 import 'package:frontend/shared/domain/models/expense.dart';
 import 'package:frontend/shared/domain/models/profile/profile.dart';
-import 'package:frontend/shared/domain/models/profile/profile_brief.dart';
 import 'package:frontend/core/network/api_client.dart';
 import 'package:frontend/core/network/api_client_provider.dart';
 import 'package:frontend/shared/domain/types/expense_category.dart';
@@ -76,7 +75,7 @@ class ExpenseRepository {
     }
   }
 
-  Future<Expense> create({
+  Future<Expense> save({
     required int apartmentId,
     required String name,
     required int amount,
@@ -116,7 +115,7 @@ class ExpenseRepository {
           category: category,
           checkImageUrl: response["checkImageUrl"],
           name: name,
-          createdBy: ProfileBrief.fromFullProfile(createdBy),
+          createdBy: createdBy,
           amount: amount,
           createdAt: DateTime.now(),
         );

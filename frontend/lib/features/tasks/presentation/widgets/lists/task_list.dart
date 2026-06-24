@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/features/tasks/presentation/widgets/cards/task_card.dart';
 import 'package:frontend/shared/domain/models/task.dart';
+import 'package:go_router/go_router.dart';
 
 class TaskList extends StatelessWidget {
   const TaskList({
@@ -36,6 +37,7 @@ class TaskList extends StatelessWidget {
             onStatusSwitch: onSwitchStatus,
             onSelect: onSelect,
             onSelectCancel: onSelectCancel,
+            onCardTap: (task) => context.push("/tasks/redact", extra: task),
           ),
         );
       },

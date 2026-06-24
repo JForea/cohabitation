@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/shared/domain/models/profile/profile_brief.dart';
+import 'package:frontend/shared/domain/models/profile/profile_base.dart';
 
 class Event {
   const Event({
@@ -13,7 +13,7 @@ class Event {
   factory Event.fromJson(Map<String, dynamic> json) {
     return Event(
       id: json["id"],
-      createdBy: ProfileBrief.fromJson(json["createdBy"]),
+      createdBy: ProfileBase.fromJson(json["createdBy"]),
       name: json["name"],
       time: json["time"] != null
           ? TimeOfDay(
@@ -26,14 +26,14 @@ class Event {
   }
 
   final int id;
-  final ProfileBrief createdBy;
+  final ProfileBase createdBy;
   final String name;
   final TimeOfDay? time;
   final String? description;
 
   Event copyWith({
     int? id,
-    ProfileBrief? createdBy,
+    ProfileBase? createdBy,
     String? name,
     TimeOfDay? time,
     String? description,

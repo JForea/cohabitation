@@ -5,7 +5,6 @@ import 'package:frontend/core/failures/failures.dart';
 import 'package:frontend/core/failures/map_dio_exception.dart';
 import 'package:frontend/shared/domain/models/event.dart';
 import 'package:frontend/shared/domain/models/profile/profile.dart';
-import 'package:frontend/shared/domain/models/profile/profile_brief.dart';
 import 'package:frontend/core/network/api_client.dart';
 import 'package:frontend/core/network/api_client_provider.dart';
 import 'package:frontend/core/utils/util_functions.dart';
@@ -64,7 +63,7 @@ class EventRepository {
     }
   }
 
-  Future<Event> create({
+  Future<Event> save({
     required int apartmentId,
     required String name,
     required Profile createdBy,
@@ -90,7 +89,7 @@ class EventRepository {
       try {
         return Event(
           id: response["id"],
-          createdBy: ProfileBrief.fromFullProfile(createdBy),
+          createdBy: createdBy,
           name: name,
           description: description,
           time: time,

@@ -31,7 +31,7 @@ class ApartmentNotifier extends AsyncNotifier<Apartment?> {
     try {
       state = const AsyncLoading();
 
-      final createApartmentResponse = await _apartmentRepository.create(
+      final createApartmentResponse = await _apartmentRepository.save(
         name: name,
         address: address,
       );

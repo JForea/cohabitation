@@ -18,6 +18,7 @@ class TaskCard extends ConsumerWidget {
     this.onSelect,
     this.onSelectCancel,
     this.selectionMode,
+    this.onCardTap,
   });
 
   final Task task;
@@ -25,6 +26,7 @@ class TaskCard extends ConsumerWidget {
   final void Function(int)? onSelect;
   final void Function(int)? onSelectCancel;
   final bool? selectionMode;
+  final void Function(Task task)? onCardTap;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -44,6 +46,10 @@ class TaskCard extends ConsumerWidget {
       if (selectionMode != null && selectionMode!) {
         onSelect?.call(task.id);
         return;
+      }
+
+      if (selectionMode == null || !selectionMode!) {
+        onCardTap?.call(task);
       }
     }
 

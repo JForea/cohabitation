@@ -2,7 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/shared/data/dtos/repeat_rule_dto.dart';
 import 'package:frontend/core/failures/failures.dart';
 import 'package:frontend/shared/domain/models/profile/profile.dart';
-import 'package:frontend/shared/domain/models/profile/profile_brief.dart';
+import 'package:frontend/shared/domain/models/profile/profile_base.dart';
 import 'package:frontend/shared/domain/models/task.dart';
 import 'package:frontend/shared/state/providers/apartment_provider.dart';
 import 'package:frontend/shared/data/repositories/task_repository.dart';
@@ -121,11 +121,12 @@ class _TasksNotifier extends AsyncNotifier<List<Task>> {
     await refresh(fullRefresh: true);
   }
 
-  Future<void> create({
+  Future<void> save({
+    int? taskId,
     required Profile userProfile,
     required String name,
     String? description,
-    required List<Profile> assignedTo,
+    required List<ProfileBase> assignedTo,
     required bool autoAssign,
     required Room room,
     required TaskPriority priority,
@@ -138,9 +139,10 @@ class _TasksNotifier extends AsyncNotifier<List<Task>> {
     try {
       _isLoading = true;
 
-      final task = await _taskRepository.create(
+      final task = await _taskRepository.save(
         apartmentId: _apartmentId!,
-        craeatedBy: userProfile,
+        taskId: taskId,
+        createdBy: userProfile,
         name: name,
         description: description,
         assignedTo: assignedTo,
@@ -152,7 +154,15 @@ class _TasksNotifier extends AsyncNotifier<List<Task>> {
         repeatRule: repeatRule,
       );
 
-      state = AsyncData([task, ...?state.value]);
+      if (taskId == null) {
+        state = AsyncData([task, ...?state.value]);
+      } else {
+        final previous = state.value ?? [];
+
+        state = AsyncData(
+          previous.map((t) => t.id == task.id ? task : t).toList(),
+        );
+      }
     } finally {
       _isLoading = false;
     }
@@ -170,7 +180,7 @@ class _TasksNotifier extends AsyncNotifier<List<Task>> {
     final task = previous[index];
 
     final updatedTask = task.completedBy == null
-        ? task.copyWith(completedBy: ProfileBrief.fromFullProfile(userProfile))
+        ? task.copyWith(completedBy: userProfile)
         : task.copyWith(clearCompletedBy: true);
 
     List<Task> updated = [...previous];

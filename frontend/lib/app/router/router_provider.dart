@@ -17,6 +17,7 @@ import 'package:frontend/features/home/presentation/pages/home_page.dart';
 import 'package:frontend/features/apartment_enter/presentation/pages/create_apartment_page.dart';
 import 'package:frontend/features/apartment_enter/presentation/pages/option_page.dart';
 import 'package:frontend/app/router/auth_flags_provider.dart';
+import 'package:frontend/shared/domain/models/task.dart';
 import 'package:go_router/go_router.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
@@ -106,8 +107,8 @@ final routerProvider = Provider<GoRouter>((ref) {
         },
       ),
       GoRoute(
-        path: '/tasks/create',
-        builder: (context, state) => RedactTaskPage(),
+        path: '/tasks/redact',
+        builder: (context, state) => RedactTaskPage(task: state.extra as Task?),
       ),
       GoRoute(
         path: '/buyings/create',

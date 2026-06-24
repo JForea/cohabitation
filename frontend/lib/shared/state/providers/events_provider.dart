@@ -39,7 +39,7 @@ class EventsNotifier extends AsyncNotifier<List<Event>> {
   }) async {
     if (_apartmentId == null) throw NotInApartmentFailure();
 
-    final event = await _eventRepository.create(
+    final event = await _eventRepository.save(
       apartmentId: _apartmentId!,
       name: name,
       description: description,

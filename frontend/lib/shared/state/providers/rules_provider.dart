@@ -35,7 +35,7 @@ class _RulesNotifier extends AsyncNotifier<List<Rule>> {
     final previousValue = state.value ?? [];
 
     try {
-      final rule = await _ruleRepository.create(_apartmentId!, text);
+      final rule = await _ruleRepository.save(_apartmentId!, text);
 
       state = AsyncValue.data([rule, ...previousValue]);
     } catch (e) {

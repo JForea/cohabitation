@@ -30,7 +30,7 @@ class ApartmentRepository {
     }
   }
 
-  Future<CreateApartmentResponse> create({
+  Future<CreateApartmentResponse> save({
     required String name,
     String? address,
   }) async {

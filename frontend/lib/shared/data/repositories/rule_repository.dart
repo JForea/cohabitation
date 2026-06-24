@@ -31,7 +31,7 @@ class RuleRepository {
     }
   }
 
-  Future<Rule> create(int apartmentId, String text) async {
+  Future<Rule> save(int apartmentId, String text) async {
     try {
       final response = await _apiClient.post(
         _baseUrl(apartmentId),

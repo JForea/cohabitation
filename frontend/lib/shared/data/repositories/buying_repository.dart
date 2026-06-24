@@ -5,7 +5,6 @@ import 'package:frontend/core/failures/failures.dart';
 import 'package:frontend/core/failures/map_dio_exception.dart';
 import 'package:frontend/shared/domain/models/buying.dart';
 import 'package:frontend/shared/domain/models/profile/profile.dart';
-import 'package:frontend/shared/domain/models/profile/profile_brief.dart';
 import 'package:frontend/core/network/api_client.dart';
 import 'package:frontend/core/network/api_client_provider.dart';
 
@@ -56,7 +55,7 @@ class BuyingRepository {
     }
   }
 
-  Future<Buying> create({
+  Future<Buying> save({
     required int apartmentId,
     required Profile createdBy,
     required BuyingRedacted buyingRedacted,
@@ -78,12 +77,10 @@ class BuyingRepository {
       try {
         return Buying(
           id: response["id"] as int,
-          createdBy: ProfileBrief.fromFullProfile(createdBy),
+          createdBy: createdBy,
           name: buyingRedacted.name,
           quantity: buyingRedacted.quantity,
-          assignedTo: assignedTo != null
-              ? ProfileBrief.fromFullProfile(assignedTo)
-              : null,
+          assignedTo: assignedTo,
           category: buyingRedacted.category,
         );
       } catch (_) {
@@ -126,7 +123,7 @@ class BuyingRepository {
           buyings.add(
             Buying(
               id: response[i]["id"] as int,
-              createdBy: ProfileBrief.fromFullProfile(createdBy),
+              createdBy: createdBy,
               name: buyingsRedacted[i].name,
               quantity: buyingsRedacted[i].quantity,
               category: buyingsRedacted[i].category,

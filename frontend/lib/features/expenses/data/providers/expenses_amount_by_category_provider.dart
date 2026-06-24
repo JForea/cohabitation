@@ -3,9 +3,9 @@ import 'dart:math';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/core/failures/failures.dart';
-import 'package:frontend/shared/data/providers/apartment_provider.dart';
+import 'package:frontend/shared/state/providers/apartment_provider.dart';
 import 'package:frontend/shared/data/repositories/expense_repository.dart';
-import 'package:frontend/shared/data/types/expense_category.dart';
+import 'package:frontend/shared/domain/types/expense_category.dart';
 
 final expensesAmountByCategoryProvider = AsyncNotifierProvider.family(
   ExpensesAmountByCategoryNotifier.new,

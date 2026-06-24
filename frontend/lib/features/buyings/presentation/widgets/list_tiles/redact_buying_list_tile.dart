@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/features/buyings/data/models/buying_redacted.dart';
 import 'package:frontend/features/buyings/presentation/widgets/selectors/category_selector.dart';
-import 'package:frontend/shared/data/types/buying_category.dart';
-import 'package:frontend/shared/presentation/ui/widgets/buttons/item_control_button.dart';
-import 'package:frontend/shared/presentation/ui/widgets/inputs/controlled_text_field.dart';
+import 'package:frontend/shared/domain/types/buying_category.dart';
+import 'package:frontend/shared/presentation/widgets/buttons/item_control_button.dart';
+import 'package:frontend/shared/presentation/widgets/inputs/controlled_text_field.dart';
 
 class RedactBuyingListTile extends StatelessWidget {
   const RedactBuyingListTile({

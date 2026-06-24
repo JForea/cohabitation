@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:frontend/features/buyings/presentation/widgets/list_tiles/buying_list_tile.dart';
-import 'package:frontend/shared/data/models/buying.dart';
-import 'package:frontend/shared/data/types/buying_category.dart';
-import 'package:frontend/shared/presentation/ui/widgets/lists/custom_widget_list.dart';
+import 'package:frontend/shared/domain/models/buying.dart';
+import 'package:frontend/shared/domain/types/buying_category.dart';
+import 'package:frontend/shared/presentation/widgets/lists/custom_widget_list.dart';
 import 'package:frontend/core/utils/util_functions.dart';
 
 class CategoryBuyingList extends StatelessWidget {

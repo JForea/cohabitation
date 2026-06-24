@@ -1,6 +1,6 @@
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
-import 'package:frontend/shared/presentation/ui/widgets/texts/field_name.dart';
+import 'package:frontend/shared/presentation/widgets/texts/field_name.dart';
 import 'package:image_picker/image_picker.dart';
 
 class ImageUploaderField extends StatelessWidget {

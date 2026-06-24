@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:frontend/shared/data/models/expense.dart';
-import 'package:frontend/shared/data/providers/selected_provider.dart';
+import 'package:frontend/shared/domain/models/expense.dart';
+import 'package:frontend/shared/state/providers/selected_provider.dart';
 import 'package:frontend/app/theme/app_colors.dart';
 import 'package:frontend/app/theme/app_decorations.dart';
-import 'package:frontend/shared/presentation/ui/widgets/badges/expense_category_badge.dart';
+import 'package:frontend/shared/presentation/widgets/badges/expense_category_badge.dart';
 import 'package:intl/intl.dart';
 
 class ExpenseCard extends ConsumerWidget {

@@ -1,14 +1,14 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/shared/data/dtos/repeat_rule_dto.dart';
 import 'package:frontend/core/failures/failures.dart';
-import 'package:frontend/shared/data/models/profile/profile.dart';
-import 'package:frontend/shared/data/models/profile/profile_brief.dart';
-import 'package:frontend/shared/data/models/task.dart';
-import 'package:frontend/shared/data/providers/apartment_provider.dart';
+import 'package:frontend/shared/domain/models/profile/profile.dart';
+import 'package:frontend/shared/domain/models/profile/profile_brief.dart';
+import 'package:frontend/shared/domain/models/task.dart';
+import 'package:frontend/shared/state/providers/apartment_provider.dart';
 import 'package:frontend/shared/data/repositories/task_repository.dart';
-import 'package:frontend/shared/data/types/room.dart';
+import 'package:frontend/shared/domain/types/room.dart';
 import 'package:frontend/shared/data/filters/task_filter.dart';
-import 'package:frontend/shared/data/types/task_priority.dart';
+import 'package:frontend/shared/domain/types/task_priority.dart';
 
 final tasksProvider = AsyncNotifierProvider<_TasksNotifier, List<Task>>(
   _TasksNotifier.new,

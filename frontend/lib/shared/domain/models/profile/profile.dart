@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/shared/data/types/role.dart';
+import 'package:frontend/shared/domain/types/role.dart';
 import 'package:frontend/core/utils/util_functions.dart';
 
 class Profile {

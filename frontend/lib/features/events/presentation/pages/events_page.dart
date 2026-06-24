@@ -2,18 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/features/events/utils/event_validators.dart';
 import 'package:frontend/core/failures/failures.dart';
-import 'package:frontend/shared/data/providers/events_provider.dart';
+import 'package:frontend/shared/state/providers/events_provider.dart';
 import 'package:frontend/features/events/presentation/widgets/cards/event_card.dart';
-import 'package:frontend/shared/data/providers/user_provider.dart';
+import 'package:frontend/shared/state/providers/user_provider.dart';
 import 'package:frontend/app/theme/app_colors.dart';
-import 'package:frontend/shared/presentation/ui/widgets/buttons/custom_app_floating_action_button.dart';
-import 'package:frontend/shared/presentation/ui/widgets/buttons/custom_text_button.dart';
-import 'package:frontend/shared/presentation/ui/widgets/dialogs/error_dialog.dart';
-import 'package:frontend/shared/presentation/ui/widgets/inputs/controlled_named_text_field.dart';
-import 'package:frontend/shared/presentation/ui/widgets/modals/app_modal.dart';
-import 'package:frontend/shared/presentation/ui/widgets/other/empty_message_widget.dart';
-import 'package:frontend/shared/presentation/ui/widgets/texts/default_load_error_text.dart';
-import 'package:frontend/shared/presentation/ui/widgets/wrappers/page_wrapper.dart';
+import 'package:frontend/shared/presentation/widgets/buttons/custom_app_floating_action_button.dart';
+import 'package:frontend/shared/presentation/widgets/buttons/custom_text_button.dart';
+import 'package:frontend/shared/presentation/widgets/dialogs/error_dialog.dart';
+import 'package:frontend/shared/presentation/widgets/inputs/controlled_named_text_field.dart';
+import 'package:frontend/shared/presentation/widgets/modals/app_modal.dart';
+import 'package:frontend/shared/presentation/widgets/other/empty_message_widget.dart';
+import 'package:frontend/shared/presentation/widgets/texts/default_load_error_text.dart';
+import 'package:frontend/shared/presentation/widgets/wrappers/page_wrapper.dart';
 import 'package:intl/intl.dart';
 
 class EventsPage extends ConsumerStatefulWidget {

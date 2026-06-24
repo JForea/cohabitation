@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/core/failures/failures.dart';
-import 'package:frontend/shared/data/models/profile/profile.dart';
-import 'package:frontend/shared/data/models/user.dart';
+import 'package:frontend/shared/domain/models/profile/profile.dart';
+import 'package:frontend/shared/domain/models/user.dart';
 import 'package:frontend/core/network/auth_session_provider.dart';
 import 'package:frontend/shared/data/repositories/user_repository.dart';
 

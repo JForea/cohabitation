@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/features/expenses/presentation/widgets/cards/inhabitant_expenses_amount_card.dart';
-import 'package:frontend/shared/data/models/profile/profile.dart';
+import 'package:frontend/shared/domain/models/profile/profile.dart';
 
 class InhabitantsExpensesAmountList extends StatelessWidget {
   const InhabitantsExpensesAmountList({

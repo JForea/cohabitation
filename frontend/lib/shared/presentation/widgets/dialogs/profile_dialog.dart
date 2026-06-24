@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:frontend/shared/data/models/profile/profile.dart';
-import 'package:frontend/shared/data/providers/async_user_provider.dart';
-import 'package:frontend/shared/data/providers/neighbours_provider.dart';
-import 'package:frontend/shared/data/types/role.dart';
+import 'package:frontend/shared/domain/models/profile/profile.dart';
+import 'package:frontend/shared/state/providers/async_user_provider.dart';
+import 'package:frontend/shared/state/providers/neighbours_provider.dart';
+import 'package:frontend/shared/domain/types/role.dart';
 import 'package:frontend/app/theme/app_colors.dart';
-import 'package:frontend/shared/presentation/ui/widgets/avatars/avatar.dart';
-import 'package:frontend/shared/presentation/ui/widgets/badges/role_badge.dart';
-import 'package:frontend/shared/presentation/ui/widgets/buttons/custom_icon_button.dart';
-import 'package:frontend/shared/presentation/ui/widgets/snack_bars/message_snack_bar.dart';
+import 'package:frontend/shared/presentation/widgets/avatars/avatar.dart';
+import 'package:frontend/shared/presentation/widgets/badges/role_badge.dart';
+import 'package:frontend/shared/presentation/widgets/buttons/custom_icon_button.dart';
+import 'package:frontend/shared/presentation/widgets/snack_bars/message_snack_bar.dart';
 
 class ProfileDialog extends ConsumerWidget {
   const ProfileDialog({super.key, required this.profile});

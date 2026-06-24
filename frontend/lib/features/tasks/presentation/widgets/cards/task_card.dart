@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:frontend/shared/data/models/task.dart';
-import 'package:frontend/shared/data/providers/selected_provider.dart';
+import 'package:frontend/shared/domain/models/task.dart';
+import 'package:frontend/shared/state/providers/selected_provider.dart';
 import 'package:frontend/app/theme/app_colors.dart';
 import 'package:frontend/app/theme/app_decorations.dart';
-import 'package:frontend/shared/presentation/ui/widgets/avatars/avatar.dart';
-import 'package:frontend/shared/presentation/ui/widgets/badges/points_badge.dart';
-import 'package:frontend/shared/presentation/ui/widgets/checkboxes/status_checkbox.dart';
+import 'package:frontend/shared/presentation/widgets/avatars/avatar.dart';
+import 'package:frontend/shared/presentation/widgets/badges/points_badge.dart';
+import 'package:frontend/shared/presentation/widgets/checkboxes/status_checkbox.dart';
 import 'package:frontend/core/utils/util_functions.dart';
 
 class TaskCard extends ConsumerWidget {

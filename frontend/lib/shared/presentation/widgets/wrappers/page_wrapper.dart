@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/shared/presentation/ui/widgets/buttons/custom_back_button.dart';
+import 'package:frontend/shared/presentation/widgets/buttons/custom_back_button.dart';
 
 class PageWrapper extends StatelessWidget {
   const PageWrapper({

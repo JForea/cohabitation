@@ -4,13 +4,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/shared/data/filters/buying_filter.dart';
 import 'package:frontend/features/buyings/data/models/buying_redacted.dart';
 import 'package:frontend/core/failures/failures.dart';
-import 'package:frontend/shared/data/models/buying.dart';
-import 'package:frontend/shared/data/models/profile/profile.dart';
-import 'package:frontend/shared/data/models/profile/profile_brief.dart';
-import 'package:frontend/shared/data/providers/apartment_provider.dart';
+import 'package:frontend/shared/domain/models/buying.dart';
+import 'package:frontend/shared/domain/models/profile/profile.dart';
+import 'package:frontend/shared/domain/models/profile/profile_brief.dart';
+import 'package:frontend/shared/state/providers/apartment_provider.dart';
 import 'package:frontend/shared/data/repositories/buying_repository.dart';
-import 'package:frontend/shared/data/types/buying_category.dart';
-import 'package:frontend/shared/data/types/role.dart';
+import 'package:frontend/shared/domain/types/buying_category.dart';
+import 'package:frontend/shared/domain/types/role.dart';
 
 final buyingsProvider =
     AsyncNotifierProvider<_BuyingNotifier, Map<BuyingCategory, List<Buying>>>(

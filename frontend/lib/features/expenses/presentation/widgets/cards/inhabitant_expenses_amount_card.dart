@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/features/expenses/presentation/widgets/stats/inhabitant_expense_line.dart';
-import 'package:frontend/shared/data/models/profile/profile.dart';
+import 'package:frontend/shared/domain/models/profile/profile.dart';
 import 'package:frontend/app/theme/app_decorations.dart';
-import 'package:frontend/shared/presentation/ui/widgets/avatars/avatar.dart';
+import 'package:frontend/shared/presentation/widgets/avatars/avatar.dart';
 
 class InhabitantExpensesAmountCard extends StatelessWidget {
   const InhabitantExpensesAmountCard({

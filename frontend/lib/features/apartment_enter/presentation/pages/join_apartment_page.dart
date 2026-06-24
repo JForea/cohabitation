@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/features/apartment_enter/presentation/widgets/cards/invite_hint_card.dart';
 import 'package:frontend/features/apartment_enter/presentation/widgets/inputs/invite_code_input.dart';
-import 'package:frontend/shared/data/providers/async_apartment_provider.dart';
-import 'package:frontend/shared/data/providers/async_user_provider.dart';
-import 'package:frontend/shared/presentation/ui/widgets/buttons/custom_back_button.dart';
-import 'package:frontend/shared/presentation/ui/widgets/buttons/custom_text_button.dart';
-import 'package:frontend/shared/presentation/ui/widgets/snack_bars/message_snack_bar.dart';
-import 'package:frontend/shared/presentation/ui/widgets/wrappers/auth_page_wrapper.dart';
+import 'package:frontend/shared/state/providers/async_apartment_provider.dart';
+import 'package:frontend/shared/state/providers/async_user_provider.dart';
+import 'package:frontend/shared/presentation/widgets/buttons/custom_back_button.dart';
+import 'package:frontend/shared/presentation/widgets/buttons/custom_text_button.dart';
+import 'package:frontend/shared/presentation/widgets/snack_bars/message_snack_bar.dart';
+import 'package:frontend/shared/presentation/widgets/wrappers/auth_page_wrapper.dart';
 
 class JoinApartmentPage extends ConsumerStatefulWidget {
   const JoinApartmentPage({super.key});

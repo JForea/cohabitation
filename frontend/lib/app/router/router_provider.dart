@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/features/apartment_enter/presentation/pages/join_apartment_page.dart';
-import 'package:frontend/features/auth/login/presentation/pages/login_page.dart';
+import 'package:frontend/features/auth/presentation/pages/login_page.dart';
 import 'package:frontend/features/buyings/presentation/pages/create_buying_page.dart';
 import 'package:frontend/features/events/presentation/pages/events_page.dart';
 import 'package:frontend/features/expenses/presentation/pages/create_expense_page.dart';
@@ -11,7 +11,7 @@ import 'package:frontend/features/notifications/presentation/pages/notifications
 import 'package:frontend/features/settings/presentation/pages/settings_page.dart';
 import 'package:frontend/features/tasks/presentation/pages/redact_task_page.dart';
 import 'package:frontend/features/onboarding/presentation/pages/onboarding_page.dart';
-import 'package:frontend/features/auth/register/presentation/pages/registration_second_page.dart';
+import 'package:frontend/features/auth/presentation/pages/registration_second_page.dart';
 import 'package:frontend/features/auth/presentation/pages/welcome_page.dart';
 import 'package:frontend/features/home/presentation/pages/home_page.dart';
 import 'package:frontend/features/apartment_enter/presentation/pages/create_apartment_page.dart';

@@ -4,15 +4,15 @@ import 'package:frontend/shared/data/filters/buying_filter.dart';
 import 'package:frontend/features/buyings/data/providers/buying_filter_index_provider.dart';
 import 'package:frontend/features/buyings/presentation/widgets/buttons/avatar_filter_button.dart';
 import 'package:frontend/features/buyings/presentation/widgets/buttons/filter_button_wide.dart';
-import 'package:frontend/shared/data/providers/buyings_provider.dart';
+import 'package:frontend/shared/state/providers/buyings_provider.dart';
 import 'package:frontend/features/buyings/presentation/widgets/lists/category_buying_list.dart';
-import 'package:frontend/shared/data/providers/neighbours_provider.dart';
-import 'package:frontend/shared/data/providers/selected_provider.dart';
-import 'package:frontend/shared/data/providers/user_provider.dart';
+import 'package:frontend/shared/state/providers/neighbours_provider.dart';
+import 'package:frontend/shared/state/providers/selected_provider.dart';
+import 'package:frontend/shared/state/providers/user_provider.dart';
 import 'package:frontend/app/theme/app_colors.dart';
-import 'package:frontend/shared/presentation/ui/widgets/other/empty_message_widget.dart';
-import 'package:frontend/shared/presentation/ui/widgets/texts/default_load_error_text.dart';
-import 'package:frontend/shared/presentation/ui/widgets/wrappers/tab_wrapper.dart';
+import 'package:frontend/shared/presentation/widgets/other/empty_message_widget.dart';
+import 'package:frontend/shared/presentation/widgets/texts/default_load_error_text.dart';
+import 'package:frontend/shared/presentation/widgets/wrappers/tab_wrapper.dart';
 
 class BuyingsTab extends ConsumerStatefulWidget {
   const BuyingsTab({super.key});

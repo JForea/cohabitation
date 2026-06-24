@@ -1,4 +1,4 @@
-import 'package:frontend/shared/data/models/profile/profile.dart';
+import 'package:frontend/shared/domain/models/profile/profile.dart';
 
 class CreateApartmentResponse {
   CreateApartmentResponse({

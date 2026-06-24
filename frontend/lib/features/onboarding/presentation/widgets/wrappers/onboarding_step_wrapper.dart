@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/shared/presentation/types/bubble.dart';
-import 'package:frontend/shared/presentation/ui/widgets/buttons/custom_icon_button.dart';
+import 'package:frontend/shared/presentation/widgets/buttons/custom_icon_button.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:frontend/shared/presentation/ui/widgets/buttons/text_icon_button.dart';
-import 'package:frontend/shared/presentation/ui/widgets/other/bubble_widget.dart';
+import 'package:frontend/shared/presentation/widgets/buttons/text_icon_button.dart';
+import 'package:frontend/shared/presentation/widgets/other/bubble_widget.dart';
 import 'package:go_router/go_router.dart';
 
 class OnboardingStepWrapper extends StatelessWidget {

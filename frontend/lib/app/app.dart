@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:frontend/shared/data/providers/async_user_provider.dart';
-import 'package:frontend/shared/data/providers/fcm_listener_provider.dart';
+import 'package:frontend/shared/state/providers/async_user_provider.dart';
+import 'package:frontend/shared/state/providers/fcm_listener_provider.dart';
 import 'package:frontend/app/theme/custom_theme.dart';
 import 'package:frontend/app/router/router_provider.dart';
 

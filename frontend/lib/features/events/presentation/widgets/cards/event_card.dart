@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/shared/data/models/event.dart';
+import 'package:frontend/shared/domain/models/event.dart';
 import 'package:frontend/app/theme/app_colors.dart';
 import 'package:frontend/app/theme/app_shadows.dart';
-import 'package:frontend/shared/presentation/ui/widgets/avatars/avatar.dart';
+import 'package:frontend/shared/presentation/widgets/avatars/avatar.dart';
 
 class EventCard extends StatelessWidget {
   const EventCard({super.key, required this.event});

@@ -1,11 +1,11 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/core/failures/failures.dart';
 import 'package:frontend/shared/data/filters/expenses_filter.dart';
-import 'package:frontend/shared/data/models/expenses_info.dart';
-import 'package:frontend/shared/data/models/profile/profile.dart';
-import 'package:frontend/shared/data/providers/apartment_provider.dart';
+import 'package:frontend/shared/domain/models/expenses_info.dart';
+import 'package:frontend/shared/domain/models/profile/profile.dart';
+import 'package:frontend/shared/state/providers/apartment_provider.dart';
 import 'package:frontend/shared/data/repositories/expense_repository.dart';
-import 'package:frontend/shared/data/types/expense_category.dart';
+import 'package:frontend/shared/domain/types/expense_category.dart';
 import 'package:image_picker/image_picker.dart';
 
 final expensesProvider = AsyncNotifierProvider(ExpensesNotifier.new);

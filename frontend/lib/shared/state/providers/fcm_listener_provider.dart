@@ -1,7 +1,7 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/features/home/data/providers/unread_notifications_count_provider.dart';
-import 'package:frontend/shared/data/providers/notifications_provider.dart';
+import 'package:frontend/shared/state/providers/notifications_provider.dart';
 import 'package:frontend/app/router/router_provider.dart';
 
 final fcmListenerProvider = Provider<void>((ref) {

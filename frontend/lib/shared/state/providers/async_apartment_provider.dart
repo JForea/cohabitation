@@ -1,8 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/core/failures/failures.dart';
-import 'package:frontend/shared/data/models/apartment.dart';
-import 'package:frontend/shared/data/models/profile/profile.dart';
-import 'package:frontend/shared/data/providers/user_provider.dart';
+import 'package:frontend/shared/domain/models/apartment.dart';
+import 'package:frontend/shared/domain/models/profile/profile.dart';
+import 'package:frontend/shared/state/providers/user_provider.dart';
 import 'package:frontend/shared/data/repositories/apartment_repository.dart';
 
 final asyncApartmentProvider =

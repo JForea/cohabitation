@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/shared/data/models/notification_value.dart';
+import 'package:frontend/shared/domain/models/notification_value.dart';
 import 'package:frontend/features/notifications/presentation/widgets/badges/notification_type_badge.dart';
 import 'package:frontend/app/theme/app_colors.dart';
 import 'package:frontend/app/theme/app_shadows.dart';

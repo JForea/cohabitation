@@ -1,9 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/core/failures/failures.dart';
-import 'package:frontend/shared/data/models/profile/profile.dart';
-import 'package:frontend/shared/data/providers/apartment_provider.dart';
+import 'package:frontend/shared/domain/models/profile/profile.dart';
+import 'package:frontend/shared/state/providers/apartment_provider.dart';
 import 'package:frontend/shared/data/repositories/profile_repository.dart';
-import 'package:frontend/shared/data/types/role.dart';
+import 'package:frontend/shared/domain/types/role.dart';
 
 final neighboursProvider =
     AsyncNotifierProvider<NeighboursNotifier, List<Profile>>(

@@ -5,16 +5,16 @@ import 'package:frontend/features/tasks/data/types/task_filter_info.dart';
 import 'package:frontend/features/tasks/presentation/widgets/chips/task_filter_chip.dart';
 import 'package:frontend/features/tasks/presentation/widgets/lists/task_list.dart';
 import 'package:frontend/shared/data/filters/task_filter.dart';
-import 'package:frontend/shared/data/models/task.dart';
-import 'package:frontend/shared/data/providers/apartment_provider.dart';
-import 'package:frontend/shared/data/providers/async_user_provider.dart';
-import 'package:frontend/shared/data/providers/selected_provider.dart';
-import 'package:frontend/shared/data/providers/tasks_provider.dart';
-import 'package:frontend/shared/data/providers/user_provider.dart';
-import 'package:frontend/shared/presentation/ui/widgets/other/empty_message_widget.dart';
-import 'package:frontend/shared/presentation/ui/widgets/snack_bars/message_snack_bar.dart';
-import 'package:frontend/shared/presentation/ui/widgets/texts/default_load_error_text.dart';
-import 'package:frontend/shared/presentation/ui/widgets/wrappers/tab_wrapper.dart';
+import 'package:frontend/shared/domain/models/task.dart';
+import 'package:frontend/shared/state/providers/apartment_provider.dart';
+import 'package:frontend/shared/state/providers/async_user_provider.dart';
+import 'package:frontend/shared/state/providers/selected_provider.dart';
+import 'package:frontend/shared/state/providers/tasks_provider.dart';
+import 'package:frontend/shared/state/providers/user_provider.dart';
+import 'package:frontend/shared/presentation/widgets/other/empty_message_widget.dart';
+import 'package:frontend/shared/presentation/widgets/snack_bars/message_snack_bar.dart';
+import 'package:frontend/shared/presentation/widgets/texts/default_load_error_text.dart';
+import 'package:frontend/shared/presentation/widgets/wrappers/tab_wrapper.dart';
 
 class TasksTab extends ConsumerStatefulWidget {
   const TasksTab({super.key});

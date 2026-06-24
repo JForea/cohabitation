@@ -2,10 +2,10 @@ import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/core/failures/failures.dart';
 import 'package:frontend/core/failures/map_dio_exception.dart';
-import 'package:frontend/shared/data/models/profile/profile.dart';
+import 'package:frontend/shared/domain/models/profile/profile.dart';
 import 'package:frontend/core/network/api_client.dart';
 import 'package:frontend/core/network/api_client_provider.dart';
-import 'package:frontend/shared/data/types/role.dart';
+import 'package:frontend/shared/domain/types/role.dart';
 
 final profileRepositoryProvider = Provider<ProfileRepository>((ref) {
   final apiClient = ref.read(apiClientProvider);

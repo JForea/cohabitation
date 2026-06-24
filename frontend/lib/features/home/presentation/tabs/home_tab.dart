@@ -6,15 +6,15 @@ import 'package:frontend/features/home/presentation/widgets/app_bars/home_app_ba
 import 'package:frontend/features/home/presentation/widgets/calendars/calendar.dart';
 import 'package:frontend/features/home/presentation/widgets/cards/task_preview_card.dart';
 import 'package:frontend/features/home/presentation/widgets/previews/neighbours_preview.dart';
-import 'package:frontend/shared/data/models/profile/profile.dart';
-import 'package:frontend/shared/data/models/task.dart';
-import 'package:frontend/shared/data/providers/apartment_provider.dart';
-import 'package:frontend/shared/data/providers/calendar_provider.dart';
-import 'package:frontend/shared/data/providers/neighbours_provider.dart';
-import 'package:frontend/shared/data/providers/user_provider.dart';
-import 'package:frontend/shared/presentation/ui/widgets/other/empty_message_widget.dart';
-import 'package:frontend/shared/presentation/ui/widgets/texts/default_load_error_text.dart';
-import 'package:frontend/shared/presentation/ui/widgets/wrappers/tab_wrapper.dart';
+import 'package:frontend/shared/domain/models/profile/profile.dart';
+import 'package:frontend/shared/domain/models/task.dart';
+import 'package:frontend/shared/state/providers/apartment_provider.dart';
+import 'package:frontend/shared/state/providers/calendar_provider.dart';
+import 'package:frontend/shared/state/providers/neighbours_provider.dart';
+import 'package:frontend/shared/state/providers/user_provider.dart';
+import 'package:frontend/shared/presentation/widgets/other/empty_message_widget.dart';
+import 'package:frontend/shared/presentation/widgets/texts/default_load_error_text.dart';
+import 'package:frontend/shared/presentation/widgets/wrappers/tab_wrapper.dart';
 import 'package:go_router/go_router.dart';
 
 class HomeTab extends ConsumerStatefulWidget {

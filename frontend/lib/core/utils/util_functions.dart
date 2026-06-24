@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/shared/data/types/buying_category.dart';
-import 'package:frontend/shared/data/types/expense_category.dart';
-import 'package:frontend/shared/data/types/notification_type.dart';
-import 'package:frontend/shared/data/types/role.dart';
-import 'package:frontend/shared/data/types/room.dart';
-import 'package:frontend/shared/data/types/task_priority.dart';
+import 'package:frontend/shared/domain/types/buying_category.dart';
+import 'package:frontend/shared/domain/types/expense_category.dart';
+import 'package:frontend/shared/domain/types/notification_type.dart';
+import 'package:frontend/shared/domain/types/role.dart';
+import 'package:frontend/shared/domain/types/room.dart';
+import 'package:frontend/shared/domain/types/task_priority.dart';
 import 'package:frontend/app/theme/app_colors.dart';
 
 class UtilFunctions {

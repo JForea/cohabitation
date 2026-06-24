@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/features/profile/presentation/widgets/app_bars/profile_app_bar.dart';
 import 'package:frontend/features/profile/presentation/widgets/lists/neighbours_top_list.dart';
-import 'package:frontend/shared/data/providers/neighbours_provider.dart';
-import 'package:frontend/shared/data/providers/rules_provider.dart';
-import 'package:frontend/shared/data/providers/user_provider.dart';
-import 'package:frontend/shared/presentation/ui/widgets/lists/rule_list.dart';
-import 'package:frontend/shared/presentation/ui/widgets/other/empty_message_widget.dart';
-import 'package:frontend/shared/presentation/ui/widgets/texts/default_load_error_text.dart';
-import 'package:frontend/shared/presentation/ui/widgets/wrappers/tab_wrapper.dart';
+import 'package:frontend/shared/state/providers/neighbours_provider.dart';
+import 'package:frontend/shared/state/providers/rules_provider.dart';
+import 'package:frontend/shared/state/providers/user_provider.dart';
+import 'package:frontend/shared/presentation/widgets/lists/rule_list.dart';
+import 'package:frontend/shared/presentation/widgets/other/empty_message_widget.dart';
+import 'package:frontend/shared/presentation/widgets/texts/default_load_error_text.dart';
+import 'package:frontend/shared/presentation/widgets/wrappers/tab_wrapper.dart';
 
 class ProfileTab extends ConsumerWidget {
   const ProfileTab({super.key});

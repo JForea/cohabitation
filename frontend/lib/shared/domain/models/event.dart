@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/shared/data/models/profile/profile_brief.dart';
+import 'package:frontend/shared/domain/models/profile/profile_brief.dart';
 
 class Event {
   const Event({

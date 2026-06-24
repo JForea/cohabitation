@@ -3,14 +3,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/features/expenses/presentation/widgets/cards/inhabitant_expenses_amount_summary_card.dart';
 import 'package:frontend/features/expenses/presentation/widgets/lists/expense_list.dart';
 import 'package:frontend/shared/data/filters/expenses_filter.dart';
-import 'package:frontend/shared/data/models/profile/profile.dart';
-import 'package:frontend/shared/data/providers/expenses_provider.dart';
-import 'package:frontend/shared/data/providers/neighbours_provider.dart';
-import 'package:frontend/shared/data/providers/user_provider.dart';
-import 'package:frontend/shared/presentation/ui/widgets/lists/profile_list.dart';
-import 'package:frontend/shared/presentation/ui/widgets/other/empty_message_widget.dart';
-import 'package:frontend/shared/presentation/ui/widgets/texts/default_load_error_text.dart';
-import 'package:frontend/shared/presentation/ui/widgets/wrappers/page_wrapper.dart';
+import 'package:frontend/shared/domain/models/profile/profile.dart';
+import 'package:frontend/shared/state/providers/expenses_provider.dart';
+import 'package:frontend/shared/state/providers/neighbours_provider.dart';
+import 'package:frontend/shared/state/providers/user_provider.dart';
+import 'package:frontend/shared/presentation/widgets/lists/profile_list.dart';
+import 'package:frontend/shared/presentation/widgets/other/empty_message_widget.dart';
+import 'package:frontend/shared/presentation/widgets/texts/default_load_error_text.dart';
+import 'package:frontend/shared/presentation/widgets/wrappers/page_wrapper.dart';
 
 class ExpensesDetailsByProfilePage extends ConsumerStatefulWidget {
   const ExpensesDetailsByProfilePage({super.key});

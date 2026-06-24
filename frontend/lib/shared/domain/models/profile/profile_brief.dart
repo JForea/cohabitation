@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/shared/data/models/profile/profile.dart';
+import 'package:frontend/shared/domain/models/profile/profile.dart';
 import 'package:frontend/core/utils/util_functions.dart';
 
 class ProfileBrief {

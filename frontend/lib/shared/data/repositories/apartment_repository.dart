@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/shared/data/dtos/join_apartment_response.dart';
 import 'package:frontend/core/failures/failures.dart';
 import 'package:frontend/core/failures/map_dio_exception.dart';
-import 'package:frontend/shared/data/models/apartment.dart';
+import 'package:frontend/shared/domain/models/apartment.dart';
 import 'package:frontend/shared/data/dtos/create_apartment_response.dart';
 import 'package:frontend/core/network/api_client.dart';
 import 'package:frontend/core/network/api_client_provider.dart';

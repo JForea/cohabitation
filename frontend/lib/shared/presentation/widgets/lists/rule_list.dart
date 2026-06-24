@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/failures/failures.dart';
-import 'package:frontend/shared/data/models/rule.dart';
-import 'package:frontend/shared/presentation/ui/widgets/buttons/custom_text_button.dart';
-import 'package:frontend/shared/presentation/ui/widgets/dialogs/error_dialog.dart';
-import 'package:frontend/shared/presentation/ui/widgets/inputs/controlled_text_field.dart';
-import 'package:frontend/shared/presentation/ui/widgets/list_tiles/add_list_tile.dart';
-import 'package:frontend/shared/presentation/ui/widgets/list_tiles/rule_list_tile.dart';
-import 'package:frontend/shared/presentation/ui/widgets/lists/custom_widget_list.dart';
+import 'package:frontend/shared/domain/models/rule.dart';
+import 'package:frontend/shared/presentation/widgets/buttons/custom_text_button.dart';
+import 'package:frontend/shared/presentation/widgets/dialogs/error_dialog.dart';
+import 'package:frontend/shared/presentation/widgets/inputs/controlled_text_field.dart';
+import 'package:frontend/shared/presentation/widgets/list_tiles/add_list_tile.dart';
+import 'package:frontend/shared/presentation/widgets/list_tiles/rule_list_tile.dart';
+import 'package:frontend/shared/presentation/widgets/lists/custom_widget_list.dart';
 
 class RuleList extends StatefulWidget {
   const RuleList({

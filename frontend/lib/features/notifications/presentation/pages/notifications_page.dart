@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/features/home/data/providers/unread_notifications_count_provider.dart';
-import 'package:frontend/shared/data/providers/notifications_provider.dart';
+import 'package:frontend/shared/state/providers/notifications_provider.dart';
 import 'package:frontend/features/notifications/presentation/widgets/lists/notification_list.dart';
-import 'package:frontend/shared/presentation/ui/widgets/buttons/custom_app_floating_action_button.dart';
-import 'package:frontend/shared/presentation/ui/widgets/snack_bars/message_snack_bar.dart';
-import 'package:frontend/shared/presentation/ui/widgets/texts/default_load_error_text.dart';
-import 'package:frontend/shared/presentation/ui/widgets/wrappers/page_wrapper.dart';
+import 'package:frontend/shared/presentation/widgets/buttons/custom_app_floating_action_button.dart';
+import 'package:frontend/shared/presentation/widgets/snack_bars/message_snack_bar.dart';
+import 'package:frontend/shared/presentation/widgets/texts/default_load_error_text.dart';
+import 'package:frontend/shared/presentation/widgets/wrappers/page_wrapper.dart';
 
 class NotificationsPage extends ConsumerStatefulWidget {
   const NotificationsPage({super.key});

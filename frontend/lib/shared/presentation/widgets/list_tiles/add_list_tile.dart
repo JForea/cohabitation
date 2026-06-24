@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/app/theme/app_colors.dart';
-import 'package:frontend/shared/presentation/ui/widgets/buttons/item_control_button.dart';
+import 'package:frontend/shared/presentation/widgets/buttons/item_control_button.dart';
 
 class AddListTile extends StatelessWidget {
   const AddListTile({super.key, required this.onAdd, required this.text});

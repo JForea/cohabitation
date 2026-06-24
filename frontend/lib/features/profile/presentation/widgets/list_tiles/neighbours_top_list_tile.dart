@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:frontend/features/profile/presentation/widgets/indicators/points_indicator.dart';
-import 'package:frontend/shared/data/models/profile/profile.dart';
+import 'package:frontend/shared/domain/models/profile/profile.dart';
 import 'package:frontend/app/theme/app_colors.dart';
-import 'package:frontend/shared/presentation/ui/widgets/avatars/avatar.dart';
-import 'package:frontend/shared/presentation/ui/widgets/dialogs/profile_dialog.dart';
+import 'package:frontend/shared/presentation/widgets/avatars/avatar.dart';
+import 'package:frontend/shared/presentation/widgets/dialogs/profile_dialog.dart';
 
 class NeighboursTopListTile extends StatelessWidget {
   const NeighboursTopListTile({

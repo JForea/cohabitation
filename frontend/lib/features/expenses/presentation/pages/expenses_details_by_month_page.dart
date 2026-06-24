@@ -4,12 +4,12 @@ import 'package:frontend/features/expenses/data/providers/expenses_amount_by_cat
 import 'package:frontend/features/expenses/presentation/widgets/cards/expenses_amount_by_categories_card.dart';
 import 'package:frontend/features/expenses/presentation/widgets/lists/expense_list.dart';
 import 'package:frontend/shared/data/filters/expenses_filter.dart';
-import 'package:frontend/shared/data/providers/apartment_provider.dart';
-import 'package:frontend/shared/data/providers/expenses_provider.dart';
-import 'package:frontend/shared/presentation/ui/widgets/buttons/page_control_button.dart';
-import 'package:frontend/shared/presentation/ui/widgets/other/empty_message_widget.dart';
-import 'package:frontend/shared/presentation/ui/widgets/texts/default_load_error_text.dart';
-import 'package:frontend/shared/presentation/ui/widgets/wrappers/page_wrapper.dart';
+import 'package:frontend/shared/state/providers/apartment_provider.dart';
+import 'package:frontend/shared/state/providers/expenses_provider.dart';
+import 'package:frontend/shared/presentation/widgets/buttons/page_control_button.dart';
+import 'package:frontend/shared/presentation/widgets/other/empty_message_widget.dart';
+import 'package:frontend/shared/presentation/widgets/texts/default_load_error_text.dart';
+import 'package:frontend/shared/presentation/widgets/wrappers/page_wrapper.dart';
 import 'package:intl/intl.dart';
 
 class ExpensesDetailsByMonthPage extends ConsumerStatefulWidget {

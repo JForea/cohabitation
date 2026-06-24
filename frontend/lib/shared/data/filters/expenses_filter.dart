@@ -1,4 +1,4 @@
-import 'package:frontend/shared/data/types/expense_category.dart';
+import 'package:frontend/shared/domain/types/expense_category.dart';
 
 class ExpensesFilter {
   const ExpensesFilter({this.category, required this.month, this.profileId});

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/app/theme/app_colors.dart';
 import 'package:frontend/shared/presentation/types/bubble.dart';
-import 'package:frontend/shared/presentation/ui/widgets/buttons/custom_icon_button.dart';
-import 'package:frontend/shared/presentation/ui/widgets/other/bubble_widget.dart';
+import 'package:frontend/shared/presentation/widgets/buttons/custom_icon_button.dart';
+import 'package:frontend/shared/presentation/widgets/other/bubble_widget.dart';
 import 'package:intl/intl.dart';
 
 class MonthlyExpensesCard extends StatelessWidget {

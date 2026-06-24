@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:frontend/shared/data/models/rule.dart';
-import 'package:frontend/shared/presentation/ui/widgets/buttons/item_control_button.dart';
+import 'package:frontend/shared/domain/models/rule.dart';
+import 'package:frontend/shared/presentation/widgets/buttons/item_control_button.dart';
 
 class RuleListTile extends StatelessWidget {
   const RuleListTile({super.key, required this.rule, this.onRemove});

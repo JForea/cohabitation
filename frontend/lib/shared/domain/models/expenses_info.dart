@@ -1,4 +1,4 @@
-import 'package:frontend/shared/data/models/expense.dart';
+import 'package:frontend/shared/domain/models/expense.dart';
 
 class ExpensesInfo {
   const ExpensesInfo({

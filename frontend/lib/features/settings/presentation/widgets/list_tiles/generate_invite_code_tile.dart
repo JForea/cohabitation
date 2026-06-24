@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/app/theme/app_colors.dart';
-import 'package:frontend/shared/presentation/ui/widgets/buttons/custom_icon_button.dart';
+import 'package:frontend/shared/presentation/widgets/buttons/custom_icon_button.dart';
 
 class GenerateInviteCodeTile extends StatelessWidget {
   const GenerateInviteCodeTile({

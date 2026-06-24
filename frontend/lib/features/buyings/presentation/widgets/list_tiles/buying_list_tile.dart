@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:frontend/shared/data/models/buying.dart';
-import 'package:frontend/shared/data/providers/selected_provider.dart';
+import 'package:frontend/shared/domain/models/buying.dart';
+import 'package:frontend/shared/state/providers/selected_provider.dart';
 import 'package:frontend/app/theme/app_colors.dart';
 import 'package:frontend/app/theme/app_decorations.dart';
-import 'package:frontend/shared/presentation/ui/widgets/avatars/avatar.dart';
-import 'package:frontend/shared/presentation/ui/widgets/checkboxes/status_checkbox.dart';
+import 'package:frontend/shared/presentation/widgets/avatars/avatar.dart';
+import 'package:frontend/shared/presentation/widgets/checkboxes/status_checkbox.dart';
 
 class BuyingListTile extends ConsumerWidget {
   const BuyingListTile({

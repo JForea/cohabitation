@@ -1,4 +1,4 @@
-import 'package:frontend/shared/data/types/notification_type.dart';
+import 'package:frontend/shared/domain/types/notification_type.dart';
 import 'package:frontend/core/utils/util_functions.dart';
 
 class NotificationValue {

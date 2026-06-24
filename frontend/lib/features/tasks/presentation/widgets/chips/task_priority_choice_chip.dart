@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/shared/data/types/task_priority.dart';
+import 'package:frontend/shared/domain/types/task_priority.dart';
 import 'package:frontend/app/theme/app_colors.dart';
 import 'package:frontend/app/theme/app_decorations.dart';
 import 'package:frontend/core/utils/util_functions.dart';

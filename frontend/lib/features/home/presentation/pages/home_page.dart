@@ -8,14 +8,14 @@ import 'package:frontend/features/home/presentation/widgets/navigation/custom_si
 import 'package:frontend/features/home/presentation/tabs/home_tab.dart';
 import 'package:frontend/features/profile/presentation/tabs/profile_tab.dart';
 import 'package:frontend/features/tasks/presentation/tabs/tasks_tab.dart';
-import 'package:frontend/shared/data/providers/buyings_provider.dart';
-import 'package:frontend/shared/data/providers/expenses_provider.dart';
-import 'package:frontend/shared/data/providers/selected_provider.dart';
-import 'package:frontend/shared/data/providers/tasks_provider.dart';
-import 'package:frontend/shared/data/providers/user_provider.dart';
-import 'package:frontend/shared/data/types/role.dart';
+import 'package:frontend/shared/state/providers/buyings_provider.dart';
+import 'package:frontend/shared/state/providers/expenses_provider.dart';
+import 'package:frontend/shared/state/providers/selected_provider.dart';
+import 'package:frontend/shared/state/providers/tasks_provider.dart';
+import 'package:frontend/shared/state/providers/user_provider.dart';
+import 'package:frontend/shared/domain/types/role.dart';
 import 'package:frontend/app/theme/app_colors.dart';
-import 'package:frontend/shared/presentation/ui/widgets/buttons/custom_app_floating_action_button.dart';
+import 'package:frontend/shared/presentation/widgets/buttons/custom_app_floating_action_button.dart';
 import 'package:go_router/go_router.dart';
 
 class HomePage extends ConsumerStatefulWidget {

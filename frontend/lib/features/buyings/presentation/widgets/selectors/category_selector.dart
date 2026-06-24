@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:frontend/shared/data/types/buying_category.dart';
+import 'package:frontend/shared/domain/types/buying_category.dart';
 import 'package:frontend/app/theme/app_shadows.dart';
 
 class CategorySelector extends StatelessWidget {

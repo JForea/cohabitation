@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/features/auth/data/auth_data_holder.dart';
 import 'package:frontend/core/failures/failures.dart';
-import 'package:frontend/shared/data/providers/async_user_provider.dart';
-import 'package:frontend/shared/presentation/ui/widgets/buttons/custom_back_button.dart';
-import 'package:frontend/shared/presentation/ui/widgets/buttons/custom_text_button.dart';
-import 'package:frontend/shared/presentation/ui/widgets/inputs/controlled_named_text_field.dart';
-import 'package:frontend/shared/presentation/ui/widgets/snack_bars/message_snack_bar.dart';
-import 'package:frontend/shared/presentation/ui/widgets/wrappers/auth_page_wrapper.dart';
+import 'package:frontend/shared/state/providers/async_user_provider.dart';
+import 'package:frontend/shared/presentation/widgets/buttons/custom_back_button.dart';
+import 'package:frontend/shared/presentation/widgets/buttons/custom_text_button.dart';
+import 'package:frontend/shared/presentation/widgets/inputs/controlled_named_text_field.dart';
+import 'package:frontend/shared/presentation/widgets/snack_bars/message_snack_bar.dart';
+import 'package:frontend/shared/presentation/widgets/wrappers/auth_page_wrapper.dart';
 import 'package:frontend/core/utils/fcm_helper.dart';
 import 'package:go_router/go_router.dart';
 

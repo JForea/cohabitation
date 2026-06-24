@@ -1,6 +1,6 @@
-import 'package:frontend/shared/data/models/profile/profile_brief.dart';
-import 'package:frontend/shared/data/types/room.dart';
-import 'package:frontend/shared/data/types/task_priority.dart';
+import 'package:frontend/shared/domain/models/profile/profile_brief.dart';
+import 'package:frontend/shared/domain/types/room.dart';
+import 'package:frontend/shared/domain/types/task_priority.dart';
 import 'package:frontend/core/utils/util_functions.dart';
 
 class Task {

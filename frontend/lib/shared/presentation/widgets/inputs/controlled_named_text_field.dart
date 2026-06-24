@@ -4,7 +4,7 @@ import 'package:frontend/core/formatters/price_input_formatter.dart';
 import 'package:frontend/core/formatters/time_input_formatter.dart';
 import 'package:frontend/app/theme/app_colors.dart';
 import 'package:frontend/app/theme/app_shadows.dart';
-import 'package:frontend/shared/presentation/ui/widgets/texts/field_name.dart';
+import 'package:frontend/shared/presentation/widgets/texts/field_name.dart';
 
 enum InputType { text, password, price, time }
 

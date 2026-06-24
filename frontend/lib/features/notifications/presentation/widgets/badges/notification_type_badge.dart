@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:frontend/shared/data/types/notification_type.dart';
+import 'package:frontend/shared/domain/types/notification_type.dart';
 import 'package:frontend/app/theme/app_colors.dart';
 
 class NotificationTypeBadge extends StatelessWidget {

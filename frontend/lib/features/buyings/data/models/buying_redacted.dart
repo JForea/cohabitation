@@ -1,4 +1,4 @@
-import 'package:frontend/shared/data/types/buying_category.dart';
+import 'package:frontend/shared/domain/types/buying_category.dart';
 
 class BuyingRedacted {
   BuyingRedacted({

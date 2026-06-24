@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/core/network/auth_session_provider.dart';
-import 'package:frontend/shared/data/providers/async_apartment_provider.dart';
-import 'package:frontend/shared/data/providers/async_user_provider.dart';
+import 'package:frontend/shared/state/providers/async_apartment_provider.dart';
+import 'package:frontend/shared/state/providers/async_user_provider.dart';
 
 class _AuthFlags {
   const _AuthFlags({
